@@ -13,7 +13,7 @@ Please verify my project is ready for code review. The required information is b
   - **Last Review:** PULL
 
 ```
-/home/public/cs212/review GITHUB_USER RELEASE
+/home/public/cs212/review augutierrez RELEASE
 ```
 
 #### Offline Review
