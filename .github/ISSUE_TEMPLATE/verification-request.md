@@ -9,7 +9,7 @@ assignees: oliviakumar
 
 Please verify my project functionality. The required information is below:
 
-  - **Name:** FULL_NAME
+  - **Name:** Antonio Gutierrez
   - **Last Release:** OLD_RELEASE
   - **This Release:** NEW_RELEASE
 
