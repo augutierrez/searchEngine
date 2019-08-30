@@ -14,7 +14,7 @@ Please verify my project functionality. The required information is below:
   - **This Release:** NEW_RELEASE
 
 ```
-/home/public/cs212/project GITHUB_USER NEW_RELEASE
+/home/public/cs212/project augutierrez NEW_RELEASE
 ```
 
 #### Functionality Grade
