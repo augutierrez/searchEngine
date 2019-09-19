@@ -238,8 +238,8 @@ public class SimpleJsonWriter {
 	 * @param level    the initial indent level
 	 * @throws IOException
 	 */
-	public static void asNestedObjectInNestedObject(Map<String, Map<String, ? extends Collection<Integer>>> elements,
-			Writer writer, int level) throws IOException {
+	public static void asNestedObjectInNestedObject(
+			TreeMap<String, TreeMap<String, TreeSet<Integer>>> elements, Writer writer, int level) throws IOException {
 		Iterator<String> setIterator = elements.keySet().iterator();
 		writer.write("{");
 		// Outer loop (Strings)
@@ -247,28 +247,36 @@ public class SimpleJsonWriter {
 			String element = setIterator.next();
 			writer.write('\n');
 
-			Iterator<Integer> intIterator = elements.get(element).iterator();
+
 			quote(element, writer, level + 1);
-			writer.write(": [");
+			writer.write(": {");
 			writer.write('\n');
 			// Inner loop (Integers)
 			Iterator<String> pathIterator = elements.get(element).keySet().iterator();
+			// path
 			while (pathIterator.hasNext()) {
 				String path = pathIterator.next();
 				quote(path, writer, level + 2);
 				writer.write(": [\n");
+				Iterator<Integer> intIterator = elements.get(element).get(path).iterator();
 
-				writer.write("],\n");
-			}
-			while (intIterator.hasNext()) {
-				indent(intIterator.next(), writer, level + 2);
-				if (intIterator.hasNext()) {
-					writer.write(",");
+				// int
+				while (intIterator.hasNext()) {
+					indent(intIterator.next(), writer, level + 3);
+					if (intIterator.hasNext()) {
+						writer.write(",");
+					}
+					writer.write('\n');
+
 				}
-				writer.write('\n');
 
+				indent("]", writer, level + 2);
+				if (pathIterator.hasNext())
+					writer.write(',');
+				writer.write('\n');
 			}
-			indent("]", writer, level + 1);
+
+			indent("}", writer, level + 1);
 			if (setIterator.hasNext()) {
 				writer.write(",");
 			}
@@ -288,7 +296,8 @@ public class SimpleJsonWriter {
 	 *
 	 * @see #asNestedObject(Map, Writer, int)
 	 */
-	public static void asNestedObjectInNestedObject(Map<String, Map<String, ? extends Collection<Integer>>> elements,
+	public static void asNestedObjectInNestedObject(
+			TreeMap<String, TreeMap<String, TreeSet<Integer>>> elements,
 			Path path) throws IOException {
 
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {

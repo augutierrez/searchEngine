@@ -40,6 +40,7 @@ public class TextFileStemmer {
 		return uniqueStems(line, new SnowballStemmer(DEFAULT));
 	}
 
+	// public File findFile
 	/**
 	 * Returns a set of unique (no duplicates) cleaned and stemmed words parsed
 	 * from the provided line.
