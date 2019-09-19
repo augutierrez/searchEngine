@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
@@ -18,18 +21,40 @@ public class Driver {
 	 * inverted index.
 	 *
 	 * @param args flag/value pairs used to start this program
+	 * @throws IOException
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		// store initial start time
 		Instant start = Instant.now();
 
 		// TODO Fill in and modify this method as necessary.
 		System.out.println(Arrays.toString(args));
+		ArgumentParser parser = new ArgumentParser();
+		parser.parse(args);
 
+		InvertedIndex index = new InvertedIndex();
+		Path path = parser.getPath("-path");
+		System.out.println(path.compareTo(path));
+		File file = new File(path.toString());
+		System.out.println(file.isDirectory());
+		if (!file.isDirectory()) {
+			index.addPath(path);
+		} else {
+			File[] listOfFiles = file.listFiles();
+			for (File single : listOfFiles) {
+				index.addPath(single.toPath());
+			}
+		}
+
+		if (parser.hasFlag("-index")) {
+			index.indexWriter(parser.getString("-index"));
+		}
 		// calculate time elapsed and output
+		// System.out.println(reader.readLine());
 		Duration elapsed = Duration.between(start, Instant.now());
 		double seconds = (double) elapsed.toMillis() / Duration.ofSeconds(1).toMillis();
 		System.out.printf("Elapsed: %f seconds%n", seconds);
+
 	}
 
 	/*
