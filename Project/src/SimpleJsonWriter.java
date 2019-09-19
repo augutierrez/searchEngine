@@ -35,7 +35,7 @@ public class SimpleJsonWriter {
 	 */
 	public static void asArray(Collection<Integer> elements, Writer writer, int level) throws IOException {
 		// TODO MODIFY AND FILL IN AS NECESSARY TO PASS TESTS
-		// TODO USE ITERATION NOT STRING REPLACEMENT
+		// TODO USE ITERATION NOT STRING REPLACEMENT //
 		Iterator<Integer> iterate = elements.iterator();
 		writer.write("[\n");
 		while (iterate.hasNext()) {

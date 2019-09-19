@@ -36,7 +36,7 @@ public class TextFileStemmer {
 	 * @see #uniqueStems(String, Stemmer)
 	 */
 	public static TreeSet<String> uniqueStems(String line) {
-		// THIS IS PROVIDED FOR YOU; NO NEED TO MODFY
+		// THIS IS PROVIDED FOR YOU; NO NEED TO MODFY //
 		return uniqueStems(line, new SnowballStemmer(DEFAULT));
 	}
 

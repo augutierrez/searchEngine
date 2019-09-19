@@ -66,7 +66,7 @@ public class Driver {
 				File[] listOfFiles = file.listFiles();
 				DirectoryIterator(listOfFiles, index);
 			}
-		// calculate time elapsed and output
+			// calculate time elapsed and output //
 		}
 		if (parser.hasFlag("-index")) {
 			try {
