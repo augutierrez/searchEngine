@@ -11,8 +11,19 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 
+/**
+ * @author Antonio Gutierrez
+ *
+ */
 public class InvertedIndex {
+	/**
+	 * Nested Data Structure that stores all the words
+	 */
 	TreeMap<String, TreeMap<String, TreeSet<Integer>>> map = new TreeMap<>();
+
+	/**
+	 * used for counts flag
+	 */
 	TreeMap<String, Integer> wordCount = new TreeMap<>();
 	/**
 	 * @param word     : the words that must be added
@@ -23,14 +34,14 @@ public class InvertedIndex {
 		TreeSet<String> set = TextFileStemmer.uniqueStems(word);
 		word = set.first();
 		if (!map.containsKey(word)) {
-			// TreeSet<Integer> tempSet = new TreeSet<>();
+
 			TreeMap<String, TreeSet<Integer>> tempMap = new TreeMap<>();
 			map.put(word, tempMap);
 
 			map.put(word, tempMap);
 		}
 		if (!map.get(word).containsKey(path)) {
-			// TreeMap<String, TreeSet<Integer>> tempMap = new TreeMap<>();
+
 			TreeSet<Integer> tempSet = new TreeSet<>();
 			map.get(word).put(path, tempSet);
 
@@ -41,18 +52,15 @@ public class InvertedIndex {
 
 	/**
 	 * @param path : the path to the file that it will read from
-	 * @throws IOException
 	 */
-	public void addPath(Path path) throws IOException {
+	public void addPath(Path path) {
 		if (path.toString().toLowerCase().endsWith(".txt") || path.toString().toLowerCase().endsWith(".text")) {
-			BufferedReader reader = new BufferedReader(new FileReader(path.toString()));
+			try (BufferedReader reader = new BufferedReader(new FileReader(path.toString()))) {
+
 			String line;
 
 			int counter = 1;
 			while ((line = reader.readLine()) != null) {
-				// TreeSet<String> words = TextFileStemmer.uniqueStems(line);
-				// Iterator<String> iterate = words.iterator();
-
 				String[] wordsInLine = TextParser.parse(line);
 
 				for (String word : wordsInLine) {
@@ -61,7 +69,9 @@ public class InvertedIndex {
 				}
 				wordCount.put(path.toString(), counter - 1);
 			}
-			reader.close();
+			} catch (IOException e) {
+				System.err.println("Trouble finding file in addPath!");
+			}
 		}
 	}
 
@@ -77,7 +87,6 @@ public class InvertedIndex {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file));) {
 			SimpleJsonWriter.asObject(wordCount, Paths.get(file.toString()));
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -85,24 +94,32 @@ public class InvertedIndex {
 
 	/**
 	 * @param name : name of the output file
-	 * @throws IOException
 	 */
-	public void indexWriter(String name) throws IOException {
+	public void indexWriter(String name) {
 		if (name == null) {
 			name = "index.json";
 		}
 		File file = new File(name);
-		BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-		SimpleJsonWriter.asNestedObjectInNestedObject(map, Paths.get(file.toString()));
-		writer.close();
+
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+			SimpleJsonWriter.asNestedObjectInNestedObject(map, Paths.get(file.toString()));
+		} catch (IOException e) {
+			System.err.println("Problem with output file!");
+		}
+
 	}
 
-	public void readFile(Path file) throws IOException {
+	/**
+	 * @param file : the file it will read
+	 */
+	public void readFile(Path file) {
 		try (BufferedReader br = Files.newBufferedReader(Paths.get("index.json"))) {
 			String line;
 			while ((line = br.readLine()) != null) {
 				System.out.println(line);
 			}
+		} catch (IOException e) {
+			System.err.println("Error reading file!");
 		}
 	}
 
