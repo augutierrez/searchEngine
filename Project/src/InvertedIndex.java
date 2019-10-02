@@ -86,7 +86,7 @@ public class InvertedIndex {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file));) {
 			SimpleJsonWriter.asObject(wordCount, Paths.get(file.toString()));
 		} catch (IOException e) {
-			e.printStackTrace();
+			e.printStackTrace(); // TODO Fix
 		}
 
 	}
@@ -96,7 +96,7 @@ public class InvertedIndex {
 	 */
 	public void indexWriter(String name) {
 		if (name == null) {
-			name = "index.json";
+			name = "index.json"; // TODO Move to Driver
 		}
 		File file = new File(name);
 
