@@ -13,7 +13,6 @@ import java.util.TreeSet;
 
 /**
  * @author Antonio Gutierrez
- *
  */
 public class InvertedIndex {
 	/**
