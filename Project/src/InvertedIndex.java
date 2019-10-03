@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,7 +26,10 @@ public class InvertedIndex {
 	 * used for counts flag
 	 */
 	TreeMap<String, Integer> wordCount = new TreeMap<>();
+	
 	/**
+	 * Receives words from addPath() and stores it in the map data structure
+	 * 
 	 * @param word     : the words that must be added
 	 * @param path     : the path where the word was found
 	 * @param position : the line the word was found in the file
@@ -51,9 +55,14 @@ public class InvertedIndex {
 	}
 
 	/**
+	 * Extracts information from the file passed and each word found in the file and
+	 * passes it to add()
+	 * 
 	 * @param path : the path to the file that it will read from
+	 * @throws IOException
+	 * @throws FileNotFoundException
 	 */
-	public void addPath(Path path) {
+	public void addPath(Path path) throws FileNotFoundException, IOException {
 		if (path.toString().toLowerCase().endsWith(".txt") || path.toString().toLowerCase().endsWith(".text")) {
 			try (BufferedReader reader = new BufferedReader(new FileReader(path.toString()))) {
 
@@ -69,8 +78,6 @@ public class InvertedIndex {
 				}
 				wordCount.put(path.toString(), counter - 1);
 			}
-			} catch (IOException e) {
-				System.err.println("Invalid file(s)!");
 			}
 		}
 	}
@@ -80,15 +87,15 @@ public class InvertedIndex {
 	 * to the data structure if it is a file.
 	 * 
 	 * @param path : the path we will extract information from
+	 * @throws IOException
+	 * @throws FileNotFoundException
 	 */
-	public void directoryIterator(Path path) {
+	public void directoryIterator(Path path) throws FileNotFoundException, IOException {
 		if (path != null) {
 			if (Files.isDirectory(path)) {
 				try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
 					for (Path currPath : listing)
 						directoryIterator(currPath);
-				} catch (IOException e) {
-					System.err.println("Invalid Path!");
 				}
 			} else {
 				if (Files.isRegularFile(path))
@@ -98,46 +105,49 @@ public class InvertedIndex {
 	}
 
 	/**
+	 * Creates a writer for the -counts flag and outputs to the file passed
+	 * 
 	 * @param name : name of output file
+	 * @throws IOException
 	 */
-	public void countsWriter(String name) {
+	public void countsWriter(String name) throws IOException {
 
 		File file = new File(name);
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file));) {
 			SimpleJsonWriter.asObject(wordCount, Paths.get(file.toString()));
-		} catch (IOException e) {
-			System.err.println("Invalid output file name!"); // Not sure about this one
 		}
 
 	}
 
 	/**
+	 * Creates a writer for the -index flag and outputs to the file passed
+	 * 
 	 * @param name : name of the output file
+	 * @throws IOException
 	 */
-	public void indexWriter(String name) {
+	public void indexWriter(String name) throws IOException {
 
 		File file = new File(name);
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
 			SimpleJsonWriter.asNestedObjectInNestedObject(map, Paths.get(file.toString()));
-		} catch (IOException e) {
-			System.err.println("Invalid output file name for index flag!");
 		}
 
 	}
 
 	/**
+	 * Reads the file passed
+	 * 
 	 * @param file : the file it will read
+	 * @throws IOException
 	 */
-	public void readFile(Path file) {
+	public void readFile(Path file) throws IOException {
 		try (BufferedReader br = Files.newBufferedReader(Paths.get("index.json"))) {
 			String line;
 			while ((line = br.readLine()) != null) {
 				System.out.println(line);
 			}
-		} catch (IOException e) {
-			System.err.println("Invalid file(s)!");
 		}
 	}
 
