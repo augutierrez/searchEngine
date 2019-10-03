@@ -1,6 +1,4 @@
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -20,52 +18,6 @@ import java.time.Instant;
  */
 public class Driver {
 
-
-	/**
-	 * Initializes the classes necessary based on the provided command-line
-	 * arguments. This includes (but is not limited to) how to build or search an
-	 * inverted index.
-	 * 
-	 * @param files : the list of files in the directory we will iterate
-	 * @param index : the data structure is storing what's found in the files
-	 * @throws IOException
-	 */
-	public static void directoryIterator(Path path, InvertedIndex index) throws IOException {
-
-		try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
-
-			for (Path path1 : listing) {
-
-//		for (File file : files) {
-//			if (file.isDirectory()) {
-//				File[] listOfFiles = file.listFiles();
-//				directoryIterator(listOfFiles, index);
-//			}
-				if (Files.isDirectory(path1)) {
-					try (DirectoryStream<Path> listing1 = Files.newDirectoryStream(path1)) {
-						// use an enhanced-for or for-each loop for efficiency and simplicity
-						for (Path tempPath : listing1) {
-//						if (Files.isDirectory(path)) {
-//							System.out.println(path.toString() + "/");
-//							traverseDirectory(path);
-//						}
-//						else {
-//							System.out.printf(FORMAT, path.toString(), Files.size(path));
-//						}
-
-							// note the duplicated logic above with traverse()!
-							// avoid the duplicated code by just calling the traverse() method
-							// (requires designing it just right to make this possible)
-							directoryIterator(tempPath, index);
-						}
-					}
-				} else {
-					if (Files.isRegularFile(path1))
-						index.addPath(path1);
-			}
-		}
-		}
-	}
 	
 	/*
 	 * TODO Driver classes: It is the programmer-specific "driver" used to call
@@ -97,21 +49,13 @@ public class Driver {
 	 */
 	
 	/**
-	 * TODO Need to actually fill in descriptions for your Javadoc comments
+	 * TODO Need to actually fill in descriptions for your Javadoc comments Driver
+	 * used to test Inverted Index for Project1
 	 * 
 	 * @param args flag/value pairs used to start this program
 	 * @throws IOException
 	 */
 
-	/*
-	 * TODO Should not use File or toFile in modern Java code. file.isDirectory()
-	 * --> Files.isDirectory(path)
-	 * 
-	 * listFiles() is the hardest one to figure out: Could try something similar
-	 * to:https://github.com/usf-cs212-fall2019/template-textfilefinder Or look at:
-	 * https://github.com/usf-cs212-fall2019/lectures/blob/master/Files%20and%
-	 * 20Exceptions/src/DirectoryStreamDemo.java
-	 */
 	public static void main(String[] args) throws IOException {
 		// store initial start time
 		Instant start = Instant.now();
@@ -121,47 +65,20 @@ public class Driver {
 		InvertedIndex index = new InvertedIndex();
 		Path path = parser.getPath("-path");
 		
-		if (path != null) {
-//			File file = new File(path.toString());
-
-//			if (Files.isDirectory(path)) {
-//				index.addPath(path);
-//			}
-			if (Files.isDirectory(path)) {
-				try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
-					// use an enhanced-for or for-each loop for efficiency and simplicity
-					for (Path tempPath : listing) {
-//						if (Files.isDirectory(path)) {
-//							System.out.println(path.toString() + "/");
-//							traverseDirectory(path);
-//						}
-//						else {
-//							System.out.printf(FORMAT, path.toString(), Files.size(path));
-//						}
-
-						// note the duplicated logic above with traverse()!
-						// avoid the duplicated code by just calling the traverse() method
-						// (requires designing it just right to make this possible)
-						directoryIterator(tempPath, index);
-					}
-				}
-			}
-
-			else
-				index.addPath(path);
-//			} else if (file.isDirectory()) {
-//				File[] listOfFiles = file.listFiles();
-//				directoryIterator(listOfFiles, index);
-//			}
-			// calculate time elapsed and output //
-		}
+		index.directoryIterator(path);
 		
 		if (parser.hasFlag("-index")) {
-			index.indexWriter(parser.getString("-index"));
+			String name = parser.getString("-index");
+			if (name == null)
+				name = "index.json";
+			index.indexWriter(name);
 		}
 		
 		if (parser.hasFlag("-counts")) {
-			index.countsWriter(parser.getString("-counts"));
+			String name = parser.getString("-counts");
+			if (name == null)
+				name = "counts.json";
+			index.countsWriter(name);
 		}
 		
 		Duration elapsed = Duration.between(start, Instant.now());

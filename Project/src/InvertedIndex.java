@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -69,7 +70,29 @@ public class InvertedIndex {
 				wordCount.put(path.toString(), counter - 1);
 			}
 			} catch (IOException e) {
-				System.err.println("Trouble finding file in addPath!");
+				System.err.println("Invalid file(s)!");
+			}
+		}
+	}
+
+	/**
+	 * Accepts a path, and iterates over it if it is a directory, or simply adds it
+	 * to the data structure if it is a file.
+	 * 
+	 * @param path : the path we will extract information from
+	 */
+	public void directoryIterator(Path path) {
+		if (path != null) {
+			if (Files.isDirectory(path)) {
+				try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
+					for (Path currPath : listing)
+						directoryIterator(currPath);
+				} catch (IOException e) {
+					System.err.println("Invalid Path!");
+				}
+			} else {
+				if (Files.isRegularFile(path))
+					addPath(path);
 			}
 		}
 	}
@@ -78,15 +101,13 @@ public class InvertedIndex {
 	 * @param name : name of output file
 	 */
 	public void countsWriter(String name) {
-		if (name == null) {
-			name = "counts.json";
-		}
+
 		File file = new File(name);
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file));) {
 			SimpleJsonWriter.asObject(wordCount, Paths.get(file.toString()));
 		} catch (IOException e) {
-			e.printStackTrace(); // TODO Fix
+			System.err.println("Invalid output file name!"); // Not sure about this one
 		}
 
 	}
@@ -95,15 +116,13 @@ public class InvertedIndex {
 	 * @param name : name of the output file
 	 */
 	public void indexWriter(String name) {
-		if (name == null) {
-			name = "index.json"; // TODO Move to Driver
-		}
+
 		File file = new File(name);
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
 			SimpleJsonWriter.asNestedObjectInNestedObject(map, Paths.get(file.toString()));
 		} catch (IOException e) {
-			System.err.println("Problem with output file!");
+			System.err.println("Invalid output file name for index flag!");
 		}
 
 	}
@@ -118,7 +137,7 @@ public class InvertedIndex {
 				System.out.println(line);
 			}
 		} catch (IOException e) {
-			System.err.println("Error reading file!");
+			System.err.println("Invalid file(s)!");
 		}
 	}
 
