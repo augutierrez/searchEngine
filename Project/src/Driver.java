@@ -26,7 +26,7 @@ public class Driver {
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
 
-		Path path = parser.getPath("-path");
+		Path path = parser.getPath("-path");//
 		try {
 			index.directoryIterator(path);
 		} catch (Exception e) {
