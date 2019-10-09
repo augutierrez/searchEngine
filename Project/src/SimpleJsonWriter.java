@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -190,6 +191,56 @@ public class SimpleJsonWriter {
 		writer.append("}");
 
 
+	}
+
+	/**
+	 * @param elements
+	 * @param writer
+	 * @param level
+	 * @throws IOException
+	 */
+	public static void searchOutput(Map<String, ? extends HashSet<Result>> elements, Writer writer, int level)
+			throws IOException {
+		Iterator<String> setIterator = elements.keySet().iterator();
+		writer.write("{");
+		// Outer loop (Strings)
+		while (setIterator.hasNext()) {
+			String element = setIterator.next();
+			writer.write('\n');
+			Iterator<Integer> intIterator = elements.get(element).iterator();
+			quote(element, writer, level + 1);
+			writer.write(": [");
+			writer.write('\n');
+			// Inner loop (Integers)
+			while (intIterator.hasNext()) {
+				indent(intIterator.next(), writer, level + 2);
+				if (intIterator.hasNext()) {
+					writer.write(",");
+				}
+				writer.write('\n');
+
+			}
+			indent("]", writer, level + 1);
+			if (setIterator.hasNext()) {
+				writer.write(",");
+			}
+
+		}
+		writer.write('\n');
+		writer.append("}");
+
+	}
+
+	/**
+	 * @param elements
+	 * @param path
+	 * @throws IOException
+	 */
+	public static void searchOutput(HashMap<String, HashSet<Result>> elements, Path path) throws IOException {
+
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			searchOutput(elements, writer, 0);
+		}
 	}
 
 	/**

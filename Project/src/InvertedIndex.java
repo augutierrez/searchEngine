@@ -9,6 +9,10 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -27,6 +31,70 @@ public class InvertedIndex {
 	 */
 	TreeMap<String, Integer> wordCount = new TreeMap<>();
 	
+	/**
+	 * 
+	 */
+	HashMap<String, HashSet<Result>> querySet = new HashMap<>();
+
+	// the data structure that will get printed:
+	HashMap<String, HashMap<String, Result>> readyToPrint = new HashMap<>();
+	// NOW
+	/*
+	 * make score a float then figure out how to print everythin format decimals
+	 * %.8f
+	 */
+
+	// inorder to store every query :
+	ArrayList<HashMap<String, Result>> setOfQuerySets = new ArrayList<>();
+	// this is for one single query
+	HashMap<String, Result> querySet1 = new HashMap<>();
+
+	/**
+	 * @param setOfQueries
+	 * @param set
+	 * @return
+	 */
+
+	public void generate(ArrayList<TreeSet<String>> setOfQueries) {
+		for (TreeSet<String> set : setOfQueries) {
+			setOfQuerySets.add(generateResults(set));
+		}
+		// added everything, now we print out everything
+	}
+
+	public HashMap<String, Result> generateResults(TreeSet<String> set) {
+//		HashSet<Result> results;
+
+		HashMap<String, Result> query = new HashMap<>();
+		for (String word : set) {
+			// traversing the maps within our map
+
+//			results = new HashSet<>();
+			if (map.containsKey(word)) {
+				Result result;
+				for (Map.Entry<String, TreeSet<Integer>> entry1 : map.get(word).entrySet()) {
+					String location = entry1.getKey();
+					int counts = entry1.getValue().size();
+					int totalWords = wordCount.get(location);
+					// if we have this result already, then update it
+					if (query.containsKey(location)) {
+						Result temp = query.get(location);
+						temp.add(counts);
+					} else {
+						result = new Result(location, counts, totalWords);
+						query.put(location, result);
+					}
+				}
+			}
+			// querySet.put(word, results);
+		}
+
+
+		System.out.println(query.toString());
+		return query;
+
+	}
+
 	/**
 	 * Receives words from addPath() and stores it in the map data structure
 	 * 
@@ -136,6 +204,20 @@ public class InvertedIndex {
 
 	}
 
+	/**
+	 * @param name
+	 * @param map
+	 * @throws IOException
+	 */
+	public void queryWriter(String name) throws IOException {
+
+		File file = new File(name);
+
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+			// SimpleJsonWriter.searchOutput(querySet, Paths.get(file.toString()));
+		}
+
+	}
 	/**
 	 * Reads the file passed
 	 * 

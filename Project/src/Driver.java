@@ -26,7 +26,7 @@ public class Driver {
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
 
-		Path path = parser.getPath("-path");//
+		Path path = parser.getPath("-path");
 		try {
 			index.directoryIterator(path);
 		} catch (Exception e) {
@@ -54,7 +54,28 @@ public class Driver {
 				System.err.println("Invalid output file name: " + name);
 			}
 		}
-		
+		if (parser.hasFlag("-query")) {
+			// what is the name of the output file???? i need to pass it to my writer
+			QueryBuilder queryBuilder = new QueryBuilder();
+			String name = parser.getString("-query");
+			if (name != null) {
+				try {
+					queryBuilder.build(name, index);
+				} catch (Exception e) {
+					System.err.println("Invlad query file: " + name);
+					System.out.println(e);
+				}
+			}
+			queryBuilder.printOut();
+//			try {
+//				queryBuilder.searchQuery(index);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+		}
+
+
 		Duration elapsed = Duration.between(start, Instant.now());
 		double seconds = (double) elapsed.toMillis() / Duration.ofSeconds(1).toMillis();
 		System.out.printf("Elapsed: %f seconds%n", seconds);
