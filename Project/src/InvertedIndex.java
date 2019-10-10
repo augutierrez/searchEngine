@@ -56,20 +56,28 @@ public class InvertedIndex {
 	 */
 
 	public void generate(ArrayList<TreeSet<String>> setOfQueries) {
+		StringBuffer buffer = new StringBuffer();
 		for (TreeSet<String> set : setOfQueries) {
-			setOfQuerySets.add(generateResults(set));
+			for (String word : set) {
+				buffer.append(word);
+				buffer.append(' ');
+			}
+			buffer.deleteCharAt(buffer.length() - 1);
+			StringBuilder builder = new StringBuilder();
+
+			// setOfQuerySets.add(generateResults(set));
+			readyToPrint.put(buffer.toString(), generateResults(set));
 		}
 		// added everything, now we print out everything
+		System.out.println(readyToPrint.toString());
 	}
 
 	public HashMap<String, Result> generateResults(TreeSet<String> set) {
-//		HashSet<Result> results;
 
 		HashMap<String, Result> query = new HashMap<>();
 		for (String word : set) {
 			// traversing the maps within our map
 
-//			results = new HashSet<>();
 			if (map.containsKey(word)) {
 				Result result;
 				for (Map.Entry<String, TreeSet<Integer>> entry1 : map.get(word).entrySet()) {
@@ -210,11 +218,11 @@ public class InvertedIndex {
 	 * @throws IOException
 	 */
 	public void queryWriter(String name) throws IOException {
-
+		System.out.println("called");
 		File file = new File(name);
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			// SimpleJsonWriter.searchOutput(querySet, Paths.get(file.toString()));
+			SimpleJsonWriter.searchOutput(readyToPrint, Paths.get(file.toString()));
 		}
 
 	}

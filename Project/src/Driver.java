@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -65,6 +66,14 @@ public class Driver {
 					System.err.println("Invlad query file: " + name);
 					System.out.println(e);
 				}
+				try {
+					index.queryWriter("search-exact-text.json");
+					// System.out.println("here");
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
 			}
 			queryBuilder.printOut();
 //			try {

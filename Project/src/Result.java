@@ -3,9 +3,9 @@
  */
 public class Result {
 	private final String directory;
-	private int count;
-	private int totalWords;
-	private int score;
+	private Integer count;
+	private Integer totalWords;
+	private Integer score;
 
 	/**
 	 * @param directory
@@ -25,6 +25,20 @@ public class Result {
 	public void add(int count) {
 		this.count += count;
 		this.score = this.count / this.totalWords;
+	}
+
+	public String getDirectory() {
+		return this.directory;
+	}
+
+	public String getCount() {
+		if (this.count == null)
+			return "0";
+		return this.count.toString();
+	}
+
+	public String getScore() {
+		return this.score.toString();
 	}
 }
 

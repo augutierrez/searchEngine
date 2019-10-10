@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -199,7 +198,7 @@ public class SimpleJsonWriter {
 	 * @param level
 	 * @throws IOException
 	 */
-	public static void searchOutput(Map<String, ? extends HashSet<Result>> elements, Writer writer, int level)
+	public static void searchOutput(Map<String, ? extends HashMap<String, Result>> elements, Writer writer, int level)
 			throws IOException {
 		Iterator<String> setIterator = elements.keySet().iterator();
 		writer.write("{");
@@ -207,14 +206,26 @@ public class SimpleJsonWriter {
 		while (setIterator.hasNext()) {
 			String element = setIterator.next();
 			writer.write('\n');
-			Iterator<Integer> intIterator = elements.get(element).iterator();
+			Iterator<String> setIterator2 = elements.get(element).keySet().iterator();
 			quote(element, writer, level + 1);
-			writer.write(": [");
+			writer.write(":[");
 			writer.write('\n');
 			// Inner loop (Integers)
-			while (intIterator.hasNext()) {
-				indent(intIterator.next(), writer, level + 2);
-				if (intIterator.hasNext()) {
+			while (setIterator2.hasNext()) {
+				String location = setIterator2.next();
+				writer.write("\"where\" : ");
+
+				indent(elements.get(element).get(location).getDirectory(), writer, level + 2);
+				writer.write(",\n");
+				writer.write("\"count\" : ");
+
+				indent(elements.get(element).get(location).getCount(), writer, level + 2);
+				writer.write(",\n");
+				writer.write("\"score\" : ");
+				indent(elements.get(element).get(location).getScore(), writer, level + 2);
+				writer.write('\n');
+				writer.write("}");
+				if (setIterator2.hasNext()) {
 					writer.write(",");
 				}
 				writer.write('\n');
@@ -236,7 +247,7 @@ public class SimpleJsonWriter {
 	 * @param path
 	 * @throws IOException
 	 */
-	public static void searchOutput(HashMap<String, HashSet<Result>> elements, Path path) throws IOException {
+	public static void searchOutput(HashMap<String, HashMap<String, Result>> elements, Path path) throws IOException {
 
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 			searchOutput(elements, writer, 0);
