@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -213,18 +214,21 @@ public class SimpleJsonWriter {
 			// Inner loop (Integers)
 			while (setIterator2.hasNext()) {
 				String location = setIterator2.next();
-				writer.write("\"where\" : ");
-
-				indent(elements.get(element).get(location).getDirectory(), writer, level + 2);
+				indent("{\n", writer, level + 2);
+				indent("\"where\" : ", writer, level + 3);
+				writer.write(elements.get(element).get(location).getDirectory());
 				writer.write(",\n");
-				writer.write("\"count\" : ");
-
-				indent(elements.get(element).get(location).getCount(), writer, level + 2);
+				indent("\"count\" : ", writer, level + 3);
+				writer.write(elements.get(element).get(location).getCount());
 				writer.write(",\n");
-				writer.write("\"score\" : ");
-				indent(elements.get(element).get(location).getScore(), writer, level + 2);
-				writer.write('\n');
-				writer.write("}");
+				indent("\"score\" : ", writer, level + 3);
+				DecimalFormat df = new DecimalFormat("0.00000000");
+				// String score = String.format("%.8f",
+				// elements.get(element).get(location).getScore());
+
+				writer.write(df.format(elements.get(element).get(location).getScore()));
+				writer.write("\n");
+				indent("}", writer, level + 2);
 				if (setIterator2.hasNext()) {
 					writer.write(",");
 				}

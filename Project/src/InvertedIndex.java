@@ -73,15 +73,21 @@ public class InvertedIndex {
 	}
 
 	public HashMap<String, Result> generateResults(TreeSet<String> set) {
-
 		HashMap<String, Result> query = new HashMap<>();
 		for (String word : set) {
 			// traversing the maps within our map
 
+			// searching for exact word
 			if (map.containsKey(word)) {
 				Result result;
+				// Partial search would change here: map.get(prefix word).entrySet()
+				//
+				// Entry Set =
+				// if()
+				// else() then run the same forloop. and replace here vvvv
 				for (Map.Entry<String, TreeSet<Integer>> entry1 : map.get(word).entrySet()) {
 					String location = entry1.getKey();
+					// Files file = Files.createFile(location);
 					int counts = entry1.getValue().size();
 					int totalWords = wordCount.get(location);
 					// if we have this result already, then update it
