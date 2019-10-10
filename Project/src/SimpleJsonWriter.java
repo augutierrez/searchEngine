@@ -199,7 +199,7 @@ public class SimpleJsonWriter {
 	 * @param level
 	 * @throws IOException
 	 */
-	public static void searchOutput(Map<String, ? extends HashMap<String, Result>> elements, Writer writer, int level)
+	public static void searchOutput(Map<String, ? extends TreeMap<String, Result>> elements, Writer writer, int level)
 			throws IOException {
 		Iterator<String> setIterator = elements.keySet().iterator();
 		writer.write("{");
@@ -251,7 +251,7 @@ public class SimpleJsonWriter {
 	 * @param path
 	 * @throws IOException
 	 */
-	public static void searchOutput(HashMap<String, HashMap<String, Result>> elements, Path path) throws IOException {
+	public static void searchOutput(HashMap<String, TreeMap<String, Result>> elements, Path path) throws IOException {
 
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 			searchOutput(elements, writer, 0);

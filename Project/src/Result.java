@@ -1,7 +1,7 @@
 /**
  * @author tony This class will hold
  */
-public class Result {
+public class Result implements Comparable<Result> {
 	private final String directory;
 	private int count;
 	private int totalWords;
@@ -38,6 +38,12 @@ public class Result {
 
 	public float getScore() {
 		return this.score;
+	}
+
+	@Override
+	public int compareTo(Result result) {
+		// TODO Auto-generated method stub
+		return Float.compare(result.getScore(), this.score);
 	}
 }
 

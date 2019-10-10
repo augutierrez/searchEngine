@@ -37,7 +37,7 @@ public class InvertedIndex {
 	HashMap<String, HashSet<Result>> querySet = new HashMap<>();
 
 	// the data structure that will get printed:
-	HashMap<String, HashMap<String, Result>> readyToPrint = new HashMap<>();
+	HashMap<String, TreeMap<String, Result>> readyToPrint = new HashMap<>();
 	// NOW
 	/*
 	 * make score a float then figure out how to print everythin format decimals
@@ -72,8 +72,8 @@ public class InvertedIndex {
 		System.out.println(readyToPrint.toString());
 	}
 
-	public HashMap<String, Result> generateResults(TreeSet<String> set) {
-		HashMap<String, Result> query = new HashMap<>();
+	public TreeMap<String, Result> generateResults(TreeSet<String> set) {
+		TreeMap<String, Result> query = new TreeMap<>();
 		for (String word : set) {
 			// traversing the maps within our map
 
