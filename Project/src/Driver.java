@@ -60,8 +60,12 @@ public class Driver {
 			QueryBuilder queryBuilder = new QueryBuilder();
 			String name = parser.getString("-query");
 			if (name != null) {
+				String type = "partial";
+
+				if (parser.hasFlag("-exact"))
+					type = "exact";
 				try {
-					queryBuilder.build(name, index);
+					queryBuilder.build(name, index, type);
 				} catch (Exception e) {
 					System.err.println("Invlad query file: " + name);
 					System.out.println(e);
@@ -71,10 +75,7 @@ public class Driver {
 					if (outputFileName == null)
 						outputFileName = "results.json";
 
-					String kind = "simple";
 
-					if (parser.hasFlag("-exact"))
-						kind = "exact";
 					// we can do(if exact, pass value exact, else simple
 					try {
 						System.out.println(outputFileName);

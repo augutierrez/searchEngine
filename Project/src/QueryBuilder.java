@@ -25,7 +25,7 @@ public class QueryBuilder {
 	 * @throws IOException           : file couldn't be found
 	 * @throws FileNotFoundException
 	 */
-	public void build(String path, InvertedIndex index) throws FileNotFoundException, IOException {
+	public void build(String path, InvertedIndex index, String type) throws FileNotFoundException, IOException {
 		if (path.toLowerCase().endsWith(".txt") || path.toLowerCase().endsWith(".text")) {
 			try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
 
@@ -39,7 +39,7 @@ public class QueryBuilder {
 					for (String word : wordsInLine) {
 						set.add(word);
 					}
-					searchQuery(index, set);
+					searchQuery(index, set, type);
 					setOfQueries.add(set);
 				}
 			}
@@ -52,8 +52,8 @@ public class QueryBuilder {
 	 * @param index
 	 * @throws IOException
 	 */
-	public void searchQuery(InvertedIndex index, TreeSet<String> set) throws IOException {
-		index.generate(set);
+	public void searchQuery(InvertedIndex index, TreeSet<String> set, String type) throws IOException {
+		index.generate(set, type);
 	}
 
 	public void printOut() {

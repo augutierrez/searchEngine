@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -22,7 +23,8 @@ import java.util.TreeSet;
  */
 public class InvertedIndex {
 	/**
-	 * Nested Data Structure that stores all the words
+	 * Nested Data Structure that stores all the words First Key is words Second Key
+	 * is for locations
 	 */
 	TreeMap<String, TreeMap<String, TreeSet<Integer>>> map = new TreeMap<>();
 
@@ -55,7 +57,7 @@ public class InvertedIndex {
 	 * @return
 	 */
 
-	public void generate(TreeSet<String> set) {
+	public void generate(TreeSet<String> set, String type) {
 		StringBuffer buffer = new StringBuffer();
 		// for (TreeSet<String> set : setOfQueries) {
 		for (String word : set) {
@@ -66,17 +68,39 @@ public class InvertedIndex {
 		// StringBuilder builder = new StringBuilder();
 
 			// setOfQuerySets.add(generateResults(set));
-		readyToPrint.put(buffer.toString(), generateResults(set));
+		readyToPrint.put(buffer.toString(), generateResults(set, type));
 
 		// added everything, now we print out everything
 		System.out.println(readyToPrint.toString());
+	}
+
+	public TreeSet<String> partialSearch(TreeSet<String> set) {
+		TreeSet<String> returnSet = new TreeSet<>();
+		Iterator<String> stems = set.iterator();
+		Iterator<String> iterate = map.keySet().iterator();
+		while (stems.hasNext()) {
+			String stem = stems.next();
+			// System.out.println("Stem: " + stem);
+			while (iterate.hasNext()) {
+				String key = iterate.next();
+				// System.out.println("Key: " + key + " " + key.startsWith(stem));
+				if (key.startsWith(stem))
+					returnSet.add(key);
+			}
+		}
+
+		return returnSet;
 	}
 
 	/**
 	 * @param set
 	 * @return
 	 */
-	public TreeMap<String, Result> generateResults(TreeSet<String> set) {
+	public TreeMap<String, Result> generateResults(TreeSet<String> set, String type) {
+		System.out.println(type);
+		if (type.equals("partial")) {
+			set.addAll(partialSearch(set));
+		}
 		TreeMap<String, Result> query = new TreeMap<>();
 		for (String word : set) {
 			// traversing the maps within our map
