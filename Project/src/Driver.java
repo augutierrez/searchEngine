@@ -66,12 +66,24 @@ public class Driver {
 					System.err.println("Invlad query file: " + name);
 					System.out.println(e);
 				}
-				try {
-					index.queryWriter("search-exact-text.json");
-					// System.out.println("here");
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				if (parser.hasFlag("-results")) {
+					String outputFileName = parser.getString("-results");
+					if (outputFileName == null)
+						outputFileName = "results.json";
+
+					String kind = "simple";
+
+					if (parser.hasFlag("-exact"))
+						kind = "exact";
+					// we can do(if exact, pass value exact, else simple
+					try {
+						System.out.println(outputFileName);
+						index.queryWriter(outputFileName); // remember to pass kind
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
 				}
 
 			}

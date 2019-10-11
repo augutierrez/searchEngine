@@ -16,7 +16,7 @@ public class Result implements Comparable<Result> {
 		this.directory = directory;
 		this.count = count;
 		this.totalWords = totalWords;
-		this.score = count / totalWords;
+		this.score = (float) count / totalWords;
 	}
 
 	/**
@@ -24,7 +24,7 @@ public class Result implements Comparable<Result> {
 	 */
 	public void add(int count) {
 		this.count += count;
-		this.score = this.count / this.totalWords;
+		this.score = (float) this.count / this.totalWords;
 	}
 
 	public String getDirectory() {

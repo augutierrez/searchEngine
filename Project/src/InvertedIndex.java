@@ -37,7 +37,7 @@ public class InvertedIndex {
 	HashMap<String, HashSet<Result>> querySet = new HashMap<>();
 
 	// the data structure that will get printed:
-	HashMap<String, TreeMap<String, Result>> readyToPrint = new HashMap<>();
+	TreeMap<String, TreeMap<String, Result>> readyToPrint = new TreeMap<>();
 	// NOW
 	/*
 	 * make score a float then figure out how to print everythin format decimals
@@ -55,23 +55,27 @@ public class InvertedIndex {
 	 * @return
 	 */
 
-	public void generate(ArrayList<TreeSet<String>> setOfQueries) {
+	public void generate(TreeSet<String> set) {
 		StringBuffer buffer = new StringBuffer();
-		for (TreeSet<String> set : setOfQueries) {
-			for (String word : set) {
-				buffer.append(word);
-				buffer.append(' ');
-			}
-			buffer.deleteCharAt(buffer.length() - 1);
-			StringBuilder builder = new StringBuilder();
+		// for (TreeSet<String> set : setOfQueries) {
+		for (String word : set) {
+			buffer.append(word);
+			buffer.append(' ');
+		}
+		buffer.deleteCharAt(buffer.length() - 1);
+		// StringBuilder builder = new StringBuilder();
 
 			// setOfQuerySets.add(generateResults(set));
-			readyToPrint.put(buffer.toString(), generateResults(set));
-		}
+		readyToPrint.put(buffer.toString(), generateResults(set));
+
 		// added everything, now we print out everything
 		System.out.println(readyToPrint.toString());
 	}
 
+	/**
+	 * @param set
+	 * @return
+	 */
 	public TreeMap<String, Result> generateResults(TreeSet<String> set) {
 		TreeMap<String, Result> query = new TreeMap<>();
 		for (String word : set) {
@@ -79,6 +83,7 @@ public class InvertedIndex {
 
 			// searching for exact word
 			if (map.containsKey(word)) {
+				System.out.println(1);
 				Result result;
 				// Partial search would change here: map.get(prefix word).entrySet()
 				//

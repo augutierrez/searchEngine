@@ -3,7 +3,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.TreeSet;
 
 /**
@@ -16,7 +15,7 @@ public class QueryBuilder {
 	 */
 	ArrayList<TreeSet<String>> setOfQueries = new ArrayList<>();
 	// will store where its from, word count, score
-	HashMap<String, Result> results = new HashMap<>();
+//	HashMap<String, Result> results = new HashMap<>();
 
 	/**
 	 * This method will take a path and clean, stem, and add the query values into
@@ -31,19 +30,21 @@ public class QueryBuilder {
 			try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
 
 				String line;
-				TreeSet<String> set;
+				TreeSet<String> set = new TreeSet<>();
 				while ((line = reader.readLine()) != null) {
-					set = new TreeSet<>();
+					set.clear();
+
 					String[] wordsInLine = TextParser.parse(line);
 
 					for (String word : wordsInLine) {
 						set.add(word);
 					}
+					searchQuery(index, set);
 					setOfQueries.add(set);
 				}
 			}
 		}
-		searchQuery(index);
+		// searchQuery(index);
 
 	}
 
@@ -51,8 +52,8 @@ public class QueryBuilder {
 	 * @param index
 	 * @throws IOException
 	 */
-	public void searchQuery(InvertedIndex index) throws IOException {
-		index.generate(setOfQueries);
+	public void searchQuery(InvertedIndex index, TreeSet<String> set) throws IOException {
+		index.generate(set);
 	}
 
 	public void printOut() {

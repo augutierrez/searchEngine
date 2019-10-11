@@ -209,19 +209,20 @@ public class SimpleJsonWriter {
 			writer.write('\n');
 			Iterator<String> setIterator2 = elements.get(element).keySet().iterator();
 			quote(element, writer, level + 1);
-			writer.write(":[");
+			writer.write(": [");
 			writer.write('\n');
 			// Inner loop (Integers)
 			while (setIterator2.hasNext()) {
 				String location = setIterator2.next();
 				indent("{\n", writer, level + 2);
-				indent("\"where\" : ", writer, level + 3);
-				writer.write(elements.get(element).get(location).getDirectory());
+				indent("\"where\": ", writer, level + 3);
+				quote(elements.get(element).get(location).getDirectory(), writer, level);
+				// writer.write(elements.get(element).get(location).getDirectory());
 				writer.write(",\n");
-				indent("\"count\" : ", writer, level + 3);
+				indent("\"count\": ", writer, level + 3);
 				writer.write(elements.get(element).get(location).getCount());
 				writer.write(",\n");
-				indent("\"score\" : ", writer, level + 3);
+				indent("\"score\": ", writer, level + 3);
 				DecimalFormat df = new DecimalFormat("0.00000000");
 				// String score = String.format("%.8f",
 				// elements.get(element).get(location).getScore());
@@ -251,7 +252,7 @@ public class SimpleJsonWriter {
 	 * @param path
 	 * @throws IOException
 	 */
-	public static void searchOutput(HashMap<String, TreeMap<String, Result>> elements, Path path) throws IOException {
+	public static void searchOutput(TreeMap<String, TreeMap<String, Result>> elements, Path path) throws IOException {
 
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 			searchOutput(elements, writer, 0);
