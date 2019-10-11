@@ -80,12 +80,13 @@ public class TextFileStemmer {
 				set.addAll(uniqueStems(line));
 			}
 		}
-		catch(java.nio.file.NoSuchFileException e) {
+		catch(java.nio.file.NoSuchFileException e) { // TODO Remove the catch block
 			System.err.println("Sorry, input file was not found.");
 		}
 		return set;
 	}
 
+	// TODO Remove the main methods from the homework classes
 	/**
 	 * A simple main method that demonstrates this class.
 	 *
