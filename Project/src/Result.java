@@ -5,7 +5,7 @@ public class Result implements Comparable<Result> {
 	private final String directory;
 	private int count;
 	private int totalWords;
-	private float score;
+	private double score;
 
 	/**
 	 * @param directory
@@ -16,7 +16,7 @@ public class Result implements Comparable<Result> {
 		this.directory = directory;
 		this.count = count;
 		this.totalWords = totalWords;
-		this.score = (float) count / totalWords;
+		this.score = (double) count / totalWords;
 	}
 
 	/**
@@ -24,7 +24,7 @@ public class Result implements Comparable<Result> {
 	 */
 	public void add(int count) {
 		this.count += count;
-		this.score = (float) this.count / this.totalWords;
+		this.score = (double) this.count / this.totalWords;
 	}
 
 	public String getDirectory() {
@@ -36,14 +36,32 @@ public class Result implements Comparable<Result> {
 		return Integer.toString(count);
 	}
 
-	public float getScore() {
+	public double getScore() {
 		return this.score;
 	}
 
 	@Override
 	public int compareTo(Result result) {
 		// TODO Auto-generated method stub
-		return Float.compare(result.getScore(), this.score);
+		// add comparing of counts and location as well.
+		int sCheck = Double.compare(this.score, result.getScore());
+		if (sCheck == 0) {
+			int cCheck = Integer.compare(this.count, Integer.parseInt(result.getCount()));
+			if (cCheck == 0) {
+				int lCheck = this.getDirectory().compareTo(result.getDirectory());
+				return lCheck * -1;
+			} else {
+				return cCheck * -1;
+			}
+		} else {
+			return sCheck * -1;
+		}
+	}
+
+	@Override
+	public String toString() {
+
+		return "location: " + this.directory + " count: " + this.getCount() + " score: " + this.getScore();
 	}
 }
 

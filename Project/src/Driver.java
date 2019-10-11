@@ -26,6 +26,7 @@ public class Driver {
 		ArgumentParser parser = new ArgumentParser();
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
+		QueryBuilder queryBuilder = new QueryBuilder();
 
 		Path path = parser.getPath("-path");
 		try {
@@ -55,46 +56,33 @@ public class Driver {
 				System.err.println("Invalid output file name: " + name);
 			}
 		}
+
 		if (parser.hasFlag("-query")) {
-			// what is the name of the output file???? i need to pass it to my writer
-			QueryBuilder queryBuilder = new QueryBuilder();
 			String name = parser.getString("-query");
 			if (name != null) {
 				String type = "partial";
-
 				if (parser.hasFlag("-exact"))
 					type = "exact";
 				try {
 					queryBuilder.build(name, index, type);
 				} catch (Exception e) {
 					System.err.println("Invlad query file: " + name);
-					System.out.println(e);
+					e.printStackTrace();
 				}
-				if (parser.hasFlag("-results")) {
-					String outputFileName = parser.getString("-results");
-					if (outputFileName == null)
-						outputFileName = "results.json";
-
-
-					// we can do(if exact, pass value exact, else simple
-					try {
-						System.out.println(outputFileName);
-						index.queryWriter(outputFileName); // remember to pass kind
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-
-				}
-
 			}
-			queryBuilder.printOut();
-//			try {
-//				queryBuilder.searchQuery(index);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+		}
+
+		if (parser.hasFlag("-results")) {
+			String outputFileName = parser.getString("-results");
+			if (outputFileName == null)
+				outputFileName = "results.json";
+			try {
+				index.queryWriter(outputFileName);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
 		}
 
 

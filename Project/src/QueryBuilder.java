@@ -28,24 +28,18 @@ public class QueryBuilder {
 	public void build(String path, InvertedIndex index, String type) throws FileNotFoundException, IOException {
 		if (path.toLowerCase().endsWith(".txt") || path.toLowerCase().endsWith(".text")) {
 			try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
-
 				String line;
 				TreeSet<String> set = new TreeSet<>();
 				while ((line = reader.readLine()) != null) {
+					// brand new set of search words for each iteration
 					set.clear();
-
-					String[] wordsInLine = TextParser.parse(line);
-
-					for (String word : wordsInLine) {
-						set.add(word);
+					if (!line.isBlank()) {
+						set.addAll(TextFileStemmer.uniqueStems(line));
+						searchQuery(index, set, type);
 					}
-					searchQuery(index, set, type);
-					setOfQueries.add(set);
 				}
 			}
 		}
-		// searchQuery(index);
-
 	}
 
 	/**

@@ -9,9 +9,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,20 +33,11 @@ public class InvertedIndex {
 	/**
 	 * 
 	 */
-	HashMap<String, HashSet<Result>> querySet = new HashMap<>();
+//	HashMap<String, HashSet<Result>> querySet = new HashMap<>();
 
 	// the data structure that will get printed:
-	TreeMap<String, TreeMap<String, Result>> readyToPrint = new TreeMap<>();
-	// NOW
-	/*
-	 * make score a float then figure out how to print everythin format decimals
-	 * %.8f
-	 */
+	TreeMap<String, TreeSet<Result>> readyToPrint = new TreeMap<>();
 
-	// inorder to store every query :
-	ArrayList<HashMap<String, Result>> setOfQuerySets = new ArrayList<>();
-	// this is for one single query
-	HashMap<String, Result> querySet1 = new HashMap<>();
 
 	/**
 	 * @param setOfQueries
@@ -59,19 +47,21 @@ public class InvertedIndex {
 
 	public void generate(TreeSet<String> set, String type) {
 		StringBuffer buffer = new StringBuffer();
-		// for (TreeSet<String> set : setOfQueries) {
-		for (String word : set) {
-			buffer.append(word);
-			buffer.append(' ');
-		}
-		buffer.deleteCharAt(buffer.length() - 1);
-		// StringBuilder builder = new StringBuilder();
+		if (!set.isEmpty()) {
+			for (String word : set) {
+				buffer.append(word);
+				buffer.append(' ');
+			}
+			// deletes extra space
+			buffer.deleteCharAt(buffer.length() - 1);
+			// StringBuilder builder = new StringBuilder();
 
 			// setOfQuerySets.add(generateResults(set));
-		readyToPrint.put(buffer.toString(), generateResults(set, type));
+			readyToPrint.put(buffer.toString(), generateResults(set, type));
 
-		// added everything, now we print out everything
-		System.out.println(readyToPrint.toString());
+			// added everything, now we print out everything
+			System.out.println("search result objects: " + readyToPrint.toString());
+		}
 	}
 
 	public TreeSet<String> partialSearch(TreeSet<String> set) {
@@ -96,36 +86,46 @@ public class InvertedIndex {
 	 * @param set
 	 * @return
 	 */
-	public TreeMap<String, Result> generateResults(TreeSet<String> set, String type) {
-		System.out.println(type);
+	public TreeSet<Result> generateResults(TreeSet<String> set, String type) {
+
 		if (type.equals("partial")) {
 			set.addAll(partialSearch(set));
 		}
-		TreeMap<String, Result> query = new TreeMap<>();
+		TreeSet<Result> query = new TreeSet<>();
 		for (String word : set) {
 			// traversing the maps within our map
 
 			// searching for exact word
 			if (map.containsKey(word)) {
-				System.out.println(1);
 				Result result;
-				// Partial search would change here: map.get(prefix word).entrySet()
-				//
-				// Entry Set =
-				// if()
-				// else() then run the same forloop. and replace here vvvv
+
 				for (Map.Entry<String, TreeSet<Integer>> entry1 : map.get(word).entrySet()) {
 					String location = entry1.getKey();
 					// Files file = Files.createFile(location);
 					int counts = entry1.getValue().size();
 					int totalWords = wordCount.get(location);
 					// if we have this result already, then update it
-					if (query.containsKey(location)) {
-						Result temp = query.get(location);
-						temp.add(counts);
-					} else {
+					boolean contains = false;
+					for (Result tempResult : query) {
+						if (tempResult.getDirectory().equals(location)) {
+							contains = true;
+							tempResult.add(counts);
+							break;
+						}
+					}
+//					if (query.containsKey(location)) {
+//						Result temp = query.get(location);
+//						temp.add(counts);
+//					}
+//					else {
+//						result = new Result(location, counts, totalWords);
+//						System.out.println("result: " + result);
+//						query.put(location, result);
+//					}
+					if (!contains) {
 						result = new Result(location, counts, totalWords);
-						query.put(location, result);
+						System.out.println("result: " + result);
+						query.add(result);
 					}
 				}
 			}
@@ -133,7 +133,6 @@ public class InvertedIndex {
 		}
 
 
-		System.out.println(query.toString());
 		return query;
 
 	}
@@ -253,7 +252,6 @@ public class InvertedIndex {
 	 * @throws IOException
 	 */
 	public void queryWriter(String name) throws IOException {
-		System.out.println("called");
 		File file = new File(name);
 
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
