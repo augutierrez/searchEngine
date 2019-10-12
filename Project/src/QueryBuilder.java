@@ -21,7 +21,9 @@ public class QueryBuilder {
 	 * This method will take a path and clean, stem, and add the query values into
 	 * our data structure.
 	 * 
-	 * @param path : the path that has the query values
+	 * @param path  : the path that has the query values
+	 * @param index
+	 * @param type
 	 * @throws IOException           : file couldn't be found
 	 * @throws FileNotFoundException
 	 */
@@ -44,12 +46,17 @@ public class QueryBuilder {
 
 	/**
 	 * @param index
+	 * @param set
+	 * @param type
 	 * @throws IOException
 	 */
 	public void searchQuery(InvertedIndex index, TreeSet<String> set, String type) throws IOException {
 		index.generate(set, type);
 	}
 
+	/**
+	 * 
+	 */
 	public void printOut() {
 		System.out.println(setOfQueries.toString());
 	}

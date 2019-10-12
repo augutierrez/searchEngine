@@ -9,6 +9,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,13 +38,13 @@ public class InvertedIndex {
 //	HashMap<String, HashSet<Result>> querySet = new HashMap<>();
 
 	// the data structure that will get printed:
-	TreeMap<String, TreeSet<Result>> readyToPrint = new TreeMap<>();
+	TreeMap<String, ArrayList<Result>> readyToPrint = new TreeMap<>();
 
 
 	/**
-	 * @param setOfQueries
+	 * 
 	 * @param set
-	 * @return
+	 * @param type
 	 */
 
 	public void generate(TreeSet<String> set, String type) {
@@ -58,6 +60,11 @@ public class InvertedIndex {
 		}
 	}
 
+	/**
+	 * @param set
+	 * @return A list with words- ----
+	 * 
+	 */
 	public TreeSet<String> partialSearch(TreeSet<String> set) {
 
 		TreeSet<String> returnSet = new TreeSet<>();
@@ -78,14 +85,15 @@ public class InvertedIndex {
 
 	/**
 	 * @param set
-	 * @return
+	 * @param type
+	 * @return a a
 	 */
-	public TreeSet<Result> generateResults(TreeSet<String> set, String type) {
+	public ArrayList<Result> generateResults(TreeSet<String> set, String type) {
 
 		if (type.equals("partial")) {
 			set.addAll(partialSearch(set));
 		}
-		TreeSet<Result> query = new TreeSet<>();
+		ArrayList<Result> query = new ArrayList<>();
 		for (String word : set) {
 			// traversing the maps within our map
 
@@ -107,23 +115,16 @@ public class InvertedIndex {
 							break;
 						}
 					}
-//					if (query.containsKey(location)) {
-//						Result temp = query.get(location);
-//						temp.add(counts);
-//					}
-//					else {
-//						result = new Result(location, counts, totalWords);
-//						System.out.println("result: " + result);
-//						query.put(location, result);
-//					}
+
 					if (!contains) {
 						result = new Result(location, counts, totalWords);
 						System.out.println("result: " + result);
 						query.add(result);
 					}
+					Collections.sort(query);
 				}
 			}
-			// querySet.put(word, results);
+
 		}
 
 
@@ -242,7 +243,6 @@ public class InvertedIndex {
 
 	/**
 	 * @param name
-	 * @param map
 	 * @throws IOException
 	 */
 	public void queryWriter(String name) throws IOException {

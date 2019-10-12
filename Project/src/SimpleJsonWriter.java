@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -199,7 +200,7 @@ public class SimpleJsonWriter {
 	 * @param level
 	 * @throws IOException
 	 */
-	public static void searchOutput(Map<String, ? extends TreeSet<Result>> elements, Writer writer, int level)
+	public static void searchOutput(Map<String, ? extends ArrayList<Result>> elements, Writer writer, int level)
 			throws IOException {
 		Iterator<String> setIterator = elements.keySet().iterator();
 		writer.write("{");
@@ -257,7 +258,7 @@ public class SimpleJsonWriter {
 	 * @param path
 	 * @throws IOException
 	 */
-	public static void searchOutput(TreeMap<String, TreeSet<Result>> elements, Path path) throws IOException {
+	public static void searchOutput(TreeMap<String, ArrayList<Result>> elements, Path path) throws IOException {
 
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 			searchOutput(elements, writer, 0);
