@@ -12,11 +12,24 @@ import java.nio.file.Paths;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+/*
+ * TODO Keep storage and string/directory/file parsing separate.
+ * 
+ * Move anything that parses string/directory/files into a builder or generator class.
+ */
 
 /**
  * @author Antonio Gutierrez
  */
 public class InvertedIndex {
+	/*
+	 * TODO Always use public or private, and other keywords, when making members.
+	 * 
+	 * Both map and word count should be private final
+	 * 
+	 * And should be initialized in the constructor
+	 */
+	
 	/**
 	 * Nested Data Structure that stores all the words
 	 */
@@ -35,6 +48,9 @@ public class InvertedIndex {
 	 * @param position : the line the word was found in the file
 	 */
 	public void add(String word, String path, int position) {
+		/*
+		 * TODO Stemming in your add method makes this class much less general.
+		 */
 		TreeSet<String> set = TextFileStemmer.uniqueStems(word);
 		word = set.first();
 		if (!map.containsKey(word)) {
@@ -51,6 +67,12 @@ public class InvertedIndex {
 
 		}
 		map.get(word).get(path).add(position);
+		
+		/* TODO Simplify just a bit more
+		map.putIfAbsent(word, new TreeMap<>());
+		map.get(word).putIfAbsent(path, new TreeSet<>());
+		map.get(word).get(path).add(position);
+		*/
 
 	}
 
@@ -63,7 +85,9 @@ public class InvertedIndex {
 	 * @throws FileNotFoundException
 	 */
 	public void addPath(Path path) throws FileNotFoundException, IOException {
+		// TODO Checking if something is a text file should be a static method
 		if (path.toString().toLowerCase().endsWith(".txt") || path.toString().toLowerCase().endsWith(".text")) {
+			// TODO Files.newBufferedReader(...)
 			try (BufferedReader reader = new BufferedReader(new FileReader(path.toString()))) {
 
 			String line;
@@ -128,8 +152,9 @@ public class InvertedIndex {
 	 */
 	public void indexWriter(String name) throws IOException {
 
-		File file = new File(name);
+		File file = new File(name); // TODO NO MORE FILE!
 
+		// TODO Files.newBufferedWriter(path, StandardCharsets.UTF8)
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
 			SimpleJsonWriter.asNestedObjectInNestedObject(map, Paths.get(file.toString()));
 		}
@@ -143,6 +168,7 @@ public class InvertedIndex {
 	 * @throws IOException
 	 */
 	public void readFile(Path file) throws IOException {
+		// TODO index.json should only appear in Driver
 		try (BufferedReader br = Files.newBufferedReader(Paths.get("index.json"))) {
 			String line;
 			while ((line = br.readLine()) != null) {
@@ -150,5 +176,20 @@ public class InvertedIndex {
 			}
 		}
 	}
+	
+	/*
+	 * TODO Add more methods so developers have more ways of safely getting the
+	 * data in your index without having to always dump it to file.
+	 * 
+	 * public boolean contains(String word)
+	 * public boolean contains(String word, String location)
+	 * public boolean contains(String word, String location, int position)
+	 * 
+	 * public Set<String> getWords()
+	 * public Set<String> getLocations(String word) unmodifiable version of map.get(word).keySet()
+	 * public Set<Integer> getPositions(String word, String location)
+	 * 
+	 * toString()
+	 */
 
 }

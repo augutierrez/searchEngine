@@ -1,5 +1,4 @@
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -21,7 +20,7 @@ public class ArgumentParser {
 	 * Initializes this argument map.
 	 */
 	public ArgumentParser() {
-		this.map = new TreeMap<>();
+		this.map = new TreeMap<>(); // TODO HashMap
 	}
 
 	/**
@@ -67,7 +66,7 @@ public class ArgumentParser {
 	 * @see String#length()
 	 */
 	public static boolean isFlag(String arg) {
-
+		// TODO return arg != null && arg.length() > 1 && arg.charAt(0) == '-';
 		boolean containsFlag = false;
 		if (arg == null)
 			return false;
@@ -91,6 +90,7 @@ public class ArgumentParser {
 	 * @see String#length()
 	 */
 	public static boolean isValue(String arg) {
+		// TODO return (arg != null && arg.length() > 0 && arg.charAt(0) != '-') ;
 		if (arg != null && arg.length() > 0 && arg.charAt(0) != '-') {
 			return true;
 		}
@@ -123,7 +123,7 @@ public class ArgumentParser {
 	 * @return {@code true} if the flag is mapped to a non-null value
 	 */
 	public boolean hasValue(String flag) {
-		if (this.map.get(flag) != null) {
+		if (this.map.get(flag) != null) { // TODO Simplify
 			return true;
 		}
 		return false;
@@ -169,7 +169,7 @@ public class ArgumentParser {
 	public Path getPath(String flag) {
 		if (map.get(flag) == null)
 			return null;
-		return Paths.get(map.get(flag));
+		return Path.of(map.get(flag));
 	}
 
 	/**
