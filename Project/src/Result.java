@@ -44,17 +44,18 @@ public class Result implements Comparable<Result> {
 	public int compareTo(Result result) {
 		// TODO Auto-generated method stub
 		// add comparing of counts and location as well.
-		int sCheck = Double.compare(result.getScore(), this.score);
+		// we want it in descending order
+		int sCheck = Double.compare(this.score, result.getScore());
 		if (sCheck == 0) {
-			int cCheck = Integer.compare(Integer.parseInt(result.getCount()), this.count);
+			int cCheck = Integer.compare(this.count, Integer.parseInt(result.getCount()));
 			if (cCheck == 0) {
-				int lCheck = this.getDirectory().compareTo(result.getDirectory());
+				int lCheck = this.getDirectory().compareToIgnoreCase(result.getDirectory());
 				return lCheck;
 			} else {
-				return cCheck;
+				return cCheck * -1;
 			}
 		} else {
-			return sCheck;
+			return sCheck * -1;
 		}
 	}
 
