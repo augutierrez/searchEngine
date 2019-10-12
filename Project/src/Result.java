@@ -44,17 +44,17 @@ public class Result implements Comparable<Result> {
 	public int compareTo(Result result) {
 		// TODO Auto-generated method stub
 		// add comparing of counts and location as well.
-		int sCheck = Double.compare(this.score, result.getScore());
+		int sCheck = Double.compare(result.getScore(), this.score);
 		if (sCheck == 0) {
-			int cCheck = Integer.compare(this.count, Integer.parseInt(result.getCount()));
+			int cCheck = Integer.compare(Integer.parseInt(result.getCount()), this.count);
 			if (cCheck == 0) {
 				int lCheck = this.getDirectory().compareTo(result.getDirectory());
-				return lCheck * -1;
+				return lCheck;
 			} else {
-				return cCheck * -1;
+				return cCheck;
 			}
 		} else {
-			return sCheck * -1;
+			return sCheck;
 		}
 	}
 

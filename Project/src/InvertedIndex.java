@@ -54,26 +54,20 @@ public class InvertedIndex {
 			}
 			// deletes extra space
 			buffer.deleteCharAt(buffer.length() - 1);
-			// StringBuilder builder = new StringBuilder();
-
-			// setOfQuerySets.add(generateResults(set));
 			readyToPrint.put(buffer.toString(), generateResults(set, type));
-
-			// added everything, now we print out everything
-			System.out.println("search result objects: " + readyToPrint.toString());
 		}
 	}
 
 	public TreeSet<String> partialSearch(TreeSet<String> set) {
+
 		TreeSet<String> returnSet = new TreeSet<>();
 		Iterator<String> stems = set.iterator();
-		Iterator<String> iterate = map.keySet().iterator();
+
 		while (stems.hasNext()) {
+			Iterator<String> iterate = map.keySet().iterator();
 			String stem = stems.next();
-			// System.out.println("Stem: " + stem);
 			while (iterate.hasNext()) {
 				String key = iterate.next();
-				// System.out.println("Key: " + key + " " + key.startsWith(stem));
 				if (key.startsWith(stem))
 					returnSet.add(key);
 			}
