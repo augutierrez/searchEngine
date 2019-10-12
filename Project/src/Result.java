@@ -63,21 +63,12 @@ public class Result implements Comparable<Result> {
 
 	@Override
 	public int compareTo(Result result) {
-		// TODO Auto-generated method stub
-		// add comparing of counts and location as well.
-		// we want it in descending order
-
-		System.out.println("This " + this.toString());
-		System.out.println("That " + result.toString());
 		int sCheck = Double.compare(this.score, result.getScore());
-		System.out.println("sCheck: " + sCheck);
 
 		if (sCheck == 0) {
 			int cCheck = Integer.compare(this.count, Integer.parseInt(result.getCount()));
-			System.out.println("cCheck: " + cCheck);
 			if (cCheck == 0) {
 				int lCheck = this.getDirectory().compareToIgnoreCase(result.getDirectory());
-				System.out.println("lCheck: " + lCheck);
 				return lCheck;
 			} else {
 				return cCheck * -1;

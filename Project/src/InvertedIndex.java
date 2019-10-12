@@ -118,7 +118,6 @@ public class InvertedIndex {
 
 					if (!contains) {
 						result = new Result(location, counts, totalWords);
-						System.out.println("result: " + result);
 						query.add(result);
 					}
 					Collections.sort(query);
