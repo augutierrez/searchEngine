@@ -1,6 +1,6 @@
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Parses and stores command-line arguments into simple key = value pairs.
@@ -20,7 +20,7 @@ public class ArgumentParser {
 	 * Initializes this argument map.
 	 */
 	public ArgumentParser() {
-		this.map = new TreeMap<>(); // TODO HashMap
+		this.map = new HashMap<>();
 	}
 
 	/**
@@ -66,17 +66,7 @@ public class ArgumentParser {
 	 * @see String#length()
 	 */
 	public static boolean isFlag(String arg) {
-		// TODO return arg != null && arg.length() > 1 && arg.charAt(0) == '-';
-		boolean containsFlag = false;
-		if (arg == null)
-			return false;
-		for (int i = 0; i < arg.length(); i++) {
-			if (arg.charAt(0) == '-' && (i + 1 <= arg.length() - 1) && i - 1 < 0) {
-				containsFlag = true;
-			}
-		}
-		return containsFlag;
-
+		return arg != null && arg.length() > 1 && arg.charAt(0) == '-';
 	}
 
 	/**
@@ -90,11 +80,7 @@ public class ArgumentParser {
 	 * @see String#length()
 	 */
 	public static boolean isValue(String arg) {
-		// TODO return (arg != null && arg.length() > 0 && arg.charAt(0) != '-') ;
-		if (arg != null && arg.length() > 0 && arg.charAt(0) != '-') {
-			return true;
-		}
-		return false;
+		return arg != null && arg.length() > 0 && arg.charAt(0) != '-';
 	}
 
 	/**
@@ -123,10 +109,7 @@ public class ArgumentParser {
 	 * @return {@code true} if the flag is mapped to a non-null value
 	 */
 	public boolean hasValue(String flag) {
-		if (this.map.get(flag) != null) { // TODO Simplify
-			return true;
-		}
-		return false;
+		return this.map.get(flag) != null;
 	}
 
 	/**
@@ -201,9 +184,9 @@ public class ArgumentParser {
 	 * @param args the command-line arguments to parse
 	 */
 	public static void main(String[] args) {
-		// TODO Modify main(...) as needed to debug code
 		var map = new ArgumentParser(args);
 		map.hasValue("x");
 		System.out.println(map);
+		System.out.println(isFlag("- "));
 	}
 }

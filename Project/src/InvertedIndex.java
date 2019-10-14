@@ -1,14 +1,13 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -22,23 +21,24 @@ import java.util.TreeSet;
  * @author Antonio Gutierrez
  */
 public class InvertedIndex {
-	/*
-	 * TODO Always use public or private, and other keywords, when making members.
-	 * 
-	 * Both map and word count should be private final
-	 * 
-	 * And should be initialized in the constructor
-	 */
 	
 	/**
 	 * Nested Data Structure that stores all the words
 	 */
-	TreeMap<String, TreeMap<String, TreeSet<Integer>>> map = new TreeMap<>();
+	private final TreeMap<String, TreeMap<String, TreeSet<Integer>>> map;
 
 	/**
-	 * used for counts flag
+	 * Used for counts flag
 	 */
-	TreeMap<String, Integer> wordCount = new TreeMap<>();
+	private final TreeMap<String, Integer> wordCount;
+
+	/**
+	 * Constructor
+	 */
+	public InvertedIndex() {
+		map = new TreeMap<>();
+		wordCount = new TreeMap<>();
+	}
 	
 	/**
 	 * Receives words from addPath() and stores it in the map data structure
@@ -53,19 +53,8 @@ public class InvertedIndex {
 		 */
 		TreeSet<String> set = TextFileStemmer.uniqueStems(word);
 		word = set.first();
-		if (!map.containsKey(word)) {
-
-			TreeMap<String, TreeSet<Integer>> tempMap = new TreeMap<>();
-			map.put(word, tempMap);
-
-			map.put(word, tempMap);
-		}
-		if (!map.get(word).containsKey(path)) {
-
-			TreeSet<Integer> tempSet = new TreeSet<>();
-			map.get(word).put(path, tempSet);
-
-		}
+		map.putIfAbsent(word, new TreeMap<>());
+		map.get(word).putIfAbsent(path, new TreeSet<>());
 		map.get(word).get(path).add(position);
 		
 		/* TODO Simplify just a bit more
@@ -131,65 +120,89 @@ public class InvertedIndex {
 	/**
 	 * Creates a writer for the -counts flag and outputs to the file passed
 	 * 
-	 * @param name : name of output file
+	 * @param path : path of output file
 	 * @throws IOException
 	 */
-	public void countsWriter(String name) throws IOException {
-
-		File file = new File(name);
-
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file));) {
-			SimpleJsonWriter.asObject(wordCount, Paths.get(file.toString()));
+	public void countsWriter(Path path) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8);) {
+			SimpleJsonWriter.asObject(wordCount, path);
 		}
-
 	}
 
 	/**
 	 * Creates a writer for the -index flag and outputs to the file passed
 	 * 
-	 * @param name : name of the output file
+	 * @param path : path of the output file
 	 * @throws IOException
 	 */
-	public void indexWriter(String name) throws IOException {
-
-		File file = new File(name); // TODO NO MORE FILE!
-
-		// TODO Files.newBufferedWriter(path, StandardCharsets.UTF8)
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			SimpleJsonWriter.asNestedObjectInNestedObject(map, Paths.get(file.toString()));
+	public void indexWriter(Path path) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			SimpleJsonWriter.asNestedObjectInNestedObject(map, path);
 		}
 
 	}
 
 	/**
-	 * Reads the file passed
-	 * 
-	 * @param file : the file it will read
-	 * @throws IOException
+	 * @param word - the word to look up
+	 * @return true/false
 	 */
-	public void readFile(Path file) throws IOException {
-		// TODO index.json should only appear in Driver
-		try (BufferedReader br = Files.newBufferedReader(Paths.get("index.json"))) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				System.out.println(line);
-			}
+	public boolean contains(String word) {
+		return map.containsKey(word);
+	}
+
+	/**
+	 * @param word     - the word associated with the location
+	 * @param location - the location we are confirming exists
+	 * @return true/false
+	 */
+	public boolean contains(String word, String location) {
+		return map.containsKey(word) && map.get(word).containsKey(location);
+	}
+
+	/**
+	 * @param word     - the word that is associated with the position
+	 * @param location - the location that is associated with the position
+	 * @param position - the position we are confirming exists
+	 * @return true/false
+	 */
+	public boolean contains(String word, String location, int position) {
+		return map.containsKey(word) && map.get(word).containsKey(location)
+				&& map.get(word).get(location).contains(position);
+	}
+
+	/**
+	 * @return a set of the words in the map
+	 */
+	public Set<String> getWords() {
+		return map.keySet();
+	}
+
+	/**
+	 * @param word - the word associated with the set of locations
+	 * @return the set of locations requested
+	 */
+	public Set<String> getLocations(String word) {
+		if (map.containsKey(word))
+			return map.get(word).keySet();
+		return null;
+	}
+
+	/**
+	 * @param word     - the word associated with the set
+	 * @param location - the location associated with the set
+	 * @return the set requested
+	 */
+	public Set<Integer> getPositions(String word, String location) {
+		if (map.containsKey(word)) {
+			if (map.get(word).containsKey(location))
+				return map.get(word).get(location);
 		}
+		return null;
 	}
 	
-	/*
-	 * TODO Add more methods so developers have more ways of safely getting the
-	 * data in your index without having to always dump it to file.
-	 * 
-	 * public boolean contains(String word)
-	 * public boolean contains(String word, String location)
-	 * public boolean contains(String word, String location, int position)
-	 * 
-	 * public Set<String> getWords()
-	 * public Set<String> getLocations(String word) unmodifiable version of map.get(word).keySet()
-	 * public Set<Integer> getPositions(String word, String location)
-	 * 
-	 * toString()
-	 */
+	@Override
+	public String toString() {
 
+		return map.toString();
+	}
 }

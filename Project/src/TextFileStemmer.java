@@ -2,8 +2,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Set;
 import java.util.TreeSet;
 
 import opennlp.tools.stemmer.Stemmer;
@@ -40,7 +38,6 @@ public class TextFileStemmer {
 		return uniqueStems(line, new SnowballStemmer(DEFAULT));
 	}
 
-	// public File findFile
 	/**
 	 * Returns a set of unique (no duplicates) cleaned and stemmed words parsed
 	 * from the provided line.
@@ -84,27 +81,5 @@ public class TextFileStemmer {
 			System.err.println("Sorry, input file was not found.");
 		}
 		return set;
-	}
-
-	// TODO Remove the main methods from the homework classes
-	/**
-	 * A simple main method that demonstrates this class.
-	 *
-	 * @param args unused
-	 * @throws IOException
-	 */
-	public static void main(String[] args) throws IOException {
-		// TODO Modify (or remove) this method as necessary to debug.
-
-		String text = "practic practical practice practiced practicer practices "
-				+ "practicing practis practisants practise practised practiser "
-				+ "practisers practises practising practitioner practitioners";
-
-		System.out.println(uniqueStems(text));
-
-		Path inputPath = Paths.get("test", "animals.text");
-//		Path inputPath = Paths.get("test", "rfc475.txt");
-		Set<String> actual = TextFileStemmer.uniqueStems(inputPath);
-		System.out.println(actual);
 	}
 }

@@ -41,7 +41,8 @@ public class Driver {
 			index.directoryIterator(path);
 		} catch (Exception e) {
 			// TODO More informative (about what functionality failed so the user knows what failed and how to fix it)
-			System.err.println("Invalid path : " + path);
+			System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
+					+ " to data structure. Please enter existing paths to textfiles.");
 		}
 		
 		/*
@@ -49,26 +50,29 @@ public class Driver {
 		 */
 		
 		if (parser.hasFlag("-index")) {
-			String name = parser.getString("-index");
-			if (name == null)
-				name = "index.json";
+			Path indexPath = parser.getPath("-index");
+			if (indexPath == null)
+				indexPath = Path.of("index.json");
 			
 			// TODO Path name = parser.getPath("-index", Path.of("index.json"));
 			try {
-			index.indexWriter(name); // TODO Make this method take a Path parameter instead of a String parameter
+				index.indexWriter(indexPath); // TODO Make this method take a Path parameter instead of a String
+												// parameter
 			} catch (Exception e) {
-				System.err.println("Invalid output file name: " + name);
+				System.err.println("Invalid output file name sent to indexWriter: " + indexPath
+						+ ". Please enter a valid output file path name.");
 			}
 		}
 		
 		if (parser.hasFlag("-counts")) {
-			String name = parser.getString("-counts");
-			if (name == null)
-				name = "counts.json";
+			Path countsPath = parser.getPath("-counts");
+			if (countsPath == null)
+				countsPath = Path.of("counts.json");
 			try {
-				index.countsWriter(name);
+				index.countsWriter(countsPath);
 			} catch (Exception e) {
-				System.err.println("Invalid output file name: " + name);
+				System.err.println("Invalid output file name sent to countsWriter:" + countsPath
+						+ ". Please enter a valid output file path name.");
 			}
 		}
 		
