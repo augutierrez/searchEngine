@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,14 +35,14 @@ public class SimpleJsonWriter {
 	public static void asArray(Collection<Integer> elements, Writer writer, int level) throws IOException {
 		Iterator<Integer> iterate = elements.iterator();
 		writer.write("[\n");
-		while (iterate.hasNext()) {
+		if (iterate.hasNext())
 			indent(iterate.next(), writer, level + 1);
-
-			if (iterate.hasNext())
-				writer.write(',');
-
+		while (iterate.hasNext()) {
+			writer.write(",");
 			writer.write('\n');
+			indent(iterate.next(), writer, level + 1);
 		}
+		writer.write('\n');
 		indent("]", writer, level);
 	}
 
@@ -93,22 +92,29 @@ public class SimpleJsonWriter {
 	 */
 	public static void asObject(Map<String, Integer> elements, Writer writer, int level) throws IOException {
 		Iterator<String> setIterator = elements.keySet().iterator();
-		indent("{", writer, level);// writer.write("{");
+		indent("{", writer, level);
 		// Iterator for Strings
-		while (setIterator.hasNext()) {
-			String element = setIterator.next();
-			writer.write('\n');
-			// Value of Integer for each String
-			Integer key = elements.get(element);
+		writer.write('\n');
+		String element;
+		Integer key;
+		if (setIterator.hasNext()) {
+			element = setIterator.next();
+			key = elements.get(element);
 			quote(element, writer, level + 1);
 			writer.write(": ");
 			writer.write(key.toString());
-			if (setIterator.hasNext()) {
-				writer.write(",");
-			}
+		}
+		while (setIterator.hasNext()) {
+			writer.write(",");
+			element = setIterator.next();
+			writer.write('\n');
+			key = elements.get(element);
+			quote(element, writer, level + 1);
+			writer.write(": ");
+			writer.write(key.toString());
 		}
 		writer.write('\n');
-		indent("}", writer, level);// writer.write("}");
+		indent("}", writer, level);
 
 	}
 
@@ -162,20 +168,24 @@ public class SimpleJsonWriter {
 		Iterator<String> setIterator = elements.keySet().iterator();
 		indent("{", writer, level);
 		// Outer loop (Strings)
-		while (setIterator.hasNext()) {
-			String element = setIterator.next();
+		String element;
+		if (setIterator.hasNext()) {
+			element = setIterator.next();
 			writer.write('\n');
 			quote(element, writer, level + 1);
 			writer.write(": ");
 			asArray(elements.get(element), writer, level + 1);
-			if (setIterator.hasNext()) {
-				writer.write(",");
-			}
-
+		}
+		while (setIterator.hasNext()) {
+			writer.write(',');
+			element = setIterator.next();
+			writer.write('\n');
+			quote(element, writer, level + 1);
+			writer.write(": ");
+			asArray(elements.get(element), writer, level + 1);
 		}
 		writer.write('\n');
 		indent("}", writer, level);
-
 	}
 
 	/**
@@ -229,51 +239,27 @@ public class SimpleJsonWriter {
 			throws IOException {
 		Iterator<String> setIterator = elements.keySet().iterator();
 		indent("{", writer, level);
+		String element;
 		// Outer loop (Strings)
-		while (setIterator.hasNext()) {
-			String element = setIterator.next();
+		if (setIterator.hasNext()) {
+			element = setIterator.next();
 			writer.write('\n');
-
-
 			quote(element, writer, level + 1);
-			writer.write(": {");
+			// about to change
+			writer.write(": ");
+			asNestedObject(elements.get(element), writer, level);
+		}
+		while (setIterator.hasNext()) {
+			writer.write(',');
+			element = setIterator.next();
 			writer.write('\n');
-			// Might go here
-			// asNestedObject(elements.get(element), writer, level + 1);
-			// Inner loop (Integers)
-			Iterator<String> pathIterator = elements.get(element).keySet().iterator();
-			// path
-			while (pathIterator.hasNext()) {
-				String path = pathIterator.next();
-				quote(path, writer, level + 2);
-				writer.write(": [\n");
-				Iterator<Integer> intIterator = elements.get(element).get(path).iterator();
-
-				// int
-				while (intIterator.hasNext()) {
-					indent(intIterator.next(), writer, level + 3);
-					if (intIterator.hasNext()) {
-						writer.write(",");
-					}
-					writer.write('\n');
-
-				}
-
-				indent("]", writer, level + 2);
-				if (pathIterator.hasNext())
-					writer.write(',');
-				writer.write('\n');
-			}
-
-			indent("}", writer, level + 1);
-			if (setIterator.hasNext()) {
-				writer.write(",");
-			}
-
+			quote(element, writer, level + 1);
+			// about to change
+			writer.write(": ");
+			asNestedObject(elements.get(element), writer, level);
 		}
 		writer.write('\n');
 		writer.append("}");
-
 	}
 
 	/**
@@ -295,6 +281,12 @@ public class SimpleJsonWriter {
 	}
 
 
+	/**
+	 * Method used for Double Nested Data Structures
+	 * 
+	 * @param nested the nested data structure to write out
+	 * @return - the double nested object in simple json format
+	 */
 	public static String asNestedObjectInNestedObject(
 			TreeMap<String, TreeMap<String, TreeSet<Integer>>> nested) {
 		// THIS CODE IS PROVIDED FOR YOU; DO NOT MODIFY
@@ -383,49 +375,5 @@ public class SimpleJsonWriter {
 		// THIS CODE IS PROVIDED FOR YOU; DO NOT MODIFY
 		indent(writer, times);
 		quote(element, writer);
-	}
-
-	/**
-	 * A simple main method that demonstrates this class.
-	 *
-	 * @param args unused
-	 */
-	public static void main(String[] args) {
-		// MODIFY AS NECESSARY TO DEBUG YOUR CODE
-
-		TreeSet<Integer> elements = new TreeSet<>();
-		System.out.println("Empty:");
-		System.out.println(asArray(elements));
-
-		elements.add(65);
-		System.out.println("\nSingle:");
-		System.out.println(asArray(elements));
-
-		elements.add(66);
-		elements.add(67);
-		System.out.println("\nSimple:");
-		System.out.println(asArray(elements));
-		Map<String, Integer> element = new HashMap<String, Integer>();
-		element.put("hello", 1);
-		System.out.println("Objects");
-		System.out.println(asObject(element));
-
-		System.out.println("NEW");
-		TreeMap<String, TreeSet<Integer>> elementr = new TreeMap<>();
-		elementr.put("a", new TreeSet<>());
-		elementr.put("b", new TreeSet<>());
-		elementr.put("c", new TreeSet<>());
-
-		elementr.get("a").add(1);
-		elementr.get("b").add(2);
-		elementr.get("b").add(3);
-		elementr.get("b").add(4);
-		System.out.println(asNestedObject(elementr));
-
-		TreeMap<String, TreeMap<String, TreeSet<Integer>>> nested = new TreeMap<>();
-		nested.put("first", elementr);
-		nested.put("second", elementr);
-		System.out.println(asNestedObjectInNestedObject(nested));
-
 	}
 }

@@ -2,16 +2,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 
-// TODO Clean up old TODO comments
-
-/*
- * TODO Fix up SimpleJSONWriter
- * 
- * (Search for asObject on Piazza there is starter code for the approach to use.)
- * – Use an approach with iterators that does not need a counter or if statement inside loop
- * – Reuse your code everywhere possible (asNestedObject should call asArray for the inner collection)
- */
-
 /**
  * Class responsible for running this project based on the provided command-line
  * arguments. See the README for details.
@@ -27,7 +17,6 @@ public class Driver {
 	 * 
 	 * @param args flag/value pairs used to start this program
 	 */
-
 	public static void main(String[] args) {
 		// store initial start time
 		Instant start = Instant.now();
@@ -38,26 +27,16 @@ public class Driver {
 
 		Path path = parser.getPath("-path");
 		try {
-			index.directoryIterator(path);
+			FileReader.directoryIterator(path, index);
 		} catch (Exception e) {
-			// TODO More informative (about what functionality failed so the user knows what failed and how to fix it)
 			System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
 					+ " to data structure. Please enter existing paths to textfiles.");
 		}
 		
-		/*
-		 * TODO Avoid converting too much between path and String
-		 */
-		
 		if (parser.hasFlag("-index")) {
-			Path indexPath = parser.getPath("-index");
-			if (indexPath == null)
-				indexPath = Path.of("index.json");
-			
-			// TODO Path name = parser.getPath("-index", Path.of("index.json"));
+			Path indexPath = parser.getPath("-index", Path.of("index.json"));
 			try {
-				index.indexWriter(indexPath); // TODO Make this method take a Path parameter instead of a String
-												// parameter
+				index.indexWriter(indexPath);
 			} catch (Exception e) {
 				System.err.println("Invalid output file name sent to indexWriter: " + indexPath
 						+ ". Please enter a valid output file path name.");
@@ -65,9 +44,7 @@ public class Driver {
 		}
 		
 		if (parser.hasFlag("-counts")) {
-			Path countsPath = parser.getPath("-counts");
-			if (countsPath == null)
-				countsPath = Path.of("counts.json");
+			Path countsPath = parser.getPath("-counts", Path.of("counts.json"));
 			try {
 				index.countsWriter(countsPath);
 			} catch (Exception e) {

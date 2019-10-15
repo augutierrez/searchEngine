@@ -1,21 +1,13 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-/*
- * TODO Keep storage and string/directory/file parsing separate.
- * 
- * Move anything that parses string/directory/files into a builder or generator class.
- */
 
 /**
  * @author Antonio Gutierrez
@@ -62,47 +54,21 @@ public class InvertedIndex {
 	 * @throws FileNotFoundException
 	 */
 	public void addPath(Path path) throws FileNotFoundException, IOException {
-		// TODO Checking if something is a text file should be a static method
-		if (path.toString().toLowerCase().endsWith(".txt") || path.toString().toLowerCase().endsWith(".text")) {
-			// TODO Files.newBufferedReader(...)
-			try (BufferedReader reader = new BufferedReader(new FileReader(path.toString()))) {
-
-			String line;
-
+		if (FileReader.checkText(path)) {
+			try (BufferedReader reader = Files.newBufferedReader(path)) {
+				String line;
 				int counter = 1;
-			while ((line = reader.readLine()) != null) {
+				while ((line = reader.readLine()) != null) {
 					String[] wordsInLine = TextParser.parse(line);
 
-				for (String word : wordsInLine) {
+					for (String word : wordsInLine) {
 						TreeSet<String> set = TextFileStemmer.uniqueStems(word);
 						word = set.first();
-					add(word, path.toString(), counter);
-					counter++;
-				}
+						add(word, path.toString(), counter);
+						counter++;
+					}
 					wordCount.put(path.toString(), counter - 1);
-			}
-			}
-		}
-	}
-
-	/**
-	 * Accepts a path, and iterates over it if it is a directory, or simply adds it
-	 * to the data structure if it is a file.
-	 * 
-	 * @param path : the path we will extract information from
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
-	public void directoryIterator(Path path) throws FileNotFoundException, IOException {
-		if (path != null) {
-			if (Files.isDirectory(path)) {
-				try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
-					for (Path currPath : listing)
-						directoryIterator(currPath);
 				}
-			} else {
-				if (Files.isRegularFile(path))
-					addPath(path);
 			}
 		}
 	}
@@ -192,7 +158,6 @@ public class InvertedIndex {
 	
 	@Override
 	public String toString() {
-
 		return map.toString();
 	}
 }
