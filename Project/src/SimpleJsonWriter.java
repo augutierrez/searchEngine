@@ -225,7 +225,7 @@ public class SimpleJsonWriter {
 	 * @throws IOException
 	 */
 	public static void asNestedObjectInNestedObject(
-			Map<String, Map<String, ? extends Collection<Integer>>> elements, Writer writer, int level)
+			TreeMap<String, TreeMap<String, TreeSet<Integer>>> elements, Writer writer, int level)
 			throws IOException {
 		Iterator<String> setIterator = elements.keySet().iterator();
 		indent("{", writer, level);
@@ -236,10 +236,10 @@ public class SimpleJsonWriter {
 
 
 			quote(element, writer, level + 1);
-			writer.write(": ");
-			// writer.write('\n');
+			writer.write(": {");
+			writer.write('\n');
 			// Might go here
-			asNestedObject(elements.get(element), writer, level);
+			// asNestedObject(elements.get(element), writer, level + 1);
 			// Inner loop (Integers)
 			Iterator<String> pathIterator = elements.get(element).keySet().iterator();
 			// path
@@ -286,7 +286,7 @@ public class SimpleJsonWriter {
 	 * @see #asNestedObject(Map, Writer, int)
 	 */
 	public static void asNestedObjectInNestedObject(
-			Map<String, Map<String, ? extends Collection<Integer>>> elements,
+			TreeMap<String, TreeMap<String, TreeSet<Integer>>> elements,
 			Path path) throws IOException {
 
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
@@ -296,7 +296,7 @@ public class SimpleJsonWriter {
 
 
 	public static String asNestedObjectInNestedObject(
-			Map<String, Map<String, ? extends Collection<Integer>>> nested) {
+			TreeMap<String, TreeMap<String, TreeSet<Integer>>> nested) {
 		// THIS CODE IS PROVIDED FOR YOU; DO NOT MODIFY
 		try {
 			StringWriter writer = new StringWriter();

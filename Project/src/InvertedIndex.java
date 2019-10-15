@@ -48,21 +48,9 @@ public class InvertedIndex {
 	 * @param position : the line the word was found in the file
 	 */
 	public void add(String word, String path, int position) {
-		/*
-		 * TODO Stemming in your add method makes this class much less general.
-		 */
-		TreeSet<String> set = TextFileStemmer.uniqueStems(word);
-		word = set.first();
 		map.putIfAbsent(word, new TreeMap<>());
 		map.get(word).putIfAbsent(path, new TreeSet<>());
 		map.get(word).get(path).add(position);
-		
-		/* TODO Simplify just a bit more
-		map.putIfAbsent(word, new TreeMap<>());
-		map.get(word).putIfAbsent(path, new TreeSet<>());
-		map.get(word).get(path).add(position);
-		*/
-
 	}
 
 	/**
@@ -81,15 +69,17 @@ public class InvertedIndex {
 
 			String line;
 
-			int counter = 1;
+				int counter = 1;
 			while ((line = reader.readLine()) != null) {
-				String[] wordsInLine = TextParser.parse(line);
+					String[] wordsInLine = TextParser.parse(line);
 
 				for (String word : wordsInLine) {
+						TreeSet<String> set = TextFileStemmer.uniqueStems(word);
+						word = set.first();
 					add(word, path.toString(), counter);
 					counter++;
 				}
-				wordCount.put(path.toString(), counter - 1);
+					wordCount.put(path.toString(), counter - 1);
 			}
 			}
 		}
