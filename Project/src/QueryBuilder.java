@@ -14,8 +14,7 @@ public class QueryBuilder {
 	 * Data Structure that will hold cleaned, stemmed, and sorted query values.
 	 */
 	ArrayList<TreeSet<String>> setOfQueries = new ArrayList<>();
-	// will store where its from, word count, score
-//	HashMap<String, Result> results = new HashMap<>();
+
 
 	/**
 	 * This method will take a path and clean, stem, and add the query values into

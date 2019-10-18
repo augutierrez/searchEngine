@@ -115,18 +115,14 @@ public class InvertedIndex {
 							break;
 						}
 					}
-
 					if (!contains) {
 						result = new Result(location, counts, totalWords);
 						query.add(result);
 					}
-					Collections.sort(query);
 				}
 			}
-
 		}
-
-
+		Collections.sort(query);
 		return query;
 
 	}
