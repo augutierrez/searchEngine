@@ -77,9 +77,6 @@ public class TextFileStemmer {
 				set.addAll(uniqueStems(line));
 			}
 		}
-		catch(java.nio.file.NoSuchFileException e) { // TODO Remove the catch block
-			System.err.println("Sorry, input file was not found.");
-		}
 		return set;
 	}
 }

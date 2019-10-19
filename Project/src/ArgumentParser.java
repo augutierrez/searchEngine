@@ -49,8 +49,9 @@ public class ArgumentParser {
 				if (i < args.length - 1 && isValue(args[i + 1])) {
 					map.put(args[i], args[i + 1]);
 					i++;
-				} else
+				} else {
 					map.put(args[i], null);
+				}
 			}
 		}
 	}
@@ -150,8 +151,9 @@ public class ArgumentParser {
 	 * @see Path#of(String, String...)
 	 */
 	public Path getPath(String flag) {
-		if (map.get(flag) == null)
+		if (map.get(flag) == null) {
 			return null;
+		}
 		return Path.of(map.get(flag));
 	}
 

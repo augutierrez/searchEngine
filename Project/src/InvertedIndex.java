@@ -1,10 +1,9 @@
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -43,58 +42,8 @@ public class InvertedIndex {
 		map.putIfAbsent(word, new TreeMap<>());
 		map.get(word).putIfAbsent(path, new TreeSet<>());
 		map.get(word).get(path).add(position);
-		
-		/*
-		 * TODO
-		 * 1) every time you add a new word/path/position increase the count by 1
-		 * (check the result of map.get(word).get(path).add(position))
-		 * 
-		 * 2) use the position as a proxy for word count
-		 * 
-		 * add(hello, hello.txt, 15) <-- know there must be 15 words in hello.txt
-		 * add(world, hello.txt, 4) <-- don't update the word count, because 4 is less than 15
-		 * if the current position is greater than the word count, update the word count to the position
-		 */
-	}
-
-	/*
-	 * TODO This belongs in another class.
-	 */
-	/**
-	 * Extracts information from the file passed and each word found in the file and
-	 * passes it to add()
-	 * 
-	 * @param path : the path to the file that it will read from
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
-	public void addPath(Path path) throws FileNotFoundException, IOException {
-		if (FileReader.checkText(path)) { // TODO This check for text files needs to happen before this method is called
-			try (BufferedReader reader = Files.newBufferedReader(path)) {
-				String line;
-				int counter = 1;
-				while ((line = reader.readLine()) != null) {
-					String[] wordsInLine = TextParser.parse(line);
-
-					for (String word : wordsInLine) {
-						/*
-						 * TODO uniqueStems is creating 1 stemmer per line
-						 * Create a stemmer before the while loop and reuse it.
-						 * 
-						 * Places words into another data structure, which then must be moved 
-						 * into the inverted index.
-						 * 
-						 * As soon as you have a stemmed word, add it to the index only.
-						 */
-						TreeSet<String> set = TextFileStemmer.uniqueStems(word);
-						word = set.first();
-						// TODO path.toString() is called for every single word... value never changes... save it in a variable before the while loop and reuse
-						add(word, path.toString(), counter);
-						counter++;
-					}
-					wordCount.put(path.toString(), counter - 1); // TODO Remove
-				}
-			}
+		if (!wordCount.containsKey(path) || wordCount.get(path) < position) {
+			wordCount.put(path, position);
 		}
 	}
 
@@ -126,6 +75,8 @@ public class InvertedIndex {
 	// TODO need to describe the methods in the javadoc
 
 	/**
+	 * Returns whether the Inverted Index contains the word
+	 * 
 	 * @param word - the word to look up
 	 * @return true/false
 	 */
@@ -134,6 +85,8 @@ public class InvertedIndex {
 	}
 
 	/**
+	 * Returns whether the InvertedIndex contains a location for a specific word
+	 * 
 	 * @param word     - the word associated with the location
 	 * @param location - the location we are confirming exists
 	 * @return true/false
@@ -143,6 +96,9 @@ public class InvertedIndex {
 	}
 
 	/**
+	 * Returns whether the InvertedIndex contains a positions for a specific
+	 * location of a word
+	 * 
 	 * @param word     - the word that is associated with the position
 	 * @param location - the location that is associated with the position
 	 * @param position - the position we are confirming exists
@@ -154,40 +110,51 @@ public class InvertedIndex {
 	}
 
 	/**
+	 * Returns an unmodifiable set of the InvertedIndex's words
+	 * 
 	 * @return a set of the words in the map
 	 */
 	public Set<String> getWords() {
 		// TODO Breaks encapsulation... wrap in an unmodifiable collection
-		return map.keySet();
+		return Collections.unmodifiableSet(map.keySet());
 	}
 	
 	// TODO All of the get methods need to return either an unmodifiable collection or Collections.emptySet()
 
 	/**
+	 * Returns an unmodifiable set of the InvertedIndex's locations
+	 * 
 	 * @param word - the word associated with the set of locations
 	 * @return the set of locations requested
 	 */
 	public Set<String> getLocations(String word) {
-		if (map.containsKey(word))
-			return map.get(word).keySet();
-		return null;
+		if (map.containsKey(word)) {
+			return Collections.unmodifiableSet(map.get(word).keySet());
+		}
+		return Collections.emptySet();
 	}
 
 	/**
+	 * Returns an unmodifiable set of the InvertedIndex's positions
+	 * 
 	 * @param word     - the word associated with the set
 	 * @param location - the location associated with the set
 	 * @return the set requested
 	 */
 	public Set<Integer> getPositions(String word, String location) {
 		if (map.containsKey(word)) {
-			if (map.get(word).containsKey(location))
-				return map.get(word).get(location);
+			if (map.get(word).containsKey(location)) {
+				return Collections.unmodifiableSet(map.get(word).get(location));
+			}
 		}
-		return null;
+		return Collections.emptySet();
 	}
 	
+	/*
+	 * toString method
+	 */
 	@Override
 	public String toString() {
-		return map.toString();
+		return map.toString(); // is this good enough for toString?
 	}
 }

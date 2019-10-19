@@ -40,8 +40,9 @@ public class SimpleJsonWriter {
 	public static void asArray(Collection<Integer> elements, Writer writer, int level) throws IOException {
 		Iterator<Integer> iterate = elements.iterator();
 		writer.write("[\n");
-		if (iterate.hasNext())
+		if (iterate.hasNext()) {
 			indent(iterate.next(), writer, level + 1);
+		}
 		while (iterate.hasNext()) {
 			writer.write(",");
 			writer.write('\n');
