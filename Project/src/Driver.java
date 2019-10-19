@@ -2,6 +2,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 
+// TODO Look for the TODO in TextFileStemmer
+
 /**
  * Class responsible for running this project based on the provided command-line
  * arguments. See the README for details.
@@ -25,6 +27,7 @@ public class Driver {
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
 
+		// TODO Move this inside if (parser.hasFlag(-path))
 		Path path = parser.getPath("-path");
 		try {
 			FileReader.directoryIterator(path, index);
@@ -48,6 +51,8 @@ public class Driver {
 			try {
 				index.countsWriter(countsPath);
 			} catch (Exception e) {
+				// TODO Avoid referencing code---users can't see method names.
+				// TODO Unable to write word counts to the path: " + countsPath
 				System.err.println("Invalid output file name sent to countsWriter:" + countsPath
 						+ ". Please enter a valid output file path name.");
 			}
