@@ -23,6 +23,11 @@ import java.util.TreeSet;
  * @version Fall 2019
  */
 public class SimpleJsonWriter {
+	
+	/*
+	 * TODO Avoid 1 line if statements (lookup the "goto fail" Apple bug).
+	 * Always use curly braces (can configure Eclipse to add them).
+	 */
 
 	/**
 	 * Writes the elements as a pretty JSON array.

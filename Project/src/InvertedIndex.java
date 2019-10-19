@@ -43,8 +43,23 @@ public class InvertedIndex {
 		map.putIfAbsent(word, new TreeMap<>());
 		map.get(word).putIfAbsent(path, new TreeSet<>());
 		map.get(word).get(path).add(position);
+		
+		/*
+		 * TODO
+		 * 1) every time you add a new word/path/position increase the count by 1
+		 * (check the result of map.get(word).get(path).add(position))
+		 * 
+		 * 2) use the position as a proxy for word count
+		 * 
+		 * add(hello, hello.txt, 15) <-- know there must be 15 words in hello.txt
+		 * add(world, hello.txt, 4) <-- don't update the word count, because 4 is less than 15
+		 * if the current position is greater than the word count, update the word count to the position
+		 */
 	}
 
+	/*
+	 * TODO This belongs in another class.
+	 */
 	/**
 	 * Extracts information from the file passed and each word found in the file and
 	 * passes it to add()
@@ -54,7 +69,7 @@ public class InvertedIndex {
 	 * @throws FileNotFoundException
 	 */
 	public void addPath(Path path) throws FileNotFoundException, IOException {
-		if (FileReader.checkText(path)) {
+		if (FileReader.checkText(path)) { // TODO This check for text files needs to happen before this method is called
 			try (BufferedReader reader = Files.newBufferedReader(path)) {
 				String line;
 				int counter = 1;
@@ -62,12 +77,22 @@ public class InvertedIndex {
 					String[] wordsInLine = TextParser.parse(line);
 
 					for (String word : wordsInLine) {
+						/*
+						 * TODO uniqueStems is creating 1 stemmer per line
+						 * Create a stemmer before the while loop and reuse it.
+						 * 
+						 * Places words into another data structure, which then must be moved 
+						 * into the inverted index.
+						 * 
+						 * As soon as you have a stemmed word, add it to the index only.
+						 */
 						TreeSet<String> set = TextFileStemmer.uniqueStems(word);
 						word = set.first();
+						// TODO path.toString() is called for every single word... value never changes... save it in a variable before the while loop and reuse
 						add(word, path.toString(), counter);
 						counter++;
 					}
-					wordCount.put(path.toString(), counter - 1);
+					wordCount.put(path.toString(), counter - 1); // TODO Remove
 				}
 			}
 		}
@@ -97,6 +122,8 @@ public class InvertedIndex {
 		}
 
 	}
+	
+	// TODO need to describe the methods in the javadoc
 
 	/**
 	 * @param word - the word to look up
@@ -130,8 +157,11 @@ public class InvertedIndex {
 	 * @return a set of the words in the map
 	 */
 	public Set<String> getWords() {
+		// TODO Breaks encapsulation... wrap in an unmodifiable collection
 		return map.keySet();
 	}
+	
+	// TODO All of the get methods need to return either an unmodifiable collection or Collections.emptySet()
 
 	/**
 	 * @param word - the word associated with the set of locations
