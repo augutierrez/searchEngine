@@ -66,34 +66,11 @@ public class InvertedIndexBuilder {
 			int counter = 1;
 			Stemmer stemmer = new SnowballStemmer(DEFAULT);
 			while ((line = reader.readLine()) != null) {
-//				String[] wordsInLine = TextParser.parse(line);
-				CharSequence wordsInLine = stemmer.stem(line);
-				System.out.println("AFTER STEM");
-				System.out.println(wordsInLine);
-//				TreeSet<String> set = ;
 
-				for (String word : TextFileStemmer.uniqueStems(line)) { // is there a difference in efficiency between
-																		// set and directly
-													// putting
-											// TextFileStem
-					/*
-					 * TODO uniqueStems is creating 1 stemmer per line Create a stemmer before the
-					 * while loop and reuse it.
-					 * 
-					 * Places words into another data structure, which then must be moved into the
-					 * inverted index.
-					 * 
-					 * As soon as you have a stemmed word, add it to the index only.
-					 */
-//					TreeSet<String> set = TextFileStemmer.uniqueStems(word);
-//					word = set.first();
-					// TODO path.toString() is called for every single word... value never
-					// changes... save it in a variable before the while loop and reuse
-
-					index.add(word, pathName, counter);
+				for (String word : TextParser.parse(line)) {
+					index.add(stemmer.stem(word).toString(), pathName, counter);
 					counter++;
 				}
-				// wordCount.put(path.toString(), counter - 1); // TODO Remove
 			}
 		}
 
