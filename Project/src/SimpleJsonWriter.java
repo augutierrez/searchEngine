@@ -23,11 +23,6 @@ import java.util.TreeSet;
  * @version Fall 2019
  */
 public class SimpleJsonWriter {
-	
-	/*
-	 * TODO Avoid 1 line if statements (lookup the "goto fail" Apple bug).
-	 * Always use curly braces (can configure Eclipse to add them).
-	 */
 
 	/**
 	 * Writes the elements as a pretty JSON array.
@@ -251,7 +246,6 @@ public class SimpleJsonWriter {
 			element = setIterator.next();
 			writer.write('\n');
 			quote(element, writer, level + 1);
-			// about to change
 			writer.write(": ");
 			asNestedObject(elements.get(element), writer, level);
 		}
@@ -260,7 +254,6 @@ public class SimpleJsonWriter {
 			element = setIterator.next();
 			writer.write('\n');
 			quote(element, writer, level + 1);
-			// about to change
 			writer.write(": ");
 			asNestedObject(elements.get(element), writer, level);
 		}

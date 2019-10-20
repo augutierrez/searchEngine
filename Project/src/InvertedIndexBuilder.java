@@ -9,7 +9,9 @@ import opennlp.tools.stemmer.Stemmer;
 import opennlp.tools.stemmer.snowball.SnowballStemmer;
 
 /**
- * @author tony Used to help generate data for the InvertedIndex
+ * Used to help generate data for the InvertedIndex
+ * 
+ * @author tony
  */
 public class InvertedIndexBuilder {
 
@@ -46,7 +48,7 @@ public class InvertedIndexBuilder {
 						directoryIterator(currPath, index);
 				}
 			} else {
-				if (Files.isRegularFile(path) && isText(path)) { // is this where I check isText()?
+				if (Files.isRegularFile(path) && isText(path)) {
 					addPath(path, index);
 				}
 			}
@@ -61,6 +63,9 @@ public class InvertedIndexBuilder {
 	 * @param index : the InvertedIndex that will store the path's data
 	 * @throws IOException
 	 * @throws FileNotFoundException
+	 * 
+	 * @see SnowballStemmer
+	 * @see #DEFAULT
 	 */
 	public void addPath(Path path, InvertedIndex index) throws FileNotFoundException, IOException {
 
