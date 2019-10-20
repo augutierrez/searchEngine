@@ -13,6 +13,9 @@ import opennlp.tools.stemmer.snowball.SnowballStemmer;
  */
 public class InvertedIndexBuilder {
 
+	/**
+	 * The stemmer used for the path's data
+	 */
 	public static final SnowballStemmer.ALGORITHM DEFAULT = SnowballStemmer.ALGORITHM.ENGLISH;
 
 	/**
@@ -54,7 +57,8 @@ public class InvertedIndexBuilder {
 	 * Extracts information from the file passed and each word found in the file and
 	 * passes it to add()
 	 * 
-	 * @param path : the path to the file that it will read from
+	 * @param path  : the path to the file that it will read from
+	 * @param index : the InvertedIndex that will store the path's data
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
@@ -66,16 +70,14 @@ public class InvertedIndexBuilder {
 			int counter = 1;
 			Stemmer stemmer = new SnowballStemmer(DEFAULT);
 			while ((line = reader.readLine()) != null) {
-
 				for (String word : TextParser.parse(line)) {
-					index.add(stemmer.stem(word).toString(), pathName, counter);
-					counter++;
+					index.add(stemmer.stem(word).toString(), pathName, counter++);
 				}
 			}
 		}
 
 	}
 	
-	// TODO Remind Sophie in project 2 code reviews to prep this class for project 3
+	// Remind Sophie in project 2 code reviews to prep this class for project 3
 
 }

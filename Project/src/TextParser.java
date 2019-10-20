@@ -31,8 +31,8 @@ public class TextParser {
 	}
 
 	/**
-	 * Splits the supplied text by whitespaces.
-	 *
+	 * Splits the supplied text by white spaces.
+	 * 
 	 * @param text the text to split
 	 * @return an array of {@link String} objects
 	 */

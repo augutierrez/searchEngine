@@ -14,17 +14,17 @@ import java.util.TreeSet;
 public class InvertedIndex {
 	
 	/**
-	 * Nested Data Structure that stores all the words
+	 * Nested Data Structure that stores all the -path data
 	 */
 	private final TreeMap<String, TreeMap<String, TreeSet<Integer>>> map;
 
 	/**
-	 * Used for counts flag
+	 * Structure used to store data for counts
 	 */
 	private final TreeMap<String, Integer> wordCount;
 
 	/**
-	 * Constructor
+	 * Constructor method
 	 */
 	public InvertedIndex() {
 		map = new TreeMap<>();
@@ -69,14 +69,10 @@ public class InvertedIndex {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 			SimpleJsonWriter.asNestedObjectInNestedObject(map, path);
 		}
-
 	}
-	
-	// TODO need to describe the methods in the javadoc
 
 	/**
 	 * Returns whether the Inverted Index contains the word
-	 * 
 	 * @param word - the word to look up
 	 * @return true/false
 	 */
@@ -115,11 +111,8 @@ public class InvertedIndex {
 	 * @return a set of the words in the map
 	 */
 	public Set<String> getWords() {
-		// TODO Breaks encapsulation... wrap in an unmodifiable collection
 		return Collections.unmodifiableSet(map.keySet());
 	}
-	
-	// TODO All of the get methods need to return either an unmodifiable collection or Collections.emptySet()
 
 	/**
 	 * Returns an unmodifiable set of the InvertedIndex's locations
@@ -150,11 +143,8 @@ public class InvertedIndex {
 		return Collections.emptySet();
 	}
 	
-	/*
-	 * toString method
-	 */
 	@Override
 	public String toString() {
-		return map.toString(); // is this good enough for toString?
+		return map.toString();
 	}
 }
