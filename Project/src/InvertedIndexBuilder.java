@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.TreeSet;
+
+import opennlp.tools.stemmer.Stemmer;
+import opennlp.tools.stemmer.snowball.SnowballStemmer;
 
 /**
  * @author tony Used to help generate data for the InvertedIndex
  */
 public class InvertedIndexBuilder {
+
+	public static final SnowballStemmer.ALGORITHM DEFAULT = SnowballStemmer.ALGORITHM.ENGLISH;
 
 	/**
 	 * Checks if a path is a text file
@@ -60,10 +64,16 @@ public class InvertedIndexBuilder {
 			String line;
 			String pathName = path.toString();
 			int counter = 1;
+			Stemmer stemmer = new SnowballStemmer(DEFAULT);
 			while ((line = reader.readLine()) != null) {
 //				String[] wordsInLine = TextParser.parse(line);
-				TreeSet<String> set = TextFileStemmer.uniqueStems(line);
-				for (String word : set) { // is there a difference in efficiency between set and directly
+				CharSequence wordsInLine = stemmer.stem(line);
+				System.out.println("AFTER STEM");
+				System.out.println(wordsInLine);
+//				TreeSet<String> set = ;
+
+				for (String word : TextFileStemmer.uniqueStems(line)) { // is there a difference in efficiency between
+																		// set and directly
 													// putting
 											// TextFileStem
 					/*
@@ -79,6 +89,7 @@ public class InvertedIndexBuilder {
 //					word = set.first();
 					// TODO path.toString() is called for every single word... value never
 					// changes... save it in a variable before the while loop and reuse
+
 					index.add(word, pathName, counter);
 					counter++;
 				}
