@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -135,22 +136,13 @@ public class InvertedIndex {
 	 * @param position : the line the word was found in the file
 	 */
 	public void add(String word, String path, int position) {
-		TreeSet<String> set = TextFileStemmer.uniqueStems(word);
-		word = set.first();
-		if (!map.containsKey(word)) {
 
-			TreeMap<String, TreeSet<Integer>> tempMap = new TreeMap<>();
-			map.put(word, tempMap);
-
-			map.put(word, tempMap);
-		}
-		if (!map.get(word).containsKey(path)) {
-
-			TreeSet<Integer> tempSet = new TreeSet<>();
-			map.get(word).put(path, tempSet);
-
-		}
+		map.putIfAbsent(word, new TreeMap<>());
+		map.get(word).putIfAbsent(path, new TreeSet<>());
 		map.get(word).get(path).add(position);
+		if (!wordCount.containsKey(path) || wordCount.get(path) < position) {
+			wordCount.put(path, position);
+		}
 
 	}
 
@@ -248,19 +240,83 @@ public class InvertedIndex {
 		}
 
 	}
+
 	/**
-	 * Reads the file passed
+	 * Returns whether the Inverted Index contains the word
 	 * 
-	 * @param file : the file it will read
-	 * @throws IOException
+	 * @param word - the word to look up
+	 * @return true/false
 	 */
-	public void readFile(Path file) throws IOException {
-		try (BufferedReader br = Files.newBufferedReader(Paths.get("index.json"))) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				System.out.println(line);
+	public boolean contains(String word) {
+		return map.containsKey(word);
+	}
+
+	/**
+	 * Returns whether the InvertedIndex contains a location for a specific word
+	 * 
+	 * @param word     - the word associated with the location
+	 * @param location - the location we are confirming exists
+	 * @return true/false
+	 */
+	public boolean contains(String word, String location) {
+		return map.containsKey(word) && map.get(word).containsKey(location);
+	}
+
+	/**
+	 * Returns whether the InvertedIndex contains a positions for a specific
+	 * location of a word
+	 * 
+	 * @param word     - the word that is associated with the position
+	 * @param location - the location that is associated with the position
+	 * @param position - the position we are confirming exists
+	 * @return true/false
+	 */
+	public boolean contains(String word, String location, int position) {
+		return map.containsKey(word) && map.get(word).containsKey(location)
+				&& map.get(word).get(location).contains(position);
+	}
+
+	/**
+	 * Returns an unmodifiable set of the InvertedIndex's words
+	 * 
+	 * @return a set of the words in the map
+	 */
+	public Set<String> getWords() {
+		return Collections.unmodifiableSet(map.keySet());
+	}
+
+	/**
+	 * Returns an unmodifiable set of the InvertedIndex's locations
+	 * 
+	 * @param word - the word associated with the set of locations
+	 * @return the set of locations requested
+	 */
+	public Set<String> getLocations(String word) {
+		if (map.containsKey(word)) {
+			return Collections.unmodifiableSet(map.get(word).keySet());
+		}
+		return Collections.emptySet();
+	}
+
+	/**
+	 * Returns an unmodifiable set of the InvertedIndex's positions
+	 * 
+	 * @param word     - the word associated with the set
+	 * @param location - the location associated with the set
+	 * @return the set requested
+	 */
+	public Set<Integer> getPositions(String word, String location) {
+		if (map.containsKey(word)) {
+			if (map.get(word).containsKey(location)) {
+				return Collections.unmodifiableSet(map.get(word).get(location));
 			}
 		}
+		return Collections.emptySet();
+	}
+
+	@Override
+	public String toString() {
+		return map.toString();
 	}
 
 }

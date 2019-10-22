@@ -27,10 +27,11 @@ public class Driver {
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
 		QueryBuilder queryBuilder = new QueryBuilder();
+		InvertedIndexBuilder builder = new InvertedIndexBuilder();
 
 		Path path = parser.getPath("-path");
 		try {
-			index.directoryIterator(path);
+			builder.directoryIterator(path, index);
 		} catch (Exception e) {
 			System.err.println("Invalid path : " + path);
 		}
