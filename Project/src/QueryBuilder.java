@@ -1,8 +1,14 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
@@ -13,8 +19,21 @@ public class QueryBuilder {
 	/**
 	 * Data Structure that will hold cleaned, stemmed, and sorted query values.
 	 */
-	ArrayList<TreeSet<String>> setOfQueries = new ArrayList<>();
+	TreeMap<String, ArrayList<Result>> readyToPrint = new TreeMap<>();
 
+	/**
+	 * The data structure with the stored information from the text files.
+	 */
+	private final InvertedIndex index;
+
+	/**
+	 * Constructor method
+	 * 
+	 * @param index
+	 */
+	public QueryBuilder(InvertedIndex index) {
+		this.index = index;
+	}
 
 	/**
 	 * This method will take a path and clean, stem, and add the query values into
@@ -26,7 +45,7 @@ public class QueryBuilder {
 	 * @throws IOException           : file couldn't be found
 	 * @throws FileNotFoundException
 	 */
-	public void build(String path, InvertedIndex index, String type) throws FileNotFoundException, IOException {
+	public void build(String path, String type) throws FileNotFoundException, IOException {
 		if (path.toLowerCase().endsWith(".txt") || path.toLowerCase().endsWith(".text")) {
 			try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
 				String line;
@@ -36,7 +55,7 @@ public class QueryBuilder {
 					set.clear();
 					if (!line.isBlank()) {
 						set.addAll(TextFileStemmer.uniqueStems(line));
-						searchQuery(index, set, type);
+						searchQuery(set, type);
 					}
 				}
 			}
@@ -49,15 +68,77 @@ public class QueryBuilder {
 	 * @param type
 	 * @throws IOException
 	 */
-	public void searchQuery(InvertedIndex index, TreeSet<String> set, String type) throws IOException {
-		index.generate(set, type);
+	public void searchQuery(TreeSet<String> set, String type) throws IOException {
+		generate(set, type);
+	}
+
+	public void generate(TreeSet<String> set, String type) {
+		StringBuffer buffer = new StringBuffer();
+		if (!set.isEmpty()) {
+			for (String word : set) {
+				buffer.append(word);
+				buffer.append(' ');
+			}
+			// deletes extra space
+			buffer.deleteCharAt(buffer.length() - 1);
+			readyToPrint.put(buffer.toString(), generateResults(set, type));
+		}
 	}
 
 	/**
-	 * 
+	 * @param set
+	 * @param type
+	 * @return a a
 	 */
-	public void printOut() {
-		System.out.println(setOfQueries.toString());
+	public ArrayList<Result> generateResults(TreeSet<String> set, String type) {
+
+		if (type.equals("partial")) {
+			set.addAll(index.partialSearch(set));
+		}
+		ArrayList<Result> query = new ArrayList<>();
+		for (String word : set) {
+			// searching for exact word
+			if (index.contains(word)) {
+				Result result;
+
+				for (String location : index.getLocations(word)) {
+					int counts = index.getPositions(word, location).size();
+					int totalWords = index.getWordCounts(location);
+					// if we have this result already, then update it
+					boolean contains = false;
+					for (Result tempResult : query) {
+						if (tempResult.getDirectory().equals(location)) {
+							contains = true;
+							tempResult.add(counts);
+							break;
+						}
+					}
+					if (!contains) {
+						result = new Result(location, counts, totalWords);
+						query.add(result);
+					}
+				}
+			}
+		}
+		Collections.sort(query);
+		return query;
+
 	}
+
+	/**
+	 * The writer used for our queries
+	 * 
+	 * @param name
+	 * @throws IOException
+	 */
+	public void queryWriter(String name) throws IOException {
+		File file = new File(name);
+
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+			SimpleJsonWriter.searchOutput(readyToPrint, Paths.get(file.toString()));
+		}
+
+	}
+
 
 }

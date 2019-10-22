@@ -26,7 +26,7 @@ public class Driver {
 		ArgumentParser parser = new ArgumentParser();
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
-		QueryBuilder queryBuilder = new QueryBuilder();
+		QueryBuilder queryBuilder = new QueryBuilder(index);
 		InvertedIndexBuilder builder = new InvertedIndexBuilder();
 
 		Path path = parser.getPath("-path");
@@ -65,7 +65,7 @@ public class Driver {
 				if (parser.hasFlag("-exact"))
 					type = "exact";
 				try {
-					queryBuilder.build(name, index, type);
+					queryBuilder.build(name, type);
 				} catch (Exception e) {
 					System.err.println("Invlad query file: " + name);
 					e.printStackTrace();
@@ -78,7 +78,7 @@ public class Driver {
 			if (outputFileName == null)
 				outputFileName = "results.json";
 			try {
-				index.queryWriter(outputFileName);
+				queryBuilder.queryWriter(outputFileName);
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
