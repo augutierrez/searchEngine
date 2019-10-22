@@ -73,6 +73,7 @@ public class TextFileStemmer {
 		TreeSet<String> set = new TreeSet<String>();
 		try (BufferedReader reader = Files.newBufferedReader(inputFile);) {
 			String line = null;
+			// TODO Better to create a stemmer object here and reuse, than force a stemmer be graded per line
 			while ((line = reader.readLine())!= null) {
 				set.addAll(uniqueStems(line));
 			}

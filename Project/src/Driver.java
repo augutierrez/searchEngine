@@ -2,6 +2,12 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 
+/*
+ * TODO Your changes need to be made in your master branch. I will take off points
+ * if these code review changes do not make it into your master branch before your
+ * next code review!
+ */
+
 /**
  * Class responsible for running this project based on the provided command-line
  * arguments. See the README for details.
@@ -34,7 +40,7 @@ public class Driver {
 				System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
 						+ " to data structure. Please enter existing paths to textfiles.");
 			}
-		}
+		} // TODO You have a blank line between if statements below but not here
 		if (parser.hasFlag("-index")) {
 			Path indexPath = parser.getPath("-index", Path.of("index.json"));
 			try {
