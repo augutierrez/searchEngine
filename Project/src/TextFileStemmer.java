@@ -73,12 +73,10 @@ public class TextFileStemmer {
 		TreeSet<String> set = new TreeSet<String>();
 		try (BufferedReader reader = Files.newBufferedReader(inputFile);) {
 			String line = null;
+			// TODO Better to create a stemmer object here and reuse, than force a stemmer be graded per line
 			while ((line = reader.readLine())!= null) {
 				set.addAll(uniqueStems(line));
 			}
-		}
-		catch(java.nio.file.NoSuchFileException e) { // TODO Remove the catch block
-			System.err.println("Sorry, input file was not found.");
 		}
 		return set;
 	}
