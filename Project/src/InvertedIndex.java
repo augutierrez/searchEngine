@@ -19,7 +19,7 @@ public class InvertedIndex {
 	private final TreeMap<String, TreeMap<String, TreeSet<Integer>>> map;
 
 	/**
-	 * Structure used to store data for counts
+	 * Structure used to store data for counts (location,counts)
 	 */
 	private final TreeMap<String, Integer> wordCount;
 
@@ -143,6 +143,19 @@ public class InvertedIndex {
 		return Collections.emptySet();
 	}
 	
+	/**
+	 * Get the counts for a text file in a specific location
+	 * 
+	 * @param location : the location of the text file to search
+	 * @return the counts in that text file
+	 */
+	public Integer getCounts(String location) {
+		if (wordCount.containsKey(location)) {
+			return wordCount.get(location);
+		}
+		return null;
+	}
+
 	@Override
 	public String toString() {
 		return map.toString();
