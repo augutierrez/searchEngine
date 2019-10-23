@@ -27,12 +27,11 @@ public class Driver {
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
 		QueryBuilder queryBuilder = new QueryBuilder(index);
-		InvertedIndexBuilder builder = new InvertedIndexBuilder();
 
 		if (parser.hasFlag("-path")) {
 			Path path = parser.getPath("-path");
 			try {
-				builder.directoryIterator(path, index);
+				InvertedIndexBuilder.directoryIterator(path, index);
 			} catch (Exception e) {
 				System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
 						+ " to data structure. Please enter existing paths to textfiles.");
