@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -202,13 +201,19 @@ public class SimpleJsonWriter {
 		Iterator<String> setIterator = elements.keySet().iterator();
 		writer.write("{");
 		// Outer loop (Strings)
-		while (setIterator.hasNext()) {
-			String element = setIterator.next();
+		String element;
+		if (setIterator.hasNext()) {
+			element = setIterator.next();
 			writer.write('\n');
 			Iterator<Result> setIterator2 = elements.get(element).iterator();
 			// elements.get(element).keySet().iterator();
 			quote(element, writer, level + 1);
-			writer.write(": [");
+			writer.write(": ");
+			asArray(elements.get(element), writer, level + 1);
+		}
+		while (setIterator.hasNext()) {
+			writer.write(',');
+			element = setIterator.next();
 			writer.write('\n');
 			// Inner loop (Integers)
 			while (setIterator2.hasNext()) {
@@ -255,6 +260,12 @@ public class SimpleJsonWriter {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 			searchOutput(elements, writer, 0);
 		}
+			quote(element, writer, level + 1);
+			writer.write(": ");
+			asArray(elements.get(element), writer, level + 1);
+		}
+		writer.write('\n');
+		indent("}", writer, level);
 	}
 
 	/**
@@ -347,6 +358,25 @@ public class SimpleJsonWriter {
 		}
 	}
 
+
+	/**
+	 * Method used for Double Nested Data Structures
+	 * 
+	 * @param nested the nested data structure to write out
+	 * @return - the double nested object in simple json format
+	 */
+	public static String asNestedObjectInNestedObject(
+			TreeMap<String, TreeMap<String, TreeSet<Integer>>> nested) {
+		// THIS CODE IS PROVIDED FOR YOU; DO NOT MODIFY
+		try {
+			StringWriter writer = new StringWriter();
+			asNestedObjectInNestedObject(nested, writer, 0);
+			return writer.toString();
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
 	/**
 	 * Writes the {@code \t} tab symbol by the number of times specified.
 	 *
@@ -423,43 +453,5 @@ public class SimpleJsonWriter {
 		// THIS CODE IS PROVIDED FOR YOU; DO NOT MODIFY
 		indent(writer, times);
 		quote(element, writer);
-	}
-
-	/**
-	 * A simple main method that demonstrates this class.
-	 *
-	 * @param args unused
-	 */
-	public static void main(String[] args) {
-		// MODIFY AS NECESSARY TO DEBUG YOUR CODE
-
-		TreeSet<Integer> elements = new TreeSet<>();
-		System.out.println("Empty:");
-		System.out.println(asArray(elements));
-
-		elements.add(65);
-		System.out.println("\nSingle:");
-		System.out.println(asArray(elements));
-
-		elements.add(66);
-		elements.add(67);
-		System.out.println("\nSimple:");
-		System.out.println(asArray(elements));
-		Map<String, Integer> element = new HashMap<String, Integer>();
-		element.put("hello", 1);
-		System.out.println("Objects");
-		System.out.println(asObject(element));
-
-		System.out.println("NEW");
-		TreeMap<String, TreeSet<Integer>> elementr = new TreeMap<>();
-		elementr.put("a", new TreeSet<>());
-		elementr.put("b", new TreeSet<>());
-		elementr.put("c", new TreeSet<>());
-
-		elementr.get("a").add(1);
-		elementr.get("b").add(2);
-		elementr.get("b").add(3);
-		elementr.get("b").add(4);
-		System.out.println(asNestedObject(elementr));
 	}
 }

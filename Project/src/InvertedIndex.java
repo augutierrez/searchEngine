@@ -8,14 +8,13 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-
 /**
  * @author Antonio Gutierrez
  */
 public class InvertedIndex {
 
 	/**
-	 *Nested Data Structure that stores all the -path data
+	 * Nested Data Structure that stores all the -path data
 	 */
 	private final TreeMap<String, TreeMap<String, TreeSet<Integer>>> map;
 
@@ -23,7 +22,14 @@ public class InvertedIndex {
 	 * Structure used to store data for counts (location,counts)
 	 */
 	private final TreeMap<String, Integer> wordCount;
-	
+
+	/**
+	 * Constructor method
+	 */
+	public InvertedIndex() {
+		map = new TreeMap<>();
+		wordCount = new TreeMap<>();
+	}
 	
 	/**
 	 * Constructor method

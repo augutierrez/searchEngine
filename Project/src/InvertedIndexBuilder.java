@@ -68,7 +68,6 @@ public class InvertedIndexBuilder {
 	 * @see #DEFAULT
 	 */
 	public static void addPath(Path path, InvertedIndex index) throws FileNotFoundException, IOException {
-
 		try (BufferedReader reader = Files.newBufferedReader(path)) {
 			String line;
 			String pathName = path.toString();
@@ -82,8 +81,5 @@ public class InvertedIndexBuilder {
 		}
 
 	}
-
 	// Remind Sophie in project 2 code reviews to prep this class for project 3
-
 }
-

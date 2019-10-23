@@ -178,12 +178,4 @@ public class ArgumentParser {
 		// DO NOT MODIFY; THIS METHOD IS PROVIDED FOR YOU
 		return this.map.toString();
 	}
-
-	/**
-	 * A simple main method that parses the command-line arguments provided and
-	 * prints the result to the console.
-	 *
-	 * @param args the command-line arguments to parse
-	 */
-
 }
