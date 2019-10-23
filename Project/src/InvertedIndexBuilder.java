@@ -26,7 +26,7 @@ public class InvertedIndexBuilder {
 	 * @param path - the path that's being considered
 	 * @return true/ false
 	 */
-	public static boolean isText(Path path) { // TODO make this method static
+	public static boolean isText(Path path) {
 		String lower = path.toString().toLowerCase();
 		return lower.endsWith(".txt") || lower.endsWith(".text");
 	}
@@ -40,12 +40,7 @@ public class InvertedIndexBuilder {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public static void directoryIterator(Path path, InvertedIndex index) throws FileNotFoundException, IOException { // TODO
-																														// Make
-																														// static
-																														// in
-																														// this
-																														// form
+	public static void directoryIterator(Path path, InvertedIndex index) throws FileNotFoundException, IOException {
 		if (path != null) {
 			if (Files.isDirectory(path)) {
 				try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
@@ -72,10 +67,7 @@ public class InvertedIndexBuilder {
 	 * @see SnowballStemmer
 	 * @see #DEFAULT
 	 */
-	public static void addPath(Path path, InvertedIndex index) throws FileNotFoundException, IOException { // TODO Make
-																											// static in
-																											// this form
-
+	public static void addPath(Path path, InvertedIndex index) throws FileNotFoundException, IOException {
 		try (BufferedReader reader = Files.newBufferedReader(path)) {
 			String line;
 			String pathName = path.toString();
