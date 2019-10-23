@@ -26,35 +26,34 @@ public class Driver {
 		ArgumentParser parser = new ArgumentParser();
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
-		QueryBuilder queryBuilder = new QueryBuilder();
+		QueryBuilder queryBuilder = new QueryBuilder(index);
 		InvertedIndexBuilder builder = new InvertedIndexBuilder();
 
 		Path path = parser.getPath("-path");
 		try {
 			builder.directoryIterator(path, index);
 		} catch (Exception e) {
-			System.err.println("Invalid path : " + path);
+			System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
+					+ " to data structure. Please enter existing paths to textfiles.");
 		}
 		
 		if (parser.hasFlag("-index")) {
-			String name = parser.getString("-index");
-			if (name == null)
-				name = "index.json";
+			Path indexPath = parser.getPath("-index", Path.of("index.json"));
 			try {
-			index.indexWriter(name);
+				index.indexWriter(indexPath);
 			} catch (Exception e) {
-				System.err.println("Invalid output file name: " + name);
+				System.err.println("Invalid output file sent to indexWriter: " + indexPath
+						+ ". Please enter a valid output file path name.");
 			}
 		}
 		
 		if (parser.hasFlag("-counts")) {
-			String name = parser.getString("-counts");
-			if (name == null)
-				name = "counts.json";
+			Path countsPath = parser.getPath("-counts", Path.of("counts.json"));
 			try {
-				index.countsWriter(name);
+				index.countsWriter(countsPath);
 			} catch (Exception e) {
-				System.err.println("Invalid output file name: " + name);
+				System.err.println("Unalbe to write word counts to the path:" + countsPath
+						+ ". Please enter a valid output file path name.");
 			}
 		}
 
@@ -65,23 +64,21 @@ public class Driver {
 				if (parser.hasFlag("-exact"))
 					type = "exact";
 				try {
-					queryBuilder.build(name, index, type);
+					queryBuilder.build(name, type);
 				} catch (Exception e) {
-					System.err.println("Invlad query file: " + name);
+					System.err.println("Invlad query file: " + name);//TODO: FIX THIS
 					e.printStackTrace();
 				}
 			}
 		}
 
 		if (parser.hasFlag("-results")) {
-			String outputFileName = parser.getString("-results");
-			if (outputFileName == null)
-				outputFileName = "results.json";
+			Path resultsPath = parser.getPath("-results", Path.of("results.json"));
 			try {
-				index.queryWriter(outputFileName);
+				queryBuilder.queryWriter(resultsPath);
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				System.err.println("Unable to write results into path : " + resultsPath
+						+ ". Please enter a valid output path name.");
 			}
 
 		}

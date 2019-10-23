@@ -1,14 +1,8 @@
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -23,15 +17,23 @@ import java.util.TreeSet;
  */
 public class InvertedIndex {
 	/**
-	 * Nested Data Structure that stores all the words First Key is words Second Key
-	 * is for locations
+	 *Nested Data Structure that stores all the -path data
 	 */
-	TreeMap<String, TreeMap<String, TreeSet<Integer>>> map = new TreeMap<>();
+	private final TreeMap<String, TreeMap<String, TreeSet<Integer>>> map;
 
 	/**
-	 * used for counts flag
+	 * Structure used to store data for counts (location,counts)
 	 */
-	TreeMap<String, Integer> wordCount = new TreeMap<>();
+	private final TreeMap<String, Integer> wordCount;
+	
+	
+	/**
+	 * Constructor method
+	 */
+	public InvertedIndex() {
+		map = new TreeMap<>();
+		wordCount = new TreeMap<>();
+	}
 	
 	/**
 	 * 
@@ -147,98 +149,37 @@ public class InvertedIndex {
 	}
 
 	/**
-	 * Extracts information from the file passed and each word found in the file and
-	 * passes it to add()
-	 * 
-	 * @param path : the path to the file that it will read from
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
-	public void addPath(Path path) throws FileNotFoundException, IOException {
-		if (path.toString().toLowerCase().endsWith(".txt") || path.toString().toLowerCase().endsWith(".text")) {
-			try (BufferedReader reader = new BufferedReader(new FileReader(path.toString()))) {
-
-			String line;
-
-			int counter = 1;
-			while ((line = reader.readLine()) != null) {
-				String[] wordsInLine = TextParser.parse(line);
-
-				for (String word : wordsInLine) {
-					add(word, path.toString(), counter);
-					counter++;
-				}
-				wordCount.put(path.toString(), counter - 1);
-			}
-			}
-		}
-	}
-
-	/**
-	 * Accepts a path, and iterates over it if it is a directory, or simply adds it
-	 * to the data structure if it is a file.
-	 * 
-	 * @param path : the path we will extract information from
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
-	public void directoryIterator(Path path) throws FileNotFoundException, IOException {
-		if (path != null) {
-			if (Files.isDirectory(path)) {
-				try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
-					for (Path currPath : listing)
-						directoryIterator(currPath);
-				}
-			} else {
-				if (Files.isRegularFile(path))
-					addPath(path);
-			}
-		}
-	}
-
-	/**
 	 * Creates a writer for the -counts flag and outputs to the file passed
 	 * 
-	 * @param name : name of output file
+	 * @param path : the path we are going to write to
 	 * @throws IOException
 	 */
-	public void countsWriter(String name) throws IOException {
-
-		File file = new File(name);
-
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file));) {
-			SimpleJsonWriter.asObject(wordCount, Paths.get(file.toString()));
+	public void countsWriter(Path path) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8);) {
+			SimpleJsonWriter.asObject(wordCount, path);
 		}
-
 	}
 
 	/**
 	 * Creates a writer for the -index flag and outputs to the file passed
 	 * 
-	 * @param name : name of the output file
+	 * @param path : name of the output file
 	 * @throws IOException
 	 */
-	public void indexWriter(String name) throws IOException {
-
-		File file = new File(name);
-
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			SimpleJsonWriter.asNestedObjectInNestedObject(map, Paths.get(file.toString()));
+	public void indexWriter(Path path) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			SimpleJsonWriter.asNestedObjectInNestedObject(map, path);
 		}
-
 	}
 
 	/**
-	 * @param name
+	 * @param path
 	 * @throws IOException
 	 */
-	public void queryWriter(String name) throws IOException {
-		File file = new File(name);
-
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			SimpleJsonWriter.searchOutput(readyToPrint, Paths.get(file.toString()));
+	public void queryWriter(Path path) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			SimpleJsonWriter.searchOutput(readyToPrint, path);
 		}
-
 	}
 
 	/**
@@ -317,6 +258,14 @@ public class InvertedIndex {
 	@Override
 	public String toString() {
 		return map.toString();
+	}
+
+	/**
+	 * @param location
+	 * @return
+	 */
+	public int getWordCounts(String location) {
+		return wordCount.get(location);
 	}
 
 }
