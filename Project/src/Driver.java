@@ -29,12 +29,14 @@ public class Driver {
 		QueryBuilder queryBuilder = new QueryBuilder(index);
 		InvertedIndexBuilder builder = new InvertedIndexBuilder();
 
-		Path path = parser.getPath("-path");
-		try {
-			builder.directoryIterator(path, index);
-		} catch (Exception e) {
-			System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
-					+ " to data structure. Please enter existing paths to textfiles.");
+		if (parser.hasFlag("-path")) {
+			Path path = parser.getPath("-path");
+			try {
+				builder.directoryIterator(path, index);
+			} catch (Exception e) {
+				System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
+						+ " to data structure. Please enter existing paths to textfiles.");
+			}
 		}
 		
 		if (parser.hasFlag("-index")) {

@@ -41,20 +41,18 @@ public class InvertedIndex {
 	 * @param position : the line the word was found in the file
 	 */
 	public void add(String word, String path, int position) {
-
 		map.putIfAbsent(word, new TreeMap<>());
 		map.get(word).putIfAbsent(path, new TreeSet<>());
 		map.get(word).get(path).add(position);
 		if (!wordCount.containsKey(path) || wordCount.get(path) < position) {
 			wordCount.put(path, position);
 		}
-
 	}
 
 	/**
 	 * Creates a writer for the -counts flag and outputs to the file passed
 	 * 
-	 * @param path : the path we are going to write to
+	 * @param path : path of output file
 	 * @throws IOException
 	 */
 	public void countsWriter(Path path) throws IOException {
@@ -66,7 +64,7 @@ public class InvertedIndex {
 	/**
 	 * Creates a writer for the -index flag and outputs to the file passed
 	 * 
-	 * @param path : name of the output file
+	 * @param path : path of the output file
 	 * @throws IOException
 	 */
 	public void indexWriter(Path path) throws IOException {
@@ -149,18 +147,20 @@ public class InvertedIndex {
 	}
 
 	/**
-	 * Returns the counts of a location
+	 * Get the counts for a text file in a specific location
 	 * 
 	 * @param location - the location we want the counts of
 	 * @return the counts of the specified location
 	 */
-	public int getWordCounts(String location) {
-		return wordCount.get(location);
+	public Integer getWordCounts(String location) {
+		if(wordCount.containsKey(location)){
+			return wordCount.get(location);
+		}
+		return null;
 	}
 
 	@Override
 	public String toString() {
 		return map.toString();
 	}
-
 }

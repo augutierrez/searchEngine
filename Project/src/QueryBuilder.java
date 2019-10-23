@@ -152,7 +152,7 @@ public class QueryBuilder {
 	/**
 	 * The writer used for our queries.
 	 * 
-	 * @param name - the output file name
+	 * @param path - the output path
 	 * @throws IOException
 	 */
 	public void queryWriter(Path path) throws IOException {
