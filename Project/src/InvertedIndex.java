@@ -12,7 +12,7 @@ import java.util.TreeSet;
  * @author Antonio Gutierrez
  */
 public class InvertedIndex {
-	
+
 	/**
 	 * Nested Data Structure that stores all the -path data
 	 */
@@ -31,6 +31,14 @@ public class InvertedIndex {
 		wordCount = new TreeMap<>();
 	}
 	
+	/**
+	 * Constructor method
+	 */
+	public InvertedIndex() {
+		map = new TreeMap<>();
+		wordCount = new TreeMap<>();
+	}
+
 	/**
 	 * Receives words from addPath() and stores it in the map data structure
 	 * 
@@ -73,6 +81,7 @@ public class InvertedIndex {
 
 	/**
 	 * Returns whether the Inverted Index contains the word
+	 * 
 	 * @param word - the word to look up
 	 * @return true/false
 	 */
@@ -142,15 +151,15 @@ public class InvertedIndex {
 		}
 		return Collections.emptySet();
 	}
-	
+
 	/**
 	 * Get the counts for a text file in a specific location
 	 * 
-	 * @param location : the location of the text file to search
-	 * @return the counts in that text file
+	 * @param location - the location we want the counts of
+	 * @return the counts of the specified location
 	 */
-	public Integer getCounts(String location) {
-		if (wordCount.containsKey(location)) {
+	public Integer getWordCounts(String location) {
+		if(wordCount.containsKey(location)){
 			return wordCount.get(location);
 		}
 		return null;

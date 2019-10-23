@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -24,6 +25,7 @@ public class Driver {
 		ArgumentParser parser = new ArgumentParser();
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
+		QueryBuilder queryBuilder = new QueryBuilder(index);
 		InvertedIndexBuilder builder = new InvertedIndexBuilder();
 
 		if (parser.hasFlag("-path")) {
@@ -56,9 +58,35 @@ public class Driver {
 			}
 		}
 
+
+		if (parser.hasFlag("-query")) {
+			String name = parser.getString("-query");
+			if (name != null) {
+				String type = "partial";
+				if (parser.hasFlag("-exact"))
+					type = "exact";
+				try {
+					queryBuilder.build(name, type);
+				} catch (Exception e) {
+					System.err.println("Invlad query file: " + name);//TODO: FIX THIS
+					e.printStackTrace();
+				}
+			}
+		}
+
+		if (parser.hasFlag("-results")) {
+			Path resultsPath = parser.getPath("-results", Path.of("results.json"));
+			try {
+				queryBuilder.queryWriter(resultsPath);
+			} catch (IOException e1) {
+				System.err.println("Unable to write results into path : " + resultsPath
+						+ ". Please enter a valid output path name.");
+			}
+
+		}
+    
 		Duration elapsed = Duration.between(start, Instant.now());
 		double seconds = (double) elapsed.toMillis() / Duration.ofSeconds(1).toMillis();
 		System.out.printf("Elapsed: %f seconds%n", seconds);
-
 	}
 }

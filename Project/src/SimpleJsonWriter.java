@@ -5,6 +5,8 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -116,7 +118,6 @@ public class SimpleJsonWriter {
 		}
 		writer.write('\n');
 		indent("}", writer, level);
-
 	}
 
 	/**
@@ -181,6 +182,84 @@ public class SimpleJsonWriter {
 			writer.write(',');
 			element = setIterator.next();
 			writer.write('\n');
+			quote(element, writer, level + 1);
+			writer.write(": ");
+			asArray(elements.get(element), writer, level + 1);
+		}
+		writer.write('\n');
+		indent("}", writer, level);
+	}
+
+	/**
+	 * @param elements
+	 * @param writer
+	 * @param level
+	 * @throws IOException
+	 */
+	public static void searchOutput(Map<String, ? extends ArrayList<Result>> elements, Writer writer, int level)
+			throws IOException {
+		Iterator<String> setIterator = elements.keySet().iterator();
+		writer.write("{");
+		// Outer loop (Strings)
+		String element;
+		if (setIterator.hasNext()) {
+			element = setIterator.next();
+			writer.write('\n');
+			Iterator<Result> setIterator2 = elements.get(element).iterator();
+			// elements.get(element).keySet().iterator();
+			quote(element, writer, level + 1);
+			writer.write(": ");
+			asArray(elements.get(element), writer, level + 1);
+		}
+		while (setIterator.hasNext()) {
+			writer.write(',');
+			element = setIterator.next();
+			writer.write('\n');
+			// Inner loop (Integers)
+			while (setIterator2.hasNext()) {
+				Result result = setIterator2.next();
+				String location = result.getDirectory();
+				String count = result.getCount();
+				DecimalFormat df = new DecimalFormat("0.00000000");
+				String score = df.format(result.getScore());
+				indent("{\n", writer, level + 2);
+				indent("\"where\": ", writer, level + 3);
+				indent(location, writer, level);// simplified
+				writer.write(",\n");
+				indent("\"count\": ", writer, level + 3);
+				writer.write(count);
+				writer.write(",\n");
+				indent("\"score\": ", writer, level + 3);
+				writer.write(score);
+				writer.write("\n");
+				indent("}", writer, level + 2);
+				if (setIterator2.hasNext()) {
+					writer.write(",");
+				}
+				writer.write('\n');
+
+			}
+			indent("]", writer, level + 1);
+			if (setIterator.hasNext()) {
+				writer.write(",");
+			}
+
+		}
+		writer.write('\n');
+		writer.append("}");
+
+	}
+
+	/**
+	 * @param elements
+	 * @param path
+	 * @throws IOException
+	 */
+	public static void searchOutput(TreeMap<String, ArrayList<Result>> elements, Path path) throws IOException {
+
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			searchOutput(elements, writer, 0);
+		}
 			quote(element, writer, level + 1);
 			writer.write(": ");
 			asArray(elements.get(element), writer, level + 1);

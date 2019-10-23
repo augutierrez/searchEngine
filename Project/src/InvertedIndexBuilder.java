@@ -81,6 +81,5 @@ public class InvertedIndexBuilder {
 		}
 
 	}
-	
 	// Remind Sophie in project 2 code reviews to prep this class for project 3
 }
