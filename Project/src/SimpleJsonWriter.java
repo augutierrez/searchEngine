@@ -36,19 +36,18 @@ public class SimpleJsonWriter {
 	 * @throws IOException
 	 */
 	public static void asArray(Collection<Integer> elements, Writer writer, int level) throws IOException {
-		// TODO MODIFY AND FILL IN AS NECESSARY TO PASS TESTS
-		// TODO USE ITERATION NOT STRING REPLACEMENT //
 		Iterator<Integer> iterate = elements.iterator();
 		writer.write("[\n");
-		while (iterate.hasNext()) {
+		if (iterate.hasNext()) {
 			indent(iterate.next(), writer, level + 1);
-
-			if (iterate.hasNext())
-				writer.write(',');
-
-			writer.write('\n');
 		}
-		writer.write(']');
+		while (iterate.hasNext()) {
+			writer.write(",");
+			writer.write('\n');
+			indent(iterate.next(), writer, level + 1);
+		}
+		writer.write('\n');
+		indent("]", writer, level);
 	}
 
 	/**
@@ -97,23 +96,29 @@ public class SimpleJsonWriter {
 	 */
 	public static void asObject(Map<String, Integer> elements, Writer writer, int level) throws IOException {
 		Iterator<String> setIterator = elements.keySet().iterator();
-		writer.write("{");
+		indent("{", writer, level);
 		// Iterator for Strings
-		while (setIterator.hasNext()) {
-			String element = setIterator.next();
-			writer.write('\n');
-			// Value of Integer for each String
-			Integer key = elements.get(element);
+		writer.write('\n');
+		String element;
+		Integer key;
+		if (setIterator.hasNext()) {
+			element = setIterator.next();
+			key = elements.get(element);
 			quote(element, writer, level + 1);
 			writer.write(": ");
 			writer.write(key.toString());
-			if (setIterator.hasNext()) {
-				writer.write(",");
-			}
+		}
+		while (setIterator.hasNext()) {
+			writer.write(",");
+			element = setIterator.next();
+			writer.write('\n');
+			key = elements.get(element);
+			quote(element, writer, level + 1);
+			writer.write(": ");
+			writer.write(key.toString());
 		}
 		writer.write('\n');
-		writer.write("}");
-
+		indent("}", writer, level);
 	}
 
 	/**
@@ -164,34 +169,26 @@ public class SimpleJsonWriter {
 	 */
 	public static void asNestedObject(Map<String, ? extends Collection<Integer>> elements, Writer writer, int level) throws IOException {
 		Iterator<String> setIterator = elements.keySet().iterator();
-		writer.write("{");
+		indent("{", writer, level);
 		// Outer loop (Strings)
-		while (setIterator.hasNext()) {
-			String element = setIterator.next();
+		String element;
+		if (setIterator.hasNext()) {
+			element = setIterator.next();
 			writer.write('\n');
-			Iterator<Integer> intIterator = elements.get(element).iterator();
 			quote(element, writer, level + 1);
-			writer.write(": [");
+			writer.write(": ");
+			asArray(elements.get(element), writer, level + 1);
+		}
+		while (setIterator.hasNext()) {
+			writer.write(',');
+			element = setIterator.next();
 			writer.write('\n');
-			// Inner loop (Integers)
-			while (intIterator.hasNext()) {
-				indent(intIterator.next(), writer, level + 2);
-				if (intIterator.hasNext()) {
-					writer.write(",");
-				}
-				writer.write('\n');
-
-			}
-			indent("]", writer, level + 1);
-			if (setIterator.hasNext()) {
-				writer.write(",");
-			}
-
+			quote(element, writer, level + 1);
+			writer.write(": ");
+			asArray(elements.get(element), writer, level + 1);
 		}
 		writer.write('\n');
-		writer.append("}");
-
-
+		indent("}", writer, level);
 	}
 
 	/**
@@ -222,17 +219,12 @@ public class SimpleJsonWriter {
 				String score = df.format(result.getScore());
 				indent("{\n", writer, level + 2);
 				indent("\"where\": ", writer, level + 3);
-				quote(location, writer, level);
-				// writer.write(elements.get(element).get(location).getDirectory());
+				indent(location, writer, level);// simplified
 				writer.write(",\n");
 				indent("\"count\": ", writer, level + 3);
 				writer.write(count);
 				writer.write(",\n");
 				indent("\"score\": ", writer, level + 3);
-				// DecimalFormat df = new DecimalFormat("0.00000000");
-				// String score = String.format("%.8f",
-				// elements.get(element).get(location).getScore());
-
 				writer.write(score);
 				writer.write("\n");
 				indent("}", writer, level + 2);
@@ -312,52 +304,29 @@ public class SimpleJsonWriter {
 	 * @throws IOException
 	 */
 	public static void asNestedObjectInNestedObject(
-			TreeMap<String, TreeMap<String, TreeSet<Integer>>> elements, Writer writer, int level) throws IOException {
+			TreeMap<String, TreeMap<String, TreeSet<Integer>>> elements, Writer writer, int level)
+			throws IOException {
 		Iterator<String> setIterator = elements.keySet().iterator();
-		writer.write("{");
+		indent("{", writer, level);
+		String element;
 		// Outer loop (Strings)
-		while (setIterator.hasNext()) {
-			String element = setIterator.next();
+		if (setIterator.hasNext()) {
+			element = setIterator.next();
 			writer.write('\n');
-
-
 			quote(element, writer, level + 1);
-			writer.write(": {");
+			writer.write(": ");
+			asNestedObject(elements.get(element), writer, level);
+		}
+		while (setIterator.hasNext()) {
+			writer.write(',');
+			element = setIterator.next();
 			writer.write('\n');
-			// Inner loop (Integers)
-			Iterator<String> pathIterator = elements.get(element).keySet().iterator();
-			// path
-			while (pathIterator.hasNext()) {
-				String path = pathIterator.next();
-				quote(path, writer, level + 2);
-				writer.write(": [\n");
-				Iterator<Integer> intIterator = elements.get(element).get(path).iterator();
-
-				// int
-				while (intIterator.hasNext()) {
-					indent(intIterator.next(), writer, level + 3);
-					if (intIterator.hasNext()) {
-						writer.write(",");
-					}
-					writer.write('\n');
-
-				}
-
-				indent("]", writer, level + 2);
-				if (pathIterator.hasNext())
-					writer.write(',');
-				writer.write('\n');
-			}
-
-			indent("}", writer, level + 1);
-			if (setIterator.hasNext()) {
-				writer.write(",");
-			}
-
+			quote(element, writer, level + 1);
+			writer.write(": ");
+			asNestedObject(elements.get(element), writer, level);
 		}
 		writer.write('\n');
 		writer.append("}");
-
 	}
 
 	/**
