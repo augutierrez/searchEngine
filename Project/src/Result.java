@@ -95,7 +95,6 @@ public class Result implements Comparable<Result> {
 
 	@Override
 	public String toString() {
-
 		return "location: " + this.directory + " count: " + this.getCount() + " score: " + this.getScore();
 	}
 }
