@@ -4,58 +4,42 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
+public class ThreadSafeInvertedIndex extends InvertedIndex {
 
-/**
- * @author Antonio Gutierrez
- */
-public class InvertedIndex {
-
-	/**
-	 * Nested Data Structure that stores all the -path data
-	 */
-	private final TreeMap<String, TreeMap<String, TreeSet<Integer>>> map;
+	/** The lock used to protect concurrent access to the underlying set. */
+	private final SimpleReadWriteLock lock;
 
 	/**
-	 * Structure used to store data for counts (location,counts)
+	 * Initializes a thread-safe indexed set.
+	 *
+	 * @param sorted whether the set should be sorted
 	 */
-	private final TreeMap<String, Integer> wordCount;
-
-	/**
-	 * Constructor method
-	 */
-	public InvertedIndex() {
-		map = new TreeMap<>();
-		wordCount = new TreeMap<>();
+	public ThreadSafeInvertedIndex() {
+		// NOTE: DO NOT MODIFY THIS METHOD
+		super();
+		lock = new SimpleReadWriteLock();
 	}
-	
+
 	/**
 	 * @param set
 	 * @return A list with words- ----
 	 * 
 	 */
 	public TreeSet<String> partialSearch(TreeSet<String> set) {
-
-		TreeSet<String> returnSet = new TreeSet<>();
-		Iterator<String> stems = set.iterator();
-
-		while (stems.hasNext()) {
-			Iterator<String> iterate = map.keySet().iterator();
-			String stem = stems.next();
-			while (iterate.hasNext()) {
-				String key = iterate.next();
-				if (key.startsWith(stem))
-					returnSet.add(key);
-			}
+		/*
+		 * Since partialSearch uses an add method, this might need the write lock as
+		 * well
+		 */
+		lock.readLock().lock();
+		try {
+			return super.partialSearch(set);
+		} finally {
+			lock.readLock().unlock();
 		}
-
-		return returnSet;
 	}
-
 
 	/**
 	 * Receives words from addPath() and stores it in the map data structure
@@ -66,13 +50,9 @@ public class InvertedIndex {
 	 */
 	public void add(String word, String path, int position) {
 
-		map.putIfAbsent(word, new TreeMap<>());
-		map.get(word).putIfAbsent(path, new TreeSet<>());
-		map.get(word).get(path).add(position);
-		if (!wordCount.containsKey(path) || wordCount.get(path) < position) {
-			wordCount.put(path, position);
-		}
-
+		lock.writeLock().lock();
+		super.add(word, path, position);
+		lock.writeLock().unlock();
 	}
 
 	/**
@@ -83,11 +63,8 @@ public class InvertedIndex {
 	 */
 	public void countsWriter(String name) throws IOException {
 
-		File file = new File(name);
-
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file));) {
-			SimpleJsonWriter.asObject(wordCount, Paths.get(file.toString()));
-		}
+		lock.readLock().lock();
+		super.countsWriter(name);
 
 	}
 
@@ -106,7 +83,6 @@ public class InvertedIndex {
 		}
 
 	}
-
 
 	/**
 	 * Returns whether the Inverted Index contains the word
