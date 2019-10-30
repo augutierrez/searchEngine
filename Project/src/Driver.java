@@ -28,6 +28,12 @@ public class Driver {
 		InvertedIndex index = new InvertedIndex();
 		QueryBuilder queryBuilder = new QueryBuilder(index);
 
+		if (parser.hasFlag("-threads")) {
+			int numThreads = Integer.parseInt(parser.getString("-threads", "5"));
+
+		}
+		// if we want it multithreaded, the workqueue must somehow take over driver I
+		// think
 		if (parser.hasFlag("-path")) {
 			Path path = parser.getPath("-path");
 			try {
@@ -83,6 +89,8 @@ public class Driver {
 			}
 
 		}
+
+
 
 
 		Duration elapsed = Duration.between(start, Instant.now());
