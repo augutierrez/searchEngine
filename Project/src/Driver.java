@@ -26,41 +26,89 @@ public class Driver {
 		ArgumentParser parser = new ArgumentParser();
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
-		QueryBuilder queryBuilder = new QueryBuilder(index);
+		ThreadSafeInvertedIndex threadIndex = new ThreadSafeInvertedIndex();
+//		if (parser.hasFlag("-threads")) {
+//			index = new ThreadSafeInvertedIndex();
+//		}
+
+		QueryBuilder queryBuilder;
 
 		if (parser.hasFlag("-threads")) {
-			int numThreads = Integer.parseInt(parser.getString("-threads", "5"));
-
-		}
-		// if we want it multithreaded, the workqueue must somehow take over driver I
-		// think
-		if (parser.hasFlag("-path")) {
-			Path path = parser.getPath("-path");
+			int numThreads;
 			try {
-				InvertedIndexBuilder.directoryIterator(path, index);
-			} catch (Exception e) {
-				System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
-						+ " to data structure. Please enter existing paths to textfiles.");
+				numThreads = Integer.parseInt(parser.getString("-threads", "5"));
+			} catch (java.lang.NumberFormatException e) {
+				numThreads = 0;
 			}
+
+			// ThreadSafeInvertedIndex threadIndex = new ThreadSafeInvertedIndex();
+			if (parser.hasFlag("-path")) {
+				Path path = parser.getPath("-path");
+				try {
+					ThreadIndexBuilder.directoryBuilder(path, threadIndex, numThreads);
+				} catch (Exception e) {
+					System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
+							+ " to data structure. Please enter existing paths to textfiles.");
+				}
+			}
+			queryBuilder = new QueryBuilder(threadIndex);
 		}
-		
+
+		// if we want it multithreaded, the workqueue must somehow take over driver I
+		// think, then create an inverted index biulder that utilizes multi threading.
+		// we need to make one thread handle one file, we can use the recursion to get
+		// the files
+		// then a thread that is ready will pick up a file as we find them.
+		// then we need those threads to use the read and write block to make sure they
+		// only write to the
+		// iverted index once at a time.
+		else {
+			if (parser.hasFlag("-path")) {
+			Path path = parser.getPath("-path");
+				try {
+					InvertedIndexBuilder.directoryIterator(path, index);
+				} catch (Exception e) {
+					System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
+							+ " to data structure. Please enter existing paths to textfiles.");
+				}
+			}
+			queryBuilder = new QueryBuilder(index);
+		}
 		if (parser.hasFlag("-index")) {
 			Path indexPath = parser.getPath("-index", Path.of("index.json"));
+			if (parser.hasFlag("-threads")) {
+				try {
+					threadIndex.indexWriter(indexPath);
+				} catch (Exception e) {
+					System.err.println("Invalid output file sent to indexWriter: " + indexPath
+							+ ". Please enter a valid output file path name.");
+				}
+			} else {
 			try {
-				index.indexWriter(indexPath);
-			} catch (Exception e) {
-				System.err.println("Invalid output file sent to indexWriter: " + indexPath
-						+ ". Please enter a valid output file path name.");
+					index.indexWriter(indexPath);
+				} catch (Exception e) {
+					System.err.println("Invalid output file sent to indexWriter: " + indexPath
+							+ ". Please enter a valid output file path name.");
+				}
 			}
 		}
 		
 		if (parser.hasFlag("-counts")) {
 			Path countsPath = parser.getPath("-counts", Path.of("counts.json"));
+			if (parser.hasFlag("-threads")) {
+				try {
+					threadIndex.countsWriter(countsPath);
+				} catch (Exception e) {
+					System.err.println("Invalid output file sent to indexWriter: " + countsPath
+							+ ". Please enter a valid output file path name.");
+				}
+			} else {
 			try {
-				index.countsWriter(countsPath);
-			} catch (Exception e) {
-				System.err.println("Unalbe to write word counts to the path:" + countsPath
-						+ ". Please enter a valid output file path name.");
+					index.countsWriter(countsPath);
+				} catch (Exception e) {
+					System.err.println("Unalbe to write word counts to the path:" + countsPath
+							+ ". Please enter a valid output file path name.");
+				}
 			}
 		}
 
@@ -98,4 +146,5 @@ public class Driver {
 		System.out.printf("Elapsed: %f seconds%n", seconds);
 
 	}
+
 }
