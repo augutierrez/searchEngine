@@ -1,6 +1,12 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Set;
+import java.util.TreeSet;
+
 
 /**
  * A thread safe version of InvertedIndex
@@ -23,6 +29,23 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 		lock = new SimpleReadWriteLock();
 	}
 
+	/**
+	 * @param set
+	 * @return A list with words- ----
+	 * 
+	 */
+	public TreeSet<String> partialSearch(TreeSet<String> set) {
+		/*
+		 * Since partialSearch uses an add method, this might need the write lock as
+		 * well
+		 */
+		lock.readLock().lock();
+		try {
+			return super.partialSearch(set);
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
 
 	/**
 	 * Receives words from addPath() and stores it in the map data structure
@@ -75,7 +98,6 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 		} finally {
 			lock.readLock().unlock();
 		}
-
 	}
 
 	/**

@@ -26,6 +26,7 @@ public class Driver {
 		ArgumentParser parser = new ArgumentParser();
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
+
 		ThreadSafeInvertedIndex threadIndex = new ThreadSafeInvertedIndex();
 //		if (parser.hasFlag("-threads")) {
 //			index = new ThreadSafeInvertedIndex();
