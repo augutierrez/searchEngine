@@ -1,18 +1,22 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 /**
- * @author tony Cleans and organizes our search queries
+ * Cleans and organizes our search queries
+ * 
+ * @author tony
  */
 public class QueryBuilder {
 
@@ -36,12 +40,10 @@ public class QueryBuilder {
 	}
 
 	/**
-	 * This method will take a path and clean, stem, and add the query values into
-	 * our data structure.
+	 * Reads the query files. It handles both exact and partial searches.
 	 * 
-	 * @param path  : the path that has the query values
-	 * @param index
-	 * @param type
+	 * @param path : the path that has the query values
+	 * @param type : exact or partial
 	 * @throws IOException           : file couldn't be found
 	 * @throws FileNotFoundException
 	 */
@@ -51,7 +53,6 @@ public class QueryBuilder {
 				String line;
 				TreeSet<String> set = new TreeSet<>();
 				while ((line = reader.readLine()) != null) {
-					// brand new set of search words for each iteration
 					set.clear();
 					if (!line.isBlank()) {
 						set.addAll(TextFileStemmer.uniqueStems(line));
@@ -63,16 +64,12 @@ public class QueryBuilder {
 	}
 
 	/**
-	 * @param index
-	 * @param set
-	 * @param type
-	 * @throws IOException
+	 * Initiates the search of queries and stores it into the data structure.
+	 * 
+	 * @param set  : the set of queries
+	 * @param type : exact / partial
 	 */
-	public void searchQuery(TreeSet<String> set, String type) throws IOException {
-		generate(set, type);
-	}
-
-	public void generate(TreeSet<String> set, String type) {
+	public void searchQuery(TreeSet<String> set, String type) {
 		StringBuffer buffer = new StringBuffer();
 		if (!set.isEmpty()) {
 			for (String word : set) {
@@ -86,18 +83,46 @@ public class QueryBuilder {
 	}
 
 	/**
-	 * @param set
-	 * @param type
-	 * @return a a
+	 * Takes the set and adds stems that start with the stems inside it for partial
+	 * search.
+	 * 
+	 * @param set - the set of queries
+	 * @return the same set with newly added queries for partial search
+	 */
+	public TreeSet<String> partialSearch(TreeSet<String> set) {
+
+		TreeSet<String> returnSet = new TreeSet<>();
+		Iterator<String> stems = set.iterator();
+
+		while (stems.hasNext()) {
+			Iterator<String> iterate = index.getWords().iterator();
+			String stem = stems.next();
+			while (iterate.hasNext()) {
+				String key = iterate.next();
+				if (key.startsWith(stem))
+					returnSet.add(key);
+			}
+		}
+
+		return returnSet;
+	}
+
+	/**
+	 * Creates a list of results based off the queries passed to it and the type of
+	 * search.
+	 * 
+	 * @param set  - set of queries
+	 * @param type - exact/partial
+	 * @return a list of results
 	 */
 	public ArrayList<Result> generateResults(TreeSet<String> set, String type) {
 
 		if (type.equals("partial")) {
-			set.addAll(index.partialSearch(set));
+			set.addAll(partialSearch(set));
 		}
+
 		ArrayList<Result> query = new ArrayList<>();
 		for (String word : set) {
-			// searching for exact word
 			if (index.contains(word)) {
 				Result result;
 
@@ -107,7 +132,8 @@ public class QueryBuilder {
 					// if we have this result already, then update it
 					boolean contains = false;
 					for (Result tempResult : query) {
-						if (tempResult.getDirectory().equals(location)) {
+						if (tempResult.getDirectory().equals('"' + location + '"')) { // added quotes so I can simplify
+																						// SJW
 							contains = true;
 							tempResult.add(counts);
 							break;
@@ -122,23 +148,17 @@ public class QueryBuilder {
 		}
 		Collections.sort(query);
 		return query;
-
 	}
 
 	/**
-	 * The writer used for our queries
+	 * The writer used for our queries.
 	 * 
-	 * @param name
+	 * @param path - the output path
 	 * @throws IOException
 	 */
-	public void queryWriter(String name) throws IOException {
-		File file = new File(name);
-
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			SimpleJsonWriter.searchOutput(readyToPrint, Paths.get(file.toString()));
+	public void queryWriter(Path path) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			SimpleJsonWriter.searchOutput(readyToPrint, path);
 		}
-
 	}
-
-
 }

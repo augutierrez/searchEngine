@@ -1,10 +1,11 @@
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
-import java.util.Iterator;
+
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -16,7 +17,7 @@ import java.util.TreeSet;
 public class InvertedIndex {
 
 	/**
-	 * Nested Data Structure that stores all the -path data
+	 *Nested Data Structure that stores all the -path data
 	 */
 	private final TreeMap<String, TreeMap<String, TreeSet<Integer>>> map;
 
@@ -24,36 +25,14 @@ public class InvertedIndex {
 	 * Structure used to store data for counts (location,counts)
 	 */
 	private final TreeMap<String, Integer> wordCount;
-
+	
+	
 	/**
 	 * Constructor method
 	 */
 	public InvertedIndex() {
 		map = new TreeMap<>();
 		wordCount = new TreeMap<>();
-	}
-	
-	/**
-	 * @param set
-	 * @return A list with words- ----
-	 * 
-	 */
-	public TreeSet<String> partialSearch(TreeSet<String> set) {
-
-		TreeSet<String> returnSet = new TreeSet<>();
-		Iterator<String> stems = set.iterator();
-
-		while (stems.hasNext()) {
-			Iterator<String> iterate = map.keySet().iterator();
-			String stem = stems.next();
-			while (iterate.hasNext()) {
-				String key = iterate.next();
-				if (key.startsWith(stem))
-					returnSet.add(key);
-			}
-		}
-
-		return returnSet;
 	}
 
 
@@ -65,48 +44,37 @@ public class InvertedIndex {
 	 * @param position : the line the word was found in the file
 	 */
 	public void add(String word, String path, int position) {
-
 		map.putIfAbsent(word, new TreeMap<>());
 		map.get(word).putIfAbsent(path, new TreeSet<>());
 		map.get(word).get(path).add(position);
 		if (!wordCount.containsKey(path) || wordCount.get(path) < position) {
 			wordCount.put(path, position);
-		}
-
+		} 
 	}
 
 	/**
 	 * Creates a writer for the -counts flag and outputs to the file passed
 	 * 
-	 * @param name : name of output file
+	 * @param path : path of output file
 	 * @throws IOException
 	 */
-	public void countsWriter(String name) throws IOException {
-
-		File file = new File(name);
-
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file));) {
-			SimpleJsonWriter.asObject(wordCount, Paths.get(file.toString()));
+	public void countsWriter(Path path) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8);) {
+			SimpleJsonWriter.asObject(wordCount, path);
 		}
-
 	}
 
 	/**
 	 * Creates a writer for the -index flag and outputs to the file passed
 	 * 
-	 * @param name : name of the output file
+	 * @param path : path of the output file
 	 * @throws IOException
 	 */
-	public void indexWriter(String name) throws IOException {
-
-		File file = new File(name);
-
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			SimpleJsonWriter.asNestedObjectInNestedObject(map, Paths.get(file.toString()));
+	public void indexWriter(Path path) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			SimpleJsonWriter.asNestedObjectInNestedObject(map, path);
 		}
-
 	}
-
 
 	/**
 	 * Returns whether the Inverted Index contains the word
@@ -181,13 +149,21 @@ public class InvertedIndex {
 		return Collections.emptySet();
 	}
 
-	public int getWordCounts(String location) {
-		return wordCount.get(location);
+	/**
+	 * Get the counts for a text file in a specific location
+	 * 
+	 * @param location - the location we want the counts of
+	 * @return the counts of the specified location
+	 */
+	public Integer getWordCounts(String location) {
+		if(wordCount.containsKey(location)){
+			return wordCount.get(location);
+		}
+		return null;
 	}
 
 	@Override
 	public String toString() {
 		return map.toString();
 	}
-
 }

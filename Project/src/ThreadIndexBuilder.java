@@ -8,12 +8,7 @@ import java.nio.file.Path;
 import opennlp.tools.stemmer.Stemmer;
 import opennlp.tools.stemmer.snowball.SnowballStemmer;
 
-/**
- * Used to help generate data for the InvertedIndex
- * 
- * @author tony
- */
-public class InvertedIndexBuilder {
+public class ThreadIndexBuilder {
 
 	/**
 	 * The stemmer used for the path's data
@@ -31,6 +26,18 @@ public class InvertedIndexBuilder {
 		return lower.endsWith(".txt") || lower.endsWith(".text");
 	}
 
+	public static void directoryBuilder(Path path, ThreadSafeInvertedIndex index, int numThreads)
+			throws FileNotFoundException, IOException, InterruptedException {
+		WorkQueue wq = new WorkQueue(numThreads);
+
+		directoryIterator(path, index, wq);
+
+		// ends the queue
+
+		wq.finish();
+
+	}
+
 	/**
 	 * Accepts a path, and iterates over it if it is a directory, or simply adds it
 	 * to the data structure if it is a file.
@@ -40,16 +47,20 @@ public class InvertedIndexBuilder {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public static void directoryIterator(Path path, InvertedIndex index) throws FileNotFoundException, IOException {
+	public static void directoryIterator(Path path, ThreadSafeInvertedIndex index, WorkQueue wq)
+			throws FileNotFoundException, IOException {
 		if (path != null) {
 			if (Files.isDirectory(path)) {
 				try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
 					for (Path currPath : listing)
-						directoryIterator(currPath, index);
+						directoryIterator(currPath, index, wq);
 				}
 			} else {
+				// maybe add path should be calling wq execute with a runnable object that holds
+				// the path .
 				if (Files.isRegularFile(path) && isText(path)) {
-					addPath(path, index);
+					// addPath(path, index);
+					wq.execute(new task(path, index));
 				}
 			}
 		}
@@ -83,7 +94,25 @@ public class InvertedIndexBuilder {
 
 	}
 
-	// Remind Sophie in project 2 code reviews to prep this class for project 3
+	public static class task implements Runnable {
+		public Path path;
+		public final InvertedIndex index;
 
+		public task(Path path, InvertedIndex index) {
+			this.path = path;
+			this.index = index;
+		}
+
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			try {
+				addPath(path, index);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+	}
 }
-

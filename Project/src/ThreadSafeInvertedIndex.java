@@ -7,6 +7,12 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
+
+/**
+ * A thread safe version of InvertedIndex
+ * 
+ * @author tony
+ */
 public class ThreadSafeInvertedIndex extends InvertedIndex {
 
 	/** The lock used to protect concurrent access to the underlying set. */
@@ -58,30 +64,25 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	/**
 	 * Creates a writer for the -counts flag and outputs to the file passed
 	 * 
-	 * @param name : name of output file
+	 * @param path : path of output file
 	 * @throws IOException
 	 */
-	public void countsWriter(String name) throws IOException {
-
+	public void countsWriter(Path path) throws IOException {
 		lock.readLock().lock();
-		super.countsWriter(name);
-
+		super.countsWriter(path);
+		lock.readLock().unlock();
 	}
 
 	/**
 	 * Creates a writer for the -index flag and outputs to the file passed
 	 * 
-	 * @param name : name of the output file
+	 * @param path : path of the output file
 	 * @throws IOException
 	 */
-	public void indexWriter(String name) throws IOException {
-
-		File file = new File(name);
-
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-			SimpleJsonWriter.asNestedObjectInNestedObject(map, Paths.get(file.toString()));
-		}
-
+	public void indexWriter(Path path) throws IOException {
+		lock.readLock().lock();
+		super.indexWriter(path);
+		lock.readLock().unlock();
 	}
 
 	/**
@@ -91,7 +92,12 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @return true/false
 	 */
 	public boolean contains(String word) {
-		return map.containsKey(word);
+		lock.readLock().lock();
+		try {
+			return super.contains(word);
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -102,7 +108,12 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @return true/false
 	 */
 	public boolean contains(String word, String location) {
-		return map.containsKey(word) && map.get(word).containsKey(location);
+		lock.readLock().lock();
+		try {
+			return super.contains(word, location);
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -115,8 +126,12 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @return true/false
 	 */
 	public boolean contains(String word, String location, int position) {
-		return map.containsKey(word) && map.get(word).containsKey(location)
-				&& map.get(word).get(location).contains(position);
+		lock.readLock().lock();
+		try {
+			return super.contains(word, location, position);
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -125,7 +140,12 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @return a set of the words in the map
 	 */
 	public Set<String> getWords() {
-		return Collections.unmodifiableSet(map.keySet());
+		lock.readLock().lock();
+		try {
+			return super.getWords();
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -135,10 +155,12 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @return the set of locations requested
 	 */
 	public Set<String> getLocations(String word) {
-		if (map.containsKey(word)) {
-			return Collections.unmodifiableSet(map.get(word).keySet());
+		lock.readLock().lock();
+		try {
+			return super.getLocations(word);
+		} finally {
+			lock.readLock().unlock();
 		}
-		return Collections.emptySet();
 	}
 
 	/**
@@ -149,21 +171,36 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @return the set requested
 	 */
 	public Set<Integer> getPositions(String word, String location) {
-		if (map.containsKey(word)) {
-			if (map.get(word).containsKey(location)) {
-				return Collections.unmodifiableSet(map.get(word).get(location));
-			}
+		lock.readLock().lock();
+		try {
+			return super.getPositions(word, location);
+		} finally {
+			lock.readLock().unlock();
 		}
-		return Collections.emptySet();
 	}
 
-	public int getWordCounts(String location) {
-		return wordCount.get(location);
+	/**
+	 * Get the counts for a text file in a specific location
+	 * 
+	 * @param location - the location we want the counts of
+	 * @return the counts of the specified location
+	 */
+	public Integer getWordCounts(String location) {
+		lock.readLock().lock();
+		try {
+			return super.getWordCounts(location);
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	@Override
 	public String toString() {
-		return map.toString();
+		lock.readLock().lock();
+		try {
+			return super.toString();
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
-
 }

@@ -1,7 +1,6 @@
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Parses and stores command-line arguments into simple key = value pairs.
@@ -21,7 +20,7 @@ public class ArgumentParser {
 	 * Initializes this argument map.
 	 */
 	public ArgumentParser() {
-		this.map = new TreeMap<>();
+		this.map = new HashMap<>();
 	}
 
 	/**
@@ -50,8 +49,9 @@ public class ArgumentParser {
 				if (i < args.length - 1 && isValue(args[i + 1])) {
 					map.put(args[i], args[i + 1]);
 					i++;
-				} else
+				} else {
 					map.put(args[i], null);
+				}
 			}
 		}
 	}
@@ -67,17 +67,7 @@ public class ArgumentParser {
 	 * @see String#length()
 	 */
 	public static boolean isFlag(String arg) {
-
-		boolean containsFlag = false;
-		if (arg == null)
-			return false;
-		for (int i = 0; i < arg.length(); i++) {
-			if (arg.charAt(0) == '-' && (i + 1 <= arg.length() - 1) && i - 1 < 0) {
-				containsFlag = true;
-			}
-		}
-		return containsFlag;
-
+		return arg != null && arg.length() > 1 && arg.charAt(0) == '-';
 	}
 
 	/**
@@ -91,10 +81,7 @@ public class ArgumentParser {
 	 * @see String#length()
 	 */
 	public static boolean isValue(String arg) {
-		if (arg != null && arg.length() > 0 && arg.charAt(0) != '-') {
-			return true;
-		}
-		return false;
+		return arg != null && arg.length() > 0 && arg.charAt(0) != '-';
 	}
 
 	/**
@@ -123,10 +110,7 @@ public class ArgumentParser {
 	 * @return {@code true} if the flag is mapped to a non-null value
 	 */
 	public boolean hasValue(String flag) {
-		if (this.map.get(flag) != null) {
-			return true;
-		}
-		return false;
+		return this.map.get(flag) != null;
 	}
 
 	/**
@@ -167,9 +151,10 @@ public class ArgumentParser {
 	 * @see Path#of(String, String...)
 	 */
 	public Path getPath(String flag) {
-		if (map.get(flag) == null)
+		if (map.get(flag) == null) {
 			return null;
-		return Paths.get(map.get(flag));
+		}
+		return Path.of(map.get(flag));
 	}
 
 	/**
@@ -200,10 +185,5 @@ public class ArgumentParser {
 	 *
 	 * @param args the command-line arguments to parse
 	 */
-	public static void main(String[] args) {
-		// TODO Modify main(...) as needed to debug code
-		var map = new ArgumentParser(args);
-		map.hasValue("x");
-		System.out.println(map);
-	}
+
 }
