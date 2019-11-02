@@ -1,11 +1,9 @@
 import java.io.BufferedWriter;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -49,7 +47,7 @@ public class InvertedIndex {
 		map.get(word).get(path).add(position);
 		if (!wordCount.containsKey(path) || wordCount.get(path) < position) {
 			wordCount.put(path, position);
-		} 
+		}
 	}
 
 	/**
