@@ -18,7 +18,6 @@ public class Driver {
 	 * 
 	 * @param args flag/value pairs used to start this program
 	 */
-
 	public static void main(String[] args) {
 		// store initial start time
 		Instant start = Instant.now();
@@ -48,7 +47,7 @@ public class Driver {
 							+ ". Please enter a valid output file path name.");
 			}
 		}
-		
+
 		if (parser.hasFlag("-counts")) {
 			Path countsPath = parser.getPath("-counts", Path.of("counts.json"));
 			try {
@@ -58,6 +57,7 @@ public class Driver {
 							+ ". Please enter a valid output file path name.");
 			}
 		}
+
 
 		if (parser.hasFlag("-query")) {
 			String name = parser.getString("-query");
