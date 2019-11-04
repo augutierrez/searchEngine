@@ -1,11 +1,9 @@
 import java.io.BufferedWriter;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -32,15 +30,6 @@ public class InvertedIndex {
 		map = new TreeMap<>();
 		wordCount = new TreeMap<>();
 	}
-	
-	/**
-	 * Constructor method
-	 */
-	public InvertedIndex() {
-		map = new TreeMap<>();
-		wordCount = new TreeMap<>();
-	}
-
 
 	/**
 	 * Receives words from addPath() and stores it in the map data structure

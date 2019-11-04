@@ -201,19 +201,13 @@ public class SimpleJsonWriter {
 		Iterator<String> setIterator = elements.keySet().iterator();
 		writer.write("{");
 		// Outer loop (Strings)
-		String element;
-		if (setIterator.hasNext()) {
-			element = setIterator.next();
+		while (setIterator.hasNext()){
+			String element = setIterator.next();
 			writer.write('\n');
 			Iterator<Result> setIterator2 = elements.get(element).iterator();
 			// elements.get(element).keySet().iterator();
 			quote(element, writer, level + 1);
-			writer.write(": ");
-			asArray(elements.get(element), writer, level + 1);
-		}
-		while (setIterator.hasNext()) {
-			writer.write(',');
-			element = setIterator.next();
+			writer.write(": [");
 			writer.write('\n');
 			// Inner loop (Integers)
 			while (setIterator2.hasNext()) {
@@ -260,12 +254,6 @@ public class SimpleJsonWriter {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 			searchOutput(elements, writer, 0);
 		}
-			quote(element, writer, level + 1);
-			writer.write(": ");
-			asArray(elements.get(element), writer, level + 1);
-		}
-		writer.write('\n');
-		indent("}", writer, level);
 	}
 
 	/**
@@ -357,7 +345,6 @@ public class SimpleJsonWriter {
 			asNestedObjectInNestedObject(elements, writer, 0);
 		}
 	}
-
 
 	/**
 	 * Method used for Double Nested Data Structures
