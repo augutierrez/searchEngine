@@ -25,13 +25,13 @@ public class Driver {
 		ArgumentParser parser = new ArgumentParser();
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
+
 		QueryBuilder queryBuilder = new QueryBuilder(index);
-		InvertedIndexBuilder builder = new InvertedIndexBuilder();
 
 		if (parser.hasFlag("-path")) {
 			Path path = parser.getPath("-path");
 			try {
-				builder.directoryIterator(path, index);
+				InvertedIndexBuilder.directoryIterator(path, index);
 			} catch (Exception e) {
 				System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
 						+ " to data structure. Please enter existing paths to textfiles.");
@@ -41,20 +41,20 @@ public class Driver {
 		if (parser.hasFlag("-index")) {
 			Path indexPath = parser.getPath("-index", Path.of("index.json"));
 			try {
-				index.indexWriter(indexPath);
+					index.indexWriter(indexPath);
 			} catch (Exception e) {
-				System.err.println("Invalid output file sent to indexWriter: " + indexPath
-						+ ". Please enter a valid output file path name.");
+					System.err.println("Invalid output file sent to indexWriter: " + indexPath
+							+ ". Please enter a valid output file path name.");
 			}
 		}
 
 		if (parser.hasFlag("-counts")) {
 			Path countsPath = parser.getPath("-counts", Path.of("counts.json"));
 			try {
-				index.countsWriter(countsPath);
+					index.countsWriter(countsPath);
 			} catch (Exception e) {
-				System.err.println("Unalbe to write word counts to the path:" + countsPath
-						+ ". Please enter a valid output file path name.");
+					System.err.println("Unalbe to write word counts to the path:" + countsPath
+							+ ". Please enter a valid output file path name.");
 			}
 		}
 
@@ -82,9 +82,8 @@ public class Driver {
 				System.err.println("Unable to write results into path : " + resultsPath
 						+ ". Please enter a valid output path name.");
 			}
-
 		}
-    
+
 		Duration elapsed = Duration.between(start, Instant.now());
 		double seconds = (double) elapsed.toMillis() / Duration.ofSeconds(1).toMillis();
 		System.out.printf("Elapsed: %f seconds%n", seconds);
