@@ -65,10 +65,8 @@ public class ThreadedQueryBuilder {
 					if (!line.isBlank()) {
 						set.addAll(TextFileStemmer.uniqueStems(line));
 
-						synchronized (readyToPrint) {
-							wq.execute(new task(set, type));
-							log.debug("started execute");
-						}
+						wq.execute(new task(set, type));
+						log.debug("started execute");
 
 //						searchQuery(set, type); // this is where you multithread, its sending
 						// searchQuery one line at a time
