@@ -12,6 +12,9 @@ import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Threaded version of Query Builder
  * 
@@ -23,7 +26,9 @@ public class ThreadedQueryBuilder {
 	/**
 	 * Data Structure that will hold cleaned, stemmed, and sorted query values.
 	 */
-	private final TreeMap<String, ArrayList<Result>> readyToPrint;
+	private final TreeMap<String, ArrayList<ThreadSafeResult>> readyToPrint;
+
+	private static final Logger log = LogManager.getLogger();
 
 	/**
 	 * The data structure with the stored information from the text files.
@@ -47,6 +52,7 @@ public class ThreadedQueryBuilder {
 	 * @param type : exact or partial
 	 * @throws IOException           : file couldn't be found
 	 * @throws FileNotFoundException
+	 * @throws InterruptedException
 	 */
 	public void build(String path, String type) throws FileNotFoundException, IOException {
 		if (path.toLowerCase().endsWith(".txt") || path.toLowerCase().endsWith(".text")) {
@@ -58,9 +64,22 @@ public class ThreadedQueryBuilder {
 					set.clear();
 					if (!line.isBlank()) {
 						set.addAll(TextFileStemmer.uniqueStems(line));
-						// searchQuery(set, type); // this is where you multithread
+
+						synchronized (readyToPrint) {
+							wq.execute(new task(set, type));
+							log.debug("started execute");
+						}
+
+//						searchQuery(set, type); // this is where you multithread, its sending
+						// searchQuery one line at a time
 
 					}
+				}
+				try {
+					wq.finish();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}
@@ -98,7 +117,11 @@ public class ThreadedQueryBuilder {
 			}
 			// deletes extra space
 			buffer.deleteCharAt(buffer.length() - 1);
-			readyToPrint.put(buffer.toString(), generateResults(set, type));
+//			synchronized (readyToPrint) {
+			readyToPrint.put(buffer.toString(), generateResults(set, type)); // this is a shared resource, but
+																					// everyone
+//			} // is writing, so might not need to
+																				// synchronize
 			/*
 			 * Search Result is probably where we multithread. If we transfer this to a
 			 * different class then we need getter setter methods, change simple json as
@@ -140,22 +163,22 @@ public class ThreadedQueryBuilder {
 	 * @param type - exact/partial
 	 * @return a list of results
 	 */
-	public ArrayList<Result> generateResults(TreeSet<String> set, String type) {
+	public ArrayList<ThreadSafeResult> generateResults(TreeSet<String> set, String type) {
 		if (type.equals("partial")) {
 			set.addAll(partialSearch(set));
 		}
 
-		ArrayList<Result> query = new ArrayList<>();
+		ArrayList<ThreadSafeResult> query = new ArrayList<>();
 		for (String word : set) {
 			if (index.contains(word)) {
-				Result result;
+				ThreadSafeResult result;
 
 				for (String location : index.getLocations(word)) {
 					int counts = index.getPositions(word, location).size();
 					int totalWords = index.getWordCounts(location);
 					// if we have this result already, then update it
 					boolean contains = false;
-					for (Result tempResult : query) {
+					for (ThreadSafeResult tempResult : query) { // maybe synchronize on tempResult here
 						if (tempResult.getDirectory().equals('"' + location + '"')) { // added quotes so I can simplify
 																						// SJW
 							contains = true;
@@ -164,13 +187,15 @@ public class ThreadedQueryBuilder {
 						}
 					}
 					if (!contains) {
-						result = new Result(location, counts, totalWords);
+						result = new ThreadSafeResult(location, counts, totalWords);
 						query.add(result);
 					}
 				}
 			}
 		}
-		Collections.sort(query);
+		synchronized (query) {
+			Collections.sort(query);
+		}
 		return query;
 	}
 
@@ -182,7 +207,7 @@ public class ThreadedQueryBuilder {
 	 */
 	public void queryWriter(Path path) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-			SimpleJsonWriter.searchOutput(readyToPrint, path);
+			SimpleJsonWriter.searchOutputs(readyToPrint, path);
 		}
 	}
 

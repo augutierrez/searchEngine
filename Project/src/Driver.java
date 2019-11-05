@@ -31,7 +31,10 @@ public class Driver {
 //			index = new ThreadSafeInvertedIndex();
 //		}
 
-		QueryBuilder queryBuilder;
+		QueryBuilder queryBuilder = new QueryBuilder(index);
+
+		ThreadedQueryBuilder threadedQueryBuilder = new ThreadedQueryBuilder(threadIndex);
+		;
 
 		if (parser.hasFlag("-threads")) {
 			int numThreads;
@@ -51,7 +54,6 @@ public class Driver {
 							+ " to data structure. Please enter existing paths to textfiles.");
 				}
 			}
-			queryBuilder = new QueryBuilder(threadIndex);
 		}
 
 		// if we want it multithreaded, the workqueue must somehow take over driver I
@@ -72,8 +74,8 @@ public class Driver {
 							+ " to data structure. Please enter existing paths to textfiles.");
 				}
 			}
-			queryBuilder = new QueryBuilder(index);
 		}
+
 		if (parser.hasFlag("-index")) {
 			Path indexPath = parser.getPath("-index", Path.of("index.json"));
 			if (parser.hasFlag("-threads")) {
@@ -119,7 +121,11 @@ public class Driver {
 				if (parser.hasFlag("-exact"))
 					type = "exact";
 				try {
-					queryBuilder.build(name, type);
+					if (parser.hasFlag("-threads")) {
+						threadedQueryBuilder.build(name, type);
+					} else {
+						queryBuilder.build(name, type);
+					}
 				} catch (Exception e) {
 					System.err.println("Invlad query file: " + name);//TODO: FIX THIS
 					e.printStackTrace();
@@ -130,7 +136,11 @@ public class Driver {
 		if (parser.hasFlag("-results")) {
 			Path resultsPath = parser.getPath("-results", Path.of("results.json"));
 			try {
-				queryBuilder.queryWriter(resultsPath);
+				if (parser.hasFlag("-threads")) {
+					threadedQueryBuilder.queryWriter(resultsPath);
+				} else {
+					queryBuilder.queryWriter(resultsPath);
+				}
 			} catch (IOException e1) {
 				System.err.println("Unable to write results into path : " + resultsPath
 						+ ". Please enter a valid output path name.");

@@ -5,7 +5,7 @@
 	<Appenders>
 		<!-- We can make the console output more user-friendly if we want. -->
 		<Console name="Console" target="SYSTEM_OUT" ignoreExceptions = "true" >
-			<PatternLayout pattern="%m %throwable{short.message}%n">
+			<PatternLayout pattern="%m %throwable{short.message} %t: %m %throwable{3}%n">
 			</PatternLayout>
 		</Console>
 

@@ -258,6 +258,73 @@ public class SimpleJsonWriter {
 	}
 
 	/**
+	 * @param elements
+	 * @param writer
+	 * @param level
+	 * @throws IOException
+	 */
+	public static void searchOutputs(Map<String, ? extends ArrayList<ThreadSafeResult>> elements, Writer writer,
+			int level) throws IOException {
+		Iterator<String> setIterator = elements.keySet().iterator();
+		writer.write("{");
+		// Outer loop (Strings)
+		while (setIterator.hasNext()) {
+			String element = setIterator.next();
+			writer.write('\n');
+			Iterator<ThreadSafeResult> setIterator2 = elements.get(element).iterator();
+			// elements.get(element).keySet().iterator();
+			quote(element, writer, level + 1);
+			writer.write(": [");
+			writer.write('\n');
+			// Inner loop (Integers)
+			while (setIterator2.hasNext()) {
+				ThreadSafeResult result = setIterator2.next();
+				String location = result.getDirectory();
+				String count = result.getCount();
+				DecimalFormat df = new DecimalFormat("0.00000000");
+				String score = df.format(result.getScore());
+				indent("{\n", writer, level + 2);
+				indent("\"where\": ", writer, level + 3);
+				indent(location, writer, level);// simplified
+				writer.write(",\n");
+				indent("\"count\": ", writer, level + 3);
+				writer.write(count);
+				writer.write(",\n");
+				indent("\"score\": ", writer, level + 3);
+				writer.write(score);
+				writer.write("\n");
+				indent("}", writer, level + 2);
+				if (setIterator2.hasNext()) {
+					writer.write(",");
+				}
+				writer.write('\n');
+
+			}
+			indent("]", writer, level + 1);
+			if (setIterator.hasNext()) {
+				writer.write(",");
+			}
+
+		}
+		writer.write('\n');
+		writer.append("}");
+
+	}
+
+	/**
+	 * @param elements
+	 * @param path
+	 * @throws IOException
+	 */
+	public static void searchOutputs(TreeMap<String, ArrayList<ThreadSafeResult>> elements, Path path)
+			throws IOException {
+
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			searchOutputs(elements, writer, 0);
+		}
+	}
+
+	/**
 	 * Writes the elements as a nested pretty JSON object to file.
 	 *
 	 * @param elements the elements to write
