@@ -70,7 +70,6 @@ public class ThreadedQueryBuilder {
 
 //						searchQuery(set, type); // this is where you multithread, its sending
 						// searchQuery one line at a time
-
 					}
 				}
 				try {
@@ -115,10 +114,10 @@ public class ThreadedQueryBuilder {
 			}
 			// deletes extra space
 			buffer.deleteCharAt(buffer.length() - 1);
-//			synchronized (readyToPrint) {
-			readyToPrint.put(buffer.toString(), generateResults(set, type)); // this is a shared resource, but
+			synchronized (readyToPrint) {
+				readyToPrint.put(buffer.toString(), generateResults(set, type)); // this is a shared resource, but
 																					// everyone
-//			} // is writing, so might not need to
+			} // is writing, so might not need to
 																				// synchronize
 			/*
 			 * Search Result is probably where we multithread. If we transfer this to a
