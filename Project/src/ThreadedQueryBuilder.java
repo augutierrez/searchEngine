@@ -29,6 +29,8 @@ public class ThreadedQueryBuilder {
 	private final TreeMap<String, ArrayList<ThreadSafeResult>> readyToPrint;
 
 	private static final Logger log = LogManager.getLogger();
+	
+	private SimpleReadWriteLock lock;
 
 	/**
 	 * The data structure with the stored information from the text files.
@@ -43,6 +45,7 @@ public class ThreadedQueryBuilder {
 	public ThreadedQueryBuilder(InvertedIndex index) {
 		this.index = index;
 		readyToPrint = new TreeMap<>();
+		lock = new SimpleReadWriteLock();
 	}
 
 	/**
@@ -65,7 +68,11 @@ public class ThreadedQueryBuilder {
 					if (!line.isBlank()) {
 						set.addAll(TextFileStemmer.uniqueStems(line));
 
-						wq.execute(new task(set, type));
+						try {
+							wq.execute(new task(set, type));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 						log.debug("started execute");
 
 //						searchQuery(set, type); // this is where you multithread, its sending
@@ -114,10 +121,11 @@ public class ThreadedQueryBuilder {
 			}
 			// deletes extra space
 			buffer.deleteCharAt(buffer.length() - 1);
-			synchronized (readyToPrint) {
-				readyToPrint.put(buffer.toString(), generateResults(set, type)); // this is a shared resource, but
-																					// everyone
-			} // is writing, so might not need to
+//			synchronized () {
+			lock.writeLock().lock();
+			readyToPrint.put(buffer.toString(), generateResults(set, type)); // this is a shared resource, but
+			lock.writeLock().unlock();
+			// } // is writing, so might not need to
 																				// synchronize
 			/*
 			 * Search Result is probably where we multithread. If we transfer this to a
@@ -190,9 +198,9 @@ public class ThreadedQueryBuilder {
 				}
 			}
 		}
-		synchronized (query) {
-			Collections.sort(query);
-		}
+//		synchronized (query) { // prob don't need this block
+		Collections.sort(query);
+//		}
 		return query;
 	}
 
