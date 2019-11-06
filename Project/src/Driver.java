@@ -31,13 +31,16 @@ public class Driver {
 //			index = new ThreadSafeInvertedIndex();
 //		}
 
+		ThreadedQueryBuilder threadedQueryBuilder = null;
 		QueryBuilder queryBuilder = new QueryBuilder(index);
+		int numThreads = 0;
+		if (parser.hasFlag("-threads")) {
+			numThreads = Integer.parseInt(parser.getString("-threads"));
+			threadedQueryBuilder = new ThreadedQueryBuilder(threadIndex, numThreads);
+		}
 
-		ThreadedQueryBuilder threadedQueryBuilder = new ThreadedQueryBuilder(threadIndex);
-		;
 
 		if (parser.hasFlag("-threads")) {
-			int numThreads;
 			try {
 				numThreads = Integer.parseInt(parser.getString("-threads", "5"));
 			} catch (java.lang.NumberFormatException e) {

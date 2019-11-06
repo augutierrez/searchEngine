@@ -35,14 +35,17 @@ public class ThreadedQueryBuilder {
 	 */
 	private final InvertedIndex index;
 
+	private final WorkQueue wq;
+
 	/**
 	 * Constructor method
 	 * 
 	 * @param index
 	 */
-	public ThreadedQueryBuilder(InvertedIndex index) {
+	public ThreadedQueryBuilder(InvertedIndex index, int numThreads) {
 		this.index = index;
 		readyToPrint = new TreeMap<>();
+		this.wq = new WorkQueue(numThreads);
 //		lock = new SimpleReadWriteLock();
 	}
 
@@ -60,29 +63,28 @@ public class ThreadedQueryBuilder {
 			try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
 				String line;
 				TreeSet<String> set = new TreeSet<>();
-				WorkQueue wq = new WorkQueue();
 				while ((line = reader.readLine()) != null) {
 					set.clear();
 					if (!line.isBlank()) {
 						set.addAll(TextFileStemmer.uniqueStems(line));
 
-						try {
-							wq.execute(new task(set, type, wq));
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						log.debug("started execute");
+//						try {
+//							wq.execute(new task(set, type));
+//						} catch (Exception e) {
+//							e.printStackTrace();
+//						}
+//						log.debug("started execute");
 
-//						searchQuery(set, type); // this is where you multithread, its sending
+						searchQuery(set, type); // this is where you multithread, its sending
 						// searchQuery one line at a time
 					}
 				}
-				try {
-					wq.finish();
-				} catch (InterruptedException e) {
-//					 TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				try {
+//					wq.finish();
+//				} catch (InterruptedException e) {
+////					 TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 			}
 		}
 	}
@@ -90,12 +92,10 @@ public class ThreadedQueryBuilder {
 	public class task implements Runnable {
 		private final TreeSet<String> set;
 		private final String type;
-		private final WorkQueue wq;
 
-		public task(TreeSet<String> set, String type, WorkQueue wq) {
+		public task(TreeSet<String> set, String type) {
 			this.set = set;
 			this.type = type;
-			this.wq = wq;
 		}
 
 		@Override
