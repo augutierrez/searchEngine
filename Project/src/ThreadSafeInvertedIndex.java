@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A thread safe version of InvertedIndex
@@ -105,6 +107,40 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 		lock.readLock().lock();
 		try {
 			return super.contains(word, location, position);
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
+	/*
+	 * Takes the set and adds stems that start with the stems inside it for partial
+	 * search.
+	 * 
+	 * @param set - the set of queries
+	 * 
+	 * @return the same set with newly added queries for partial search
+	 */
+	public TreeSet<String> partialSearch(TreeSet<String> set) {
+		lock.readLock().lock();
+		try {
+			return super.partialSearch(set);
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
+	/**
+	 * Creates a list of results based off the queries passed to it and the type of
+	 * search.
+	 * 
+	 * @param set  - set of queries
+	 * @param type - exact/partial
+	 * @return a list of results
+	 */
+	public ArrayList<ThreadSafeResult> generateResults(TreeSet<String> set, String type) {
+		lock.readLock().lock();
+		try {
+			return super.generateResults(set, type);
 		} finally {
 			lock.readLock().unlock();
 		}

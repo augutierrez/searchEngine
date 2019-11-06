@@ -30,7 +30,7 @@ public class ThreadedQueryBuilder {
 
 	private static final Logger log = LogManager.getLogger();
 	
-	private SimpleReadWriteLock lock;
+//	private SimpleReadWriteLock lock;
 
 	/**
 	 * The data structure with the stored information from the text files.
@@ -45,7 +45,7 @@ public class ThreadedQueryBuilder {
 	public ThreadedQueryBuilder(InvertedIndex index) {
 		this.index = index;
 		readyToPrint = new TreeMap<>();
-		lock = new SimpleReadWriteLock();
+//		lock = new SimpleReadWriteLock();
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class ThreadedQueryBuilder {
 						set.addAll(TextFileStemmer.uniqueStems(line));
 
 						try {
-							wq.execute(new task(set, type));
+							wq.execute(new task(set, type, wq));
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -82,7 +82,7 @@ public class ThreadedQueryBuilder {
 				try {
 					wq.finish();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+//					 TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -92,16 +92,20 @@ public class ThreadedQueryBuilder {
 	public class task implements Runnable {
 		private final TreeSet<String> set;
 		private final String type;
+		private final WorkQueue wq;
 
-		public task(TreeSet<String> set, String type) {
+		public task(TreeSet<String> set, String type, WorkQueue wq) {
 			this.set = set;
 			this.type = type;
+			this.wq = wq;
 		}
 
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
-			searchQuery(set, type);
+			synchronized (wq) {
+				searchQuery(set, type);
+			}
 
 		}
 	}
@@ -120,12 +124,14 @@ public class ThreadedQueryBuilder {
 				buffer.append(' ');
 			}
 			// deletes extra space
-			buffer.deleteCharAt(buffer.length() - 1);
-//			synchronized () {
-			lock.writeLock().lock();
-			readyToPrint.put(buffer.toString(), generateResults(set, type)); // this is a shared resource, but
-			lock.writeLock().unlock();
-			// } // is writing, so might not need to
+			if (buffer.length() > 1) {
+				buffer.deleteCharAt(buffer.length() - 1);
+			}
+			synchronized (readyToPrint) {
+//			lock.writeLock().lock();
+				readyToPrint.put(buffer.toString(), index.generateResults(set, type)); // this is a shared resource, but
+//			lock.writeLock().unlock();
+			} // is writing, so might not need to
 																				// synchronize
 			/*
 			 * Search Result is probably where we multithread. If we transfer this to a
