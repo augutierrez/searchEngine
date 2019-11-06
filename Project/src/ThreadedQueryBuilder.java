@@ -62,39 +62,39 @@ public class ThreadedQueryBuilder {
 		if (path.toLowerCase().endsWith(".txt") || path.toLowerCase().endsWith(".text")) {
 			try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
 				String line;
-				TreeSet<String> set = new TreeSet<>();
+//				TreeSet<String> set = new TreeSet<>();
 				while ((line = reader.readLine()) != null) {
-					set.clear();
+//					set.clear();
 					if (!line.isBlank()) {
-						set.addAll(TextFileStemmer.uniqueStems(line));
+//						set.addAll(TextFileStemmer.uniqueStems(line));
 
-//						try {
-//							wq.execute(new task(set, type));
-//						} catch (Exception e) {
-//							e.printStackTrace();
-//						}
-//						log.debug("started execute");
+						try {
+							wq.execute(new task(line, type));
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						log.debug("started execute");
 
-						searchQuery(set, type); // this is where you multithread, its sending
+//						searchQuery(set, type); // this is where you multithread, its sending
 						// searchQuery one line at a time
 					}
 				}
-//				try {
-//					wq.finish();
-//				} catch (InterruptedException e) {
-////					 TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
+				try {
+					wq.finish();
+				} catch (InterruptedException e) {
+//					 TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 
 	public class task implements Runnable {
-		private final TreeSet<String> set;
+		private final String line;
 		private final String type;
 
-		public task(TreeSet<String> set, String type) {
-			this.set = set;
+		public task(String line, String type) {
+			this.line = line;
 			this.type = type;
 		}
 
@@ -102,21 +102,27 @@ public class ThreadedQueryBuilder {
 		public void run() {
 			// TODO Auto-generated method stub
 			synchronized (wq) {
-				searchQuery(set, type);
+				searchQuery(line, type);
 			}
 
 		}
 	}
 
+	public TreeSet<String> getLineStems(String line) {
+		TreeSet<String> set = new TreeSet<String>();
+		set.addAll(TextFileStemmer.uniqueStems(line));
+		return set;
+	}
 	/**
 	 * Initiates the search of queries and stores it into the data structure.
 	 * 
 	 * @param set  : the set of queries
 	 * @param type : exact / partial
 	 */
-	public void searchQuery(TreeSet<String> set, String type) {
+	public void searchQuery(String line, String type) {
 		StringBuffer buffer = new StringBuffer();
-		if (!set.isEmpty()) {
+		if (!line.isEmpty()) {
+			TreeSet<String> set = getLineStems(line);
 			for (String word : set) {
 				buffer.append(word);
 				buffer.append(' ');
@@ -124,11 +130,13 @@ public class ThreadedQueryBuilder {
 			// deletes extra space
 			if (buffer.length() > 1) {
 				buffer.deleteCharAt(buffer.length() - 1);
-			}
-			synchronized (readyToPrint) {
-//			lock.writeLock().lock();
-				readyToPrint.put(buffer.toString(), index.generateResults(set, type)); // this is a shared resource, but
+
+				synchronized (readyToPrint) {
+					// lock.writeLock().lock();
+					readyToPrint.put(buffer.toString(), index.generateResults(set, type)); // this is a shared resource,
+																							// but
 //			lock.writeLock().unlock();
+				}
 			} // is writing, so might not need to
 																				// synchronize
 			/*
