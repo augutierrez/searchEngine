@@ -7,8 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -142,73 +140,73 @@ public class ThreadedQueryBuilder {
 		}
 	}
 
-	/**
-	 * Takes the set and adds stems that start with the stems inside it for partial
-	 * search.
-	 * 
-	 * @param set - the set of queries
-	 * @return the same set with newly added queries for partial search
-	 */
-	public TreeSet<String> partialSearch(TreeSet<String> set) {
-		TreeSet<String> returnSet = new TreeSet<>();
-		Iterator<String> stems = set.iterator();
-
-		while (stems.hasNext()) {
-			Iterator<String> iterate = index.getWords().iterator();
-			String stem = stems.next();
-			while (iterate.hasNext()) {
-				String key = iterate.next();
-				if (key.startsWith(stem))
-					returnSet.add(key);
-			}
-		}
-
-		return returnSet;
-	}
-
-	/**
-	 * Creates a list of results based off the queries passed to it and the type of
-	 * search.
-	 * 
-	 * @param set  - set of queries
-	 * @param type - exact/partial
-	 * @return a list of results
-	 */
-	public ArrayList<ThreadSafeResult> generateResults(TreeSet<String> set, String type) {
-		if (type.equals("partial")) {
-			set.addAll(partialSearch(set));
-		}
-
-		ArrayList<ThreadSafeResult> query = new ArrayList<>();
-		for (String word : set) {
-			if (index.contains(word)) {
-				ThreadSafeResult result;
-
-				for (String location : index.getLocations(word)) {
-					int counts = index.getPositions(word, location).size();
-					int totalWords = index.getWordCounts(location);
-					// if we have this result already, then update it
-					boolean contains = false;
-					for (ThreadSafeResult tempResult : query) { // maybe synchronize on tempResult here
-						if (tempResult.getDirectory().equals('"' + location + '"')) { // added quotes so I can simplify
-																						// SJW
-							contains = true;
-							tempResult.add(counts);
-							break;
-						}
-					}
-					if (!contains) {
-						result = new ThreadSafeResult(location, counts, totalWords);
-						query.add(result);
-					}
-				}
-			}
-		}
-//		synchronized (query) { // prob don't need this block
-		Collections.sort(query);
+//	/**
+//	 * Takes the set and adds stems that start with the stems inside it for partial
+//	 * search.
+//	 * 
+//	 * @param set - the set of queries
+//	 * @return the same set with newly added queries for partial search
+//	 */
+//	public TreeSet<String> partialSearch(TreeSet<String> set) {
+//		TreeSet<String> returnSet = new TreeSet<>();
+//		Iterator<String> stems = set.iterator();
+//
+//		while (stems.hasNext()) {
+//			Iterator<String> iterate = index.getWords().iterator();
+//			String stem = stems.next();
+//			while (iterate.hasNext()) {
+//				String key = iterate.next();
+//				if (key.startsWith(stem))
+//					returnSet.add(key);
+//			}
 //		}
-		return query;
-	}
+//
+//		return returnSet;
+//	}
+//
+//	/**
+//	 * Creates a list of results based off the queries passed to it and the type of
+//	 * search.
+//	 * 
+//	 * @param set  - set of queries
+//	 * @param type - exact/partial
+//	 * @return a list of results
+//	 */
+//	public ArrayList<ThreadSafeResult> generateResults(TreeSet<String> set, String type) {
+//		if (type.equals("partial")) {
+//			set.addAll(partialSearch(set));
+//		}
+//
+//		ArrayList<ThreadSafeResult> query = new ArrayList<>();
+//		for (String word : set) {
+//			if (index.contains(word)) {
+//				ThreadSafeResult result;
+//
+//				for (String location : index.getLocations(word)) {
+//					int counts = index.getPositions(word, location).size();
+//					int totalWords = index.getWordCounts(location);
+//					// if we have this result already, then update it
+//					boolean contains = false;
+//					for (ThreadSafeResult tempResult : query) { // maybe synchronize on tempResult here
+//						if (tempResult.getDirectory().equals('"' + location + '"')) { // added quotes so I can simplify
+//																						// SJW
+//							contains = true;
+//							tempResult.add(counts);
+//							break;
+//						}
+//					}
+//					if (!contains) {
+//						result = new ThreadSafeResult(location, counts, totalWords);
+//						query.add(result);
+//					}
+//				}
+//			}
+//		}
+////		synchronized (query) { // prob don't need this block
+//		Collections.sort(query);
+////		}
+//		return query;
+//	}
 
 	/**
 	 * The writer used for our queries.
