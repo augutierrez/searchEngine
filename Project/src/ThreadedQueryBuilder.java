@@ -7,8 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -30,22 +28,25 @@ public class ThreadedQueryBuilder {
 
 	private static final Logger log = LogManager.getLogger();
 	
-	private SimpleReadWriteLock lock;
+//	private SimpleReadWriteLock lock;
 
 	/**
 	 * The data structure with the stored information from the text files.
 	 */
 	private final InvertedIndex index;
 
+	private final WorkQueue wq;
+
 	/**
 	 * Constructor method
 	 * 
 	 * @param index
 	 */
-	public ThreadedQueryBuilder(InvertedIndex index) {
+	public ThreadedQueryBuilder(InvertedIndex index, int numThreads) {
 		this.index = index;
 		readyToPrint = new TreeMap<>();
-		lock = new SimpleReadWriteLock();
+		this.wq = new WorkQueue(numThreads);
+//		lock = new SimpleReadWriteLock();
 	}
 
 	/**
@@ -61,15 +62,14 @@ public class ThreadedQueryBuilder {
 		if (path.toLowerCase().endsWith(".txt") || path.toLowerCase().endsWith(".text")) {
 			try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
 				String line;
-				TreeSet<String> set = new TreeSet<>();
-				WorkQueue wq = new WorkQueue();
+//				TreeSet<String> set = new TreeSet<>();
 				while ((line = reader.readLine()) != null) {
-					set.clear();
+//					set.clear();
 					if (!line.isBlank()) {
-						set.addAll(TextFileStemmer.uniqueStems(line));
+//						set.addAll(TextFileStemmer.uniqueStems(line));
 
 						try {
-							wq.execute(new task(set, type));
+							wq.execute(new task(line, type));
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -82,7 +82,7 @@ public class ThreadedQueryBuilder {
 				try {
 					wq.finish();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
+//					 TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -90,42 +90,54 @@ public class ThreadedQueryBuilder {
 	}
 
 	public class task implements Runnable {
-		private final TreeSet<String> set;
+		private final String line;
 		private final String type;
 
-		public task(TreeSet<String> set, String type) {
-			this.set = set;
+		public task(String line, String type) {
+			this.line = line;
 			this.type = type;
 		}
 
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
-			searchQuery(set, type);
+			synchronized (wq) {
+				searchQuery(line, type);
+			}
 
 		}
 	}
 
+	public TreeSet<String> getLineStems(String line) {
+		TreeSet<String> set = new TreeSet<String>();
+		set.addAll(TextFileStemmer.uniqueStems(line));
+		return set;
+	}
 	/**
 	 * Initiates the search of queries and stores it into the data structure.
 	 * 
 	 * @param set  : the set of queries
 	 * @param type : exact / partial
 	 */
-	public void searchQuery(TreeSet<String> set, String type) {
+	public void searchQuery(String line, String type) {
 		StringBuffer buffer = new StringBuffer();
-		if (!set.isEmpty()) {
+		if (!line.isEmpty()) {
+			TreeSet<String> set = getLineStems(line);
 			for (String word : set) {
 				buffer.append(word);
 				buffer.append(' ');
 			}
 			// deletes extra space
-			buffer.deleteCharAt(buffer.length() - 1);
-//			synchronized () {
-			lock.writeLock().lock();
-			readyToPrint.put(buffer.toString(), generateResults(set, type)); // this is a shared resource, but
-			lock.writeLock().unlock();
-			// } // is writing, so might not need to
+			if (buffer.length() > 1) {
+				buffer.deleteCharAt(buffer.length() - 1);
+
+				synchronized (readyToPrint) {
+					// lock.writeLock().lock();
+					readyToPrint.put(buffer.toString(), index.generateResults(set, type)); // this is a shared resource,
+																							// but
+//			lock.writeLock().unlock();
+				}
+			} // is writing, so might not need to
 																				// synchronize
 			/*
 			 * Search Result is probably where we multithread. If we transfer this to a
@@ -136,73 +148,73 @@ public class ThreadedQueryBuilder {
 		}
 	}
 
-	/**
-	 * Takes the set and adds stems that start with the stems inside it for partial
-	 * search.
-	 * 
-	 * @param set - the set of queries
-	 * @return the same set with newly added queries for partial search
-	 */
-	public TreeSet<String> partialSearch(TreeSet<String> set) {
-		TreeSet<String> returnSet = new TreeSet<>();
-		Iterator<String> stems = set.iterator();
-
-		while (stems.hasNext()) {
-			Iterator<String> iterate = index.getWords().iterator();
-			String stem = stems.next();
-			while (iterate.hasNext()) {
-				String key = iterate.next();
-				if (key.startsWith(stem))
-					returnSet.add(key);
-			}
-		}
-
-		return returnSet;
-	}
-
-	/**
-	 * Creates a list of results based off the queries passed to it and the type of
-	 * search.
-	 * 
-	 * @param set  - set of queries
-	 * @param type - exact/partial
-	 * @return a list of results
-	 */
-	public ArrayList<ThreadSafeResult> generateResults(TreeSet<String> set, String type) {
-		if (type.equals("partial")) {
-			set.addAll(partialSearch(set));
-		}
-
-		ArrayList<ThreadSafeResult> query = new ArrayList<>();
-		for (String word : set) {
-			if (index.contains(word)) {
-				ThreadSafeResult result;
-
-				for (String location : index.getLocations(word)) {
-					int counts = index.getPositions(word, location).size();
-					int totalWords = index.getWordCounts(location);
-					// if we have this result already, then update it
-					boolean contains = false;
-					for (ThreadSafeResult tempResult : query) { // maybe synchronize on tempResult here
-						if (tempResult.getDirectory().equals('"' + location + '"')) { // added quotes so I can simplify
-																						// SJW
-							contains = true;
-							tempResult.add(counts);
-							break;
-						}
-					}
-					if (!contains) {
-						result = new ThreadSafeResult(location, counts, totalWords);
-						query.add(result);
-					}
-				}
-			}
-		}
-//		synchronized (query) { // prob don't need this block
-		Collections.sort(query);
+//	/**
+//	 * Takes the set and adds stems that start with the stems inside it for partial
+//	 * search.
+//	 * 
+//	 * @param set - the set of queries
+//	 * @return the same set with newly added queries for partial search
+//	 */
+//	public TreeSet<String> partialSearch(TreeSet<String> set) {
+//		TreeSet<String> returnSet = new TreeSet<>();
+//		Iterator<String> stems = set.iterator();
+//
+//		while (stems.hasNext()) {
+//			Iterator<String> iterate = index.getWords().iterator();
+//			String stem = stems.next();
+//			while (iterate.hasNext()) {
+//				String key = iterate.next();
+//				if (key.startsWith(stem))
+//					returnSet.add(key);
+//			}
 //		}
-		return query;
-	}
+//
+//		return returnSet;
+//	}
+//
+//	/**
+//	 * Creates a list of results based off the queries passed to it and the type of
+//	 * search.
+//	 * 
+//	 * @param set  - set of queries
+//	 * @param type - exact/partial
+//	 * @return a list of results
+//	 */
+//	public ArrayList<ThreadSafeResult> generateResults(TreeSet<String> set, String type) {
+//		if (type.equals("partial")) {
+//			set.addAll(partialSearch(set));
+//		}
+//
+//		ArrayList<ThreadSafeResult> query = new ArrayList<>();
+//		for (String word : set) {
+//			if (index.contains(word)) {
+//				ThreadSafeResult result;
+//
+//				for (String location : index.getLocations(word)) {
+//					int counts = index.getPositions(word, location).size();
+//					int totalWords = index.getWordCounts(location);
+//					// if we have this result already, then update it
+//					boolean contains = false;
+//					for (ThreadSafeResult tempResult : query) { // maybe synchronize on tempResult here
+//						if (tempResult.getDirectory().equals('"' + location + '"')) { // added quotes so I can simplify
+//																						// SJW
+//							contains = true;
+//							tempResult.add(counts);
+//							break;
+//						}
+//					}
+//					if (!contains) {
+//						result = new ThreadSafeResult(location, counts, totalWords);
+//						query.add(result);
+//					}
+//				}
+//			}
+//		}
+////		synchronized (query) { // prob don't need this block
+//		Collections.sort(query);
+////		}
+//		return query;
+//	}
 
 	/**
 	 * The writer used for our queries.

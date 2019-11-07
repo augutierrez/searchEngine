@@ -8,12 +8,18 @@ import java.nio.file.Path;
 import opennlp.tools.stemmer.Stemmer;
 import opennlp.tools.stemmer.snowball.SnowballStemmer;
 
-public class ThreadIndexBuilder {
+public class ThreadIndexBuilder extends InvertedIndexBuilder {
 
 	/**
 	 * The stemmer used for the path's data
 	 */
 	public static final SnowballStemmer.ALGORITHM DEFAULT = SnowballStemmer.ALGORITHM.ENGLISH;
+
+//	private final ThreadSafeInvertedIndex index;
+
+//	public ThreadIndexBuilder(ThreadSafeInvertedIndex index) {
+//		this.index = index;
+//	}
 
 	/**
 	 * Checks if a path is a text file
@@ -28,14 +34,20 @@ public class ThreadIndexBuilder {
 
 	public static void directoryBuilder(Path path, ThreadSafeInvertedIndex index, int numThreads)
 			throws FileNotFoundException, IOException, InterruptedException {
+
 		WorkQueue wq = new WorkQueue(numThreads);
 
 		directoryIterator(path, index, wq);
 
 		// ends the queue
 
+//		try {
 		wq.finish();
-
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//			Thread.currentThread().interrupt();
+//		}
+//		wq.shutdown();
 	}
 
 	/**
@@ -96,9 +108,9 @@ public class ThreadIndexBuilder {
 
 	public static class task implements Runnable {
 		public Path path;
-		public final InvertedIndex index;
+		public final ThreadSafeInvertedIndex index;
 
-		public task(Path path, InvertedIndex index) {
+		public task(Path path, ThreadSafeInvertedIndex index) {
 			this.path = path;
 			this.index = index;
 		}

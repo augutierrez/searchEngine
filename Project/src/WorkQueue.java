@@ -53,9 +53,6 @@ public class WorkQueue {
 		this.pending = 0;
 		this.shutdown = false;
 
-		if (threads <= 0) {
-			threads = 5;
-		}
 		// start the threads so they are waiting in the background
 		for (int i = 0; i < threads; i++) {
 			workers[i] = new PoolWorker();
