@@ -1,3 +1,17 @@
+/*
+ * TODO Since each Result object depends on data from a specific instance of an
+ * inverted index... it makes sense to move this class inside of inverted index
+ * as a public non-static inner class.
+ * 
+ * Then this object can access map and wordCount directly. There is no longer any
+ * need to store totalWords because where you need it you can do wordCount.get(directory)
+ * 
+	public void update(String word) {
+		this.count += map.get(word).get(directory).size();
+		this.score = (double) this.count / this.wordCount.get(directory);
+	}
+ */
+
 /**
  * @author tony This class will hold
  */
@@ -5,7 +19,7 @@ public class Result implements Comparable<Result> {
 	/**
 	 * the location of the textfile for this result
 	 */
-	private final String directory;
+	private final String directory; // TODO Refactor to location
 
 	/**
 	 * the amount of times our queries show up in this text file
@@ -31,11 +45,17 @@ public class Result implements Comparable<Result> {
 	 * @param totalWords - the amount of total words for the text file
 	 */
 	public Result(String directory, int count, int totalWords) {
+		// TODO Don't add the quotes here---will mess with our other stuff
 		this.directory = '"' + directory + '"'; // added this so I can simplify SJW
 		this.count = count;
 		this.totalWords = totalWords;
 		this.score = (double) count / totalWords;
 	}
+	
+	/*
+	 * TODO There is no super great way to output a custom object to JSON. So hard-code
+	 * something for Result objects if you need.
+	 */
 
 	/**
 	 * Updates the count for the queries in the text file, as well as the score of

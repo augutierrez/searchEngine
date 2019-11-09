@@ -3,6 +3,11 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 
+/*
+ * TODO Last warning on warnings and old TODO comments. Ask on Piazza for the views
+ * to see warnigns and TODOs.
+ */
+
 /**
  * Class responsible for running this project based on the provided command-line
  * arguments. See the README for details.

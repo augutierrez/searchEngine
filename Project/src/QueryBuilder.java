@@ -20,6 +20,7 @@ import java.util.TreeSet;
  */
 public class QueryBuilder {
 
+	// TODO Missing keywords, should be intialized in the constructor.
 	/**
 	 * Data Structure that will hold cleaned, stemmed, and sorted query values.
 	 */
@@ -70,6 +71,7 @@ public class QueryBuilder {
 	 * @param type : exact / partial
 	 */
 	public void searchQuery(TreeSet<String> set, String type) {
+		// TODO Reinvented String.join(" ", set)
 		StringBuffer buffer = new StringBuffer();
 		if (!set.isEmpty()) {
 			for (String word : set) {
@@ -94,6 +96,9 @@ public class QueryBuilder {
 		TreeSet<String> returnSet = new TreeSet<>();
 		Iterator<String> stems = set.iterator();
 
+		/*
+		 * TODO This is a linear search, so usually a better way...
+		 */
 		while (stems.hasNext()) {
 			Iterator<String> iterate = index.getWords().iterator();
 			String stem = stems.next();
@@ -117,6 +122,11 @@ public class QueryBuilder {
 	 */
 	public ArrayList<Result> generateResults(TreeSet<String> set, String type) {
 
+		/*
+		 * TODO Instead of String type, if only 2 choices use a boolean, if more than
+		 * 2 choices, use an ENUM.
+		 */
+		
 		if (type.equals("partial")) {
 			set.addAll(partialSearch(set));
 		}
@@ -131,6 +141,18 @@ public class QueryBuilder {
 					int totalWords = index.getWordCounts(location);
 					// if we have this result already, then update it
 					boolean contains = false;
+					/*
+					 * TODO This is another linear search below...
+					 * 
+					 * It is always looking for a result with a specific location...
+					 * 
+					 * Use a lookup map!
+					 * 
+					 * Map<String (location), Result> lookup = 
+					 * 
+					 * if lookup.containsKey(location)
+					 * 		lookup.get(location).update(word)
+					 */
 					for (Result tempResult : query) {
 						if (tempResult.getDirectory().equals('"' + location + '"')) { // added quotes so I can simplify
 																						// SJW
@@ -142,6 +164,7 @@ public class QueryBuilder {
 					if (!contains) {
 						result = new Result(location, counts, totalWords);
 						query.add(result);
+						// TODO Also add the result to the lookup map
 					}
 				}
 			}

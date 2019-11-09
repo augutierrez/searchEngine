@@ -156,6 +156,20 @@ public class InvertedIndex {
 		}
 		return null;
 	}
+	
+	/* TODO
+	public List<Result> search(Collection<String> queries, boolean exact) {
+		return exact ? exactSearch(queries) : partialSearch(queries);
+	}
+	
+	public List<Result> partialSearch(Collection<String> queries) {
+		
+	}
+	
+	public List<Result> exactSearch(Collection<String> queries) {
+		
+	}
+	*/
 
 	@Override
 	public String toString() {
