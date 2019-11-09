@@ -196,7 +196,8 @@ public class SimpleJsonWriter {
 	 * @param level
 	 * @throws IOException
 	 */
-	public static void searchOutput(Map<String, ? extends ArrayList<Result>> elements, Writer writer, int level)
+	public static void searchOutput(Map<String, ? extends ArrayList<InvertedIndex.Result>> elements, Writer writer,
+			int level)
 			throws IOException {
 		Iterator<String> setIterator = elements.keySet().iterator();
 		writer.write("{");
@@ -204,21 +205,21 @@ public class SimpleJsonWriter {
 		while (setIterator.hasNext()){
 			String element = setIterator.next();
 			writer.write('\n');
-			Iterator<Result> setIterator2 = elements.get(element).iterator();
+			Iterator<InvertedIndex.Result> setIterator2 = elements.get(element).iterator();
 			// elements.get(element).keySet().iterator();
 			quote(element, writer, level + 1);
 			writer.write(": [");
 			writer.write('\n');
 			// Inner loop (Integers)
 			while (setIterator2.hasNext()) {
-				Result result = setIterator2.next();
+				InvertedIndex.Result result = setIterator2.next();
 				String location = result.getDirectory();
 				String count = result.getCount();
 				DecimalFormat df = new DecimalFormat("0.00000000");
 				String score = df.format(result.getScore());
 				indent("{\n", writer, level + 2);
 				indent("\"where\": ", writer, level + 3);
-				indent(location, writer, level);// simplified
+				quote(location, writer, level);// simplified
 				writer.write(",\n");
 				indent("\"count\": ", writer, level + 3);
 				writer.write(count);
@@ -249,7 +250,8 @@ public class SimpleJsonWriter {
 	 * @param path
 	 * @throws IOException
 	 */
-	public static void searchOutput(TreeMap<String, ArrayList<Result>> elements, Path path) throws IOException {
+	public static void searchOutput(TreeMap<String, ArrayList<InvertedIndex.Result>> elements, Path path)
+			throws IOException {
 
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 			searchOutput(elements, writer, 0);

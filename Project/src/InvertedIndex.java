@@ -175,4 +175,98 @@ public class InvertedIndex {
 	public String toString() {
 		return map.toString();
 	}
+
+	/**
+	 * Search Result Objects that help score matches
+	 * 
+	 * @author tony
+	 */
+	public class Result implements Comparable<Result> {
+		/**
+		 * the location of the text file for this result
+		 */
+		private String location;
+
+		/**
+		 * the amount of times our queries show up in this text file
+		 */
+		private int count;
+
+		/**
+		 * the metric used to decide the importance of this text file for the search
+		 * query
+		 */
+		private double score;
+
+		/**
+		 * @param location - the location of the text file
+		 * @param count    - the number of times the query word shows up in the text
+		 */
+		public Result(String location, int count) {
+			this.location = location;
+			this.count = count;
+			this.score = (double) this.count / wordCount.get(location);
+		}
+
+		@Override
+		public int compareTo(Result result) {
+			int sCheck = Double.compare(this.score, result.getScore());
+
+			if (sCheck == 0) {
+				int cCheck = Integer.compare(this.count, Integer.parseInt(result.getCount()));
+				if (cCheck == 0) {
+					int lCheck = this.getDirectory().compareToIgnoreCase(result.getDirectory());
+					return lCheck;
+				} else {
+					return cCheck * -1;
+				}
+			} else {
+				return (sCheck * -1);
+			}
+		}
+
+		/**
+		 * Updates the count and score for a result object
+		 * 
+		 * @param word - the query word that will update the score for this location
+		 */
+		public void update(String word) {
+			this.count += map.get(word).get(this.location).size();
+			this.score = (double) this.count / wordCount.get(location);
+		}
+
+		/**
+		 * Returns the location of the text file for this result
+		 * 
+		 * @return directory
+		 */
+		public String getDirectory() {
+			return this.location;
+		}
+
+		/**
+		 * Returns the amount of times the query shows up in the text file
+		 * 
+		 * @return count
+		 */
+		public String getCount() {
+
+			return Integer.toString(count);
+		}
+
+		/**
+		 * Returns the score for the text file
+		 * 
+		 * @return score
+		 */
+		public double getScore() {
+			return this.score;
+		}
+
+		@Override
+		public String toString() {
+			return "location: " + this.location + " count: " + this.getCount() + " score: " + this.getScore();
+		}
+
+	}
 }

@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,11 +19,10 @@ import java.util.TreeSet;
  */
 public class QueryBuilder {
 
-	// TODO Missing keywords, should be intialized in the constructor.
 	/**
 	 * Data Structure that will hold cleaned, stemmed, and sorted query values.
 	 */
-	TreeMap<String, ArrayList<Result>> readyToPrint = new TreeMap<>();
+	private final TreeMap<String, ArrayList<InvertedIndex.Result>> readyToPrint;
 
 	/**
 	 * The data structure with the stored information from the text files.
@@ -37,18 +35,19 @@ public class QueryBuilder {
 	 * @param index
 	 */
 	public QueryBuilder(InvertedIndex index) {
+		readyToPrint = new TreeMap<>();
 		this.index = index;
 	}
 
 	/**
 	 * Reads the query files. It handles both exact and partial searches.
 	 * 
-	 * @param path : the path that has the query values
-	 * @param type : exact or partial
+	 * @param path    : the path that has the query values
+	 * @param partial : whether or not to perform partial search
 	 * @throws IOException           : file couldn't be found
 	 * @throws FileNotFoundException
 	 */
-	public void build(String path, String type) throws FileNotFoundException, IOException {
+	public void build(String path, boolean partial) throws FileNotFoundException, IOException {
 		if (path.toLowerCase().endsWith(".txt") || path.toLowerCase().endsWith(".text")) {
 			try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
 				String line;
@@ -57,7 +56,7 @@ public class QueryBuilder {
 					set.clear();
 					if (!line.isBlank()) {
 						set.addAll(TextFileStemmer.uniqueStems(line));
-						searchQuery(set, type);
+						searchQuery(set, partial);
 					}
 				}
 			}
@@ -67,20 +66,12 @@ public class QueryBuilder {
 	/**
 	 * Initiates the search of queries and stores it into the data structure.
 	 * 
-	 * @param set  : the set of queries
-	 * @param type : exact / partial
+	 * @param set     : the set of queries
+	 * @param partial : whether or not to perform partial search
 	 */
-	public void searchQuery(TreeSet<String> set, String type) {
-		// TODO Reinvented String.join(" ", set)
-		StringBuffer buffer = new StringBuffer();
+	public void searchQuery(TreeSet<String> set, boolean partial) {
 		if (!set.isEmpty()) {
-			for (String word : set) {
-				buffer.append(word);
-				buffer.append(' ');
-			}
-			// deletes extra space
-			buffer.deleteCharAt(buffer.length() - 1);
-			readyToPrint.put(buffer.toString(), generateResults(set, type));
+			readyToPrint.put(String.join(" ", set), generateResults(set, partial));
 		}
 	}
 
@@ -116,25 +107,19 @@ public class QueryBuilder {
 	 * Creates a list of results based off the queries passed to it and the type of
 	 * search.
 	 * 
-	 * @param set  - set of queries
-	 * @param type - exact/partial
+	 * @param set     - set of queries
+	 * @param partial : whether or not to perform partial search
 	 * @return a list of results
 	 */
-	public ArrayList<Result> generateResults(TreeSet<String> set, String type) {
-
-		/*
-		 * TODO Instead of String type, if only 2 choices use a boolean, if more than
-		 * 2 choices, use an ENUM.
-		 */
-		
-		if (type.equals("partial")) {
+	public ArrayList<InvertedIndex.Result> generateResults(TreeSet<String> set, boolean partial) {
+		if (partial) {
 			set.addAll(partialSearch(set));
 		}
 
-		ArrayList<Result> query = new ArrayList<>();
+		ArrayList<InvertedIndex.Result> query = new ArrayList<>();
 		for (String word : set) {
 			if (index.contains(word)) {
-				Result result;
+				InvertedIndex.Result result;
 
 				for (String location : index.getLocations(word)) {
 					int counts = index.getPositions(word, location).size();
@@ -153,16 +138,15 @@ public class QueryBuilder {
 					 * if lookup.containsKey(location)
 					 * 		lookup.get(location).update(word)
 					 */
-					for (Result tempResult : query) {
-						if (tempResult.getDirectory().equals('"' + location + '"')) { // added quotes so I can simplify
-																						// SJW
+					for (InvertedIndex.Result tempResult : query) {
+						if (tempResult.getDirectory().equals(location)) {
 							contains = true;
-							tempResult.add(counts);
+							tempResult.update(word);
 							break;
 						}
 					}
 					if (!contains) {
-						result = new Result(location, counts, totalWords);
+						result = index.new Result(location, counts);
 						query.add(result);
 						// TODO Also add the result to the lookup map
 					}

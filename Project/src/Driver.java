@@ -3,11 +3,6 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 
-/*
- * TODO Last warning on warnings and old TODO comments. Ask on Piazza for the views
- * to see warnigns and TODOs.
- */
-
 /**
  * Class responsible for running this project based on the provided command-line
  * arguments. See the README for details.
@@ -67,14 +62,13 @@ public class Driver {
 		if (parser.hasFlag("-query")) {
 			String name = parser.getString("-query");
 			if (name != null) {
-				String type = "partial";
+				boolean partial = true;
 				if (parser.hasFlag("-exact"))
-					type = "exact";
+					partial = false;
 				try {
-					queryBuilder.build(name, type);
+					queryBuilder.build(name, partial);
 				} catch (Exception e) {
-					System.err.println("Invlad query file: " + name);//TODO: FIX THIS
-					e.printStackTrace();
+					System.err.println("Invlad query file: " + name);
 				}
 			}
 		}
