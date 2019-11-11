@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
@@ -24,6 +25,7 @@ public class InvertedIndex {
 	 * Structure used to store data for counts (location,counts)
 	 */
 	private final TreeMap<String, Integer> wordCount;
+
 
 	/**
 	 * Constructor method
@@ -196,6 +198,8 @@ public class InvertedIndex {
 	 * @return a list of results
 	 */
 	public ArrayList<InvertedIndex.Result> generateResults(TreeSet<String> set, boolean partial) {
+		HashMap<String, InvertedIndex.Result> lookup = new HashMap<>();
+
 		if (partial) {
 			set.addAll(partialSearch(set));
 		}
@@ -208,29 +212,13 @@ public class InvertedIndex {
 				for (String location : this.getLocations(word)) {
 					int counts = this.getPositions(word, location).size();
 					// if we have this result already, then update it
-					boolean contains = false;
-					/*
-					 * TODO This is another linear search below...
-					 * 
-					 * It is always looking for a result with a specific location...
-					 * 
-					 * Use a lookup map!
-					 * 
-					 * Map<String (location), Result> lookup =
-					 * 
-					 * if lookup.containsKey(location) lookup.get(location).update(word)
-					 */
-					for (InvertedIndex.Result tempResult : query) {
-						if (tempResult.getDirectory().equals(location)) {
-							contains = true;
-							tempResult.update(word);
-							break;
-						}
+					if (lookup.containsKey(location)) {
+						lookup.get(location).update(word);
 					}
-					if (!contains) {
+					else {
 						result = this.new Result(location, counts);
 						query.add(result);
-						// TODO Also add the result to the lookup map
+						lookup.put(location, result);
 					}
 				}
 			}
