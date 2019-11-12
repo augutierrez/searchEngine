@@ -196,6 +196,7 @@ public class InvertedIndex {
 	 * @return a list of results
 	 */
 	public ArrayList<InvertedIndex.Result> generateResults(TreeSet<String> set, boolean partial) {
+		// stores results in order to access them faster
 		HashMap<String, InvertedIndex.Result> lookup = new HashMap<>();
 
 		if (partial) {
