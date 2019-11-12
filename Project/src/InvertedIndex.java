@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -170,28 +169,21 @@ public class InvertedIndex {
 	 * @return the same set with newly added queries for partial search
 	 */
 	public TreeSet<String> partialSearch(TreeSet<String> set) {
-
 		TreeSet<String> returnSet = new TreeSet<>();
 		Iterator<String> stems = set.iterator();
-
-		/*
-		 * TODO This is a linear search, so usually a better way...
-		 */
-
 		while (stems.hasNext()) {
-//			Iterator<String> iterate = this.getWords().iterator();
 			String stem = stems.next();
-			SortedMap<String, TreeMap<String, TreeSet<Integer>>> temp = map.tailMap(stem);
-			Set<String> list = temp.keySet();
-			Iterator<String> iterate = list.iterator();
-
+			Iterator<String> tailMapIterate = map.tailMap(stem).keySet().iterator();
 			String word;
-			while ((word = iterate.next()).startsWith(stem)) {
-				returnSet.add(word);
+			while (tailMapIterate.hasNext()) {
+				word = tailMapIterate.next();
+				if (word.startsWith(stem)) {
+					returnSet.add(word);
+				} else {
+					break;
+				}
 			}
-
 		}
-
 		return returnSet;
 	}
 
