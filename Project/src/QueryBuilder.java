@@ -20,7 +20,7 @@ public class QueryBuilder {
 	/**
 	 * Data Structure that will hold cleaned, stemmed, and sorted query values.
 	 */
-	private final TreeMap<String, ArrayList<InvertedIndex.Result>> readyToPrint;
+	private final TreeMap<String, ArrayList<InvertedIndex.Result>> resultsMap;
 
 	/**
 	 * The data structure with the stored information from the text files.
@@ -33,7 +33,7 @@ public class QueryBuilder {
 	 * @param index
 	 */
 	public QueryBuilder(InvertedIndex index) {
-		readyToPrint = new TreeMap<>();
+		resultsMap = new TreeMap<>();
 		this.index = index;
 	}
 
@@ -69,7 +69,7 @@ public class QueryBuilder {
 	 */
 	public void searchQuery(TreeSet<String> set, boolean partial) {
 		if (!set.isEmpty()) {
-			readyToPrint.put(String.join(" ", set), index.generateResults(set, partial));
+			resultsMap.put(String.join(" ", set), index.generateResults(set, partial));
 		}
 	}
 
@@ -81,7 +81,7 @@ public class QueryBuilder {
 	 */
 	public void queryWriter(Path path) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-			SimpleJsonWriter.searchOutput(readyToPrint, path);
+			SimpleJsonWriter.searchOutput(resultsMap, path);
 		}
 	}
 }

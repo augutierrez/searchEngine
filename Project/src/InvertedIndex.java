@@ -169,23 +169,21 @@ public class InvertedIndex {
 	 * @return the same set with newly added queries for partial search
 	 */
 	public TreeSet<String> partialSearch(TreeSet<String> set) {
-
 		TreeSet<String> returnSet = new TreeSet<>();
 		Iterator<String> stems = set.iterator();
-
-		/*
-		 * TODO This is a linear search, so usually a better way...
-		 */
 		while (stems.hasNext()) {
-			Iterator<String> iterate = this.getWords().iterator();
 			String stem = stems.next();
-			while (iterate.hasNext()) {
-				String key = iterate.next();
-				if (key.startsWith(stem))
-					returnSet.add(key);
+			Iterator<String> tailMapIterate = map.tailMap(stem).keySet().iterator();
+			String word;
+			while (tailMapIterate.hasNext()) {
+				word = tailMapIterate.next();
+				if (word.startsWith(stem)) {
+					returnSet.add(word);
+				} else {
+					break;
+				}
 			}
 		}
-
 		return returnSet;
 	}
 
@@ -198,6 +196,7 @@ public class InvertedIndex {
 	 * @return a list of results
 	 */
 	public ArrayList<InvertedIndex.Result> generateResults(TreeSet<String> set, boolean partial) {
+		// stores results in order to access them faster
 		HashMap<String, InvertedIndex.Result> lookup = new HashMap<>();
 
 		if (partial) {
