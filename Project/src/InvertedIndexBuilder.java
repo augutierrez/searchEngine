@@ -102,13 +102,6 @@ public class InvertedIndexBuilder {
 		}
 	}
 	
-	/*
-	 * TODO
-	 * 
-	 * 
-	 * Use this version in Driver where you create an InvertedIndexBuilder object.
-	 */
-
 	/**
 	 * Extracts information from the file passed and each word found in the file is
 	 * passed to add()
