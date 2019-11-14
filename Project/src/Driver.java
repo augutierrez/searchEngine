@@ -26,11 +26,12 @@ public class Driver {
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
 		QueryBuilder queryBuilder = new QueryBuilder(index);
+		InvertedIndexBuilder indexBuilder = new InvertedIndexBuilder(index);
 
 		if (parser.hasFlag("-path")) {
 			Path path = parser.getPath("-path");
 			try {
-				InvertedIndexBuilder.directoryIterator(path, index);
+				indexBuilder.directoryIterator(path);
 			} catch (Exception e) {
 				System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
 						+ " to data structure. Please enter existing paths to textfiles.");
@@ -59,14 +60,10 @@ public class Driver {
 
 
 		if (parser.hasFlag("-query")) {
-			String name = parser.getString("-query");
+			Path name = parser.getPath("-query");
 			if (name != null) {
-				boolean partial = true;
-				if (parser.hasFlag("-exact"))
-					partial = false;
 				try {
-					queryBuilder.build(name, partial);
-					// TODO queryBuilder.build(name, !parser.hasFlag("-exact"));
+					queryBuilder.build(name, !parser.hasFlag("-exact"));
 				} catch (Exception e) {
 					System.err.println("Invlad query file: " + name);
 				}

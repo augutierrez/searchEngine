@@ -21,6 +21,53 @@ public class InvertedIndexBuilder {
 	public static final SnowballStemmer.ALGORITHM DEFAULT = SnowballStemmer.ALGORITHM.ENGLISH;
 
 	/**
+	 * The InvertedIndex that will be utilized
+	 */
+	private final InvertedIndex index;
+
+	/**
+	 * Constructor method for InvertedIndexBuilder
+	 * 
+	 * @param index - the inverted index to build to.
+	 */
+	public InvertedIndexBuilder(InvertedIndex index) {
+		this.index = index;
+	}
+
+	/**
+	 * Non static DirectoryIterator method - Iterates over a directory to extract
+	 * files
+	 * 
+	 * @param path
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public void directoryIterator(Path path) throws FileNotFoundException, IOException {
+		if (Files.isDirectory(path)) {
+			try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
+				for (Path currPath : listing)
+					directoryIterator(currPath);
+			}
+		} else {
+			if (Files.isRegularFile(path) && isText(path)) {
+				addPath(path);
+			}
+		}
+	}
+
+	/**
+	 * Non static addPath method - Extracts information from the file passed and
+	 * each word found in the file
+	 * 
+	 * @param path - the path to add to the inverted index
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public void addPath(Path path) throws FileNotFoundException, IOException {
+		addPath(path, this.index);
+	}
+
+	/**
 	 * Checks if a path is a text file
 	 * 
 	 * @param path - the path that's being considered
@@ -55,34 +102,16 @@ public class InvertedIndexBuilder {
 		}
 	}
 	
-	/* TODO
-	private final InvertedIndex index;
-	
-	public InvertedIndexBuilder(InveretedIndex...) { etc. }
-
-	public void directoryIterator(Path path) throws FileNotFoundException, IOException { 
-		if (Files.isDirectory(path)) {
-			try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
-				for (Path currPath : listing)
-					directoryIterator(currPath);
-			}
-		} else {
-			if (Files.isRegularFile(path) && isText(path)) {
-				addPath(path);
-			}
-		}
-	}
-
-	public void addPath(Path path) {
-		addPath(path, this.index);
-	}
-
-	Use this version in Driver where you create an InvertedIndexBuilder object.
-	*/
+	/*
+	 * TODO
+	 * 
+	 * 
+	 * Use this version in Driver where you create an InvertedIndexBuilder object.
+	 */
 
 	/**
-	 * Extracts information from the file passed and each word found in the file and
-	 * passes it to add()
+	 * Extracts information from the file passed and each word found in the file is
+	 * passed to add()
 	 * 
 	 * @param path  : the path to the file that it will read from
 	 * @param index : the InvertedIndex that will store the path's data

@@ -1,7 +1,6 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -46,19 +45,12 @@ public class QueryBuilder {
 	 * @throws FileNotFoundException
 	 */
 	// TODO String path --> Path path
-	public void build(String path, boolean partial) throws FileNotFoundException, IOException {
-		if (path.toLowerCase().endsWith(".txt") || path.toLowerCase().endsWith(".text")) { // TODO Remove
-			try (BufferedReader reader = new BufferedReader(new FileReader(path))) { // TODO Files.newBufferedReader
-				String line;
-				TreeSet<String> set = new TreeSet<>(); // TODO Remove
-				while ((line = reader.readLine()) != null) {
-					set.clear();
-					if (!line.isBlank()) {
-						set.addAll(TextFileStemmer.uniqueStems(line));
-						searchQuery(set, partial);
-					}
-					
-					// TODO Just ALWAYS call searchQuery(line, partial);
+	public void build(Path path, boolean partial) throws FileNotFoundException, IOException {
+		try (BufferedReader reader = Files.newBufferedReader(path)) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				if (!line.isBlank()) {
+					searchQuery(line, partial);
 				}
 			}
 		}
@@ -67,30 +59,19 @@ public class QueryBuilder {
 	/**
 	 * Initiates the search of queries and stores it into the data structure.
 	 * 
-	 * @param set     : the set of queries
+	 * @param line    : the query line
 	 * @param partial : whether or not to perform partial search
 	 */
-	// TODO public void searchQuery(String line, boolean partial) {
-	public void searchQuery(TreeSet<String> set, boolean partial) {
-		if (!set.isEmpty()) {
-			resultsMap.put(String.join(" ", set), index.generateResults(set, partial));
-		}
-		
-		/* TODO
+	public void searchQuery(String line, boolean partial) {
 		TreeSet<String> stems = TextFileStemmer.uniqueStems(line);
-		
-		if (set.isEmpty()) {
+		if (stems.isEmpty()) {
 			return;
 		}
-		
 		String joined = String.join(" ", stems);
-		
 		if (resultsMap.containsKey(joined)) {
 			return;
 		}
-		
-		resultsMap.put(joined, index.generateResults(set, partial));
-		*/
+		resultsMap.put(joined, index.generateResults(stems, partial));
 	}
 
 	/**
