@@ -40,7 +40,7 @@ public class InvertedIndexBuilder {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public static void directoryIterator(Path path, InvertedIndex index) throws FileNotFoundException, IOException {
+	public static void directoryIterator(Path path, InvertedIndex index) throws FileNotFoundException, IOException { // TODO Remove
 		if (path != null) {
 			if (Files.isDirectory(path)) {
 				try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
@@ -54,6 +54,31 @@ public class InvertedIndexBuilder {
 			}
 		}
 	}
+	
+	/* TODO
+	private final InvertedIndex index;
+	
+	public InvertedIndexBuilder(InveretedIndex...) { etc. }
+
+	public void directoryIterator(Path path) throws FileNotFoundException, IOException { 
+		if (Files.isDirectory(path)) {
+			try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
+				for (Path currPath : listing)
+					directoryIterator(currPath);
+			}
+		} else {
+			if (Files.isRegularFile(path) && isText(path)) {
+				addPath(path);
+			}
+		}
+	}
+
+	public void addPath(Path path) {
+		addPath(path, this.index);
+	}
+
+	Use this version in Driver where you create an InvertedIndexBuilder object.
+	*/
 
 	/**
 	 * Extracts information from the file passed and each word found in the file and
@@ -67,7 +92,7 @@ public class InvertedIndexBuilder {
 	 * @see SnowballStemmer
 	 * @see #DEFAULT
 	 */
-	public static void addPath(Path path, InvertedIndex index) throws FileNotFoundException, IOException {
+	public static void addPath(Path path, InvertedIndex index) throws FileNotFoundException, IOException { // TODO Keep
 		try (BufferedReader reader = Files.newBufferedReader(path)) {
 			String line;
 			String pathName = path.toString();
@@ -81,5 +106,4 @@ public class InvertedIndexBuilder {
 		}
 
 	}
-	// Remind Sophie in project 2 code reviews to prep this class for project 3
 }

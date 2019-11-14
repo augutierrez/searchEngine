@@ -45,17 +45,20 @@ public class QueryBuilder {
 	 * @throws IOException           : file couldn't be found
 	 * @throws FileNotFoundException
 	 */
+	// TODO String path --> Path path
 	public void build(String path, boolean partial) throws FileNotFoundException, IOException {
-		if (path.toLowerCase().endsWith(".txt") || path.toLowerCase().endsWith(".text")) {
-			try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+		if (path.toLowerCase().endsWith(".txt") || path.toLowerCase().endsWith(".text")) { // TODO Remove
+			try (BufferedReader reader = new BufferedReader(new FileReader(path))) { // TODO Files.newBufferedReader
 				String line;
-				TreeSet<String> set = new TreeSet<>();
+				TreeSet<String> set = new TreeSet<>(); // TODO Remove
 				while ((line = reader.readLine()) != null) {
 					set.clear();
 					if (!line.isBlank()) {
 						set.addAll(TextFileStemmer.uniqueStems(line));
 						searchQuery(set, partial);
 					}
+					
+					// TODO Just ALWAYS call searchQuery(line, partial);
 				}
 			}
 		}
@@ -67,10 +70,27 @@ public class QueryBuilder {
 	 * @param set     : the set of queries
 	 * @param partial : whether or not to perform partial search
 	 */
+	// TODO public void searchQuery(String line, boolean partial) {
 	public void searchQuery(TreeSet<String> set, boolean partial) {
 		if (!set.isEmpty()) {
 			resultsMap.put(String.join(" ", set), index.generateResults(set, partial));
 		}
+		
+		/* TODO
+		TreeSet<String> stems = TextFileStemmer.uniqueStems(line);
+		
+		if (set.isEmpty()) {
+			return;
+		}
+		
+		String joined = String.join(" ", stems);
+		
+		if (resultsMap.containsKey(joined)) {
+			return;
+		}
+		
+		resultsMap.put(joined, index.generateResults(set, partial));
+		*/
 	}
 
 	/**

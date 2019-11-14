@@ -25,7 +25,6 @@ public class Driver {
 		ArgumentParser parser = new ArgumentParser();
 		parser.parse(args);
 		InvertedIndex index = new InvertedIndex();
-
 		QueryBuilder queryBuilder = new QueryBuilder(index);
 
 		if (parser.hasFlag("-path")) {
@@ -67,6 +66,7 @@ public class Driver {
 					partial = false;
 				try {
 					queryBuilder.build(name, partial);
+					// TODO queryBuilder.build(name, !parser.hasFlag("-exact"));
 				} catch (Exception e) {
 					System.err.println("Invlad query file: " + name);
 				}

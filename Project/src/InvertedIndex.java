@@ -168,7 +168,7 @@ public class InvertedIndex {
 	 * @param set - the set of queries
 	 * @return the same set with newly added queries for partial search
 	 */
-	public TreeSet<String> partialSearch(TreeSet<String> set) {
+	public TreeSet<String> partialSearch(TreeSet<String> set) { // TODO Remove, no copies
 		TreeSet<String> returnSet = new TreeSet<>();
 		Iterator<String> stems = set.iterator();
 		while (stems.hasNext()) {
@@ -186,6 +186,24 @@ public class InvertedIndex {
 		}
 		return returnSet;
 	}
+	
+	/* TODO partial search
+
+HashMap<String, InvertedIndex.Result> lookup = new HashMap<>();
+ArrayList<InvertedIndex.Result> results = new ArrayList<>();
+
+for (String query : queries) {
+	for (String word : map.tailMap(stem).keySet()) {
+		if (word.startsWith(query)) {
+			then do stuff!
+		}
+		else {
+			break;
+		}
+	}
+}
+
+	 */
 
 	/**
 	 * Creates a list of results based off the queries passed to it and the type of
@@ -195,6 +213,7 @@ public class InvertedIndex {
 	 * @param partial : whether or not to perform partial search
 	 * @return a list of results
 	 */
+	// TODO public ArrayList<InvertedIndex.Result> generateResults(Set<String> set, boolean partial) {
 	public ArrayList<InvertedIndex.Result> generateResults(TreeSet<String> set, boolean partial) {
 		// stores results in order to access them faster
 		HashMap<String, InvertedIndex.Result> lookup = new HashMap<>();
@@ -203,6 +222,10 @@ public class InvertedIndex {
 			set.addAll(partialSearch(set));
 		}
 
+		/*
+		 * TODO Break out exact search and partial search logic.
+		 */
+		
 		ArrayList<InvertedIndex.Result> query = new ArrayList<>();
 		for (String word : set) {
 			if (this.contains(word)) {
@@ -225,6 +248,22 @@ public class InvertedIndex {
 		Collections.sort(query);
 		return query;
 	}
+	
+/* TODO Create a search helper method (private)
+
+				for (String location : this.map.get(word).keyset()) {
+					if (lookup.containsKey(location)) {
+						lookup.get(location).update(word);
+					}
+					else {
+						result = this.new Result(location, word);
+						query.add(result);
+						lookup.put(location, result);
+					}
+				}
+
+ */
+	
 
 	@Override
 	public String toString() {
@@ -240,7 +279,7 @@ public class InvertedIndex {
 		/**
 		 * the location of the text file for this result
 		 */
-		private String location;
+		private String location; // TODO final
 
 		/**
 		 * the amount of times our queries show up in this text file
@@ -254,6 +293,7 @@ public class InvertedIndex {
 		private double score;
 
 		/**
+		 * TODO describe
 		 * @param location - the location of the text file
 		 * @param count    - the number of times the query word shows up in the text
 		 */
@@ -263,6 +303,14 @@ public class InvertedIndex {
 			this.score = (double) this.count / wordCount.get(location);
 		}
 
+		/* TODO Switch to this constructor
+		public Result(String location, String word) {
+			this.location = location;
+			this.update(word);
+		}
+		*/
+		
+		
 		@Override
 		public int compareTo(Result result) {
 			int sCheck = Double.compare(this.score, result.getScore());
@@ -285,7 +333,7 @@ public class InvertedIndex {
 		 * 
 		 * @param word - the query word that will update the score for this location
 		 */
-		public void update(String word) {
+		public void update(String word) { // TODO private
 			this.count += map.get(word).get(this.location).size();
 			this.score = (double) this.count / wordCount.get(location);
 		}
