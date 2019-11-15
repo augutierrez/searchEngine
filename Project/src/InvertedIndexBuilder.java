@@ -77,30 +77,6 @@ public class InvertedIndexBuilder {
 		String lower = path.toString().toLowerCase();
 		return lower.endsWith(".txt") || lower.endsWith(".text");
 	}
-
-	/**
-	 * Accepts a path, and iterates over it if it is a directory, or simply adds it
-	 * to the data structure if it is a file.
-	 * 
-	 * @param path  : the path we will extract information from
-	 * @param index : the data structure we are storing in
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
-	public static void directoryIterator(Path path, InvertedIndex index) throws FileNotFoundException, IOException { // TODO Remove
-		if (path != null) {
-			if (Files.isDirectory(path)) {
-				try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
-					for (Path currPath : listing)
-						directoryIterator(currPath, index);
-				}
-			} else {
-				if (Files.isRegularFile(path) && isText(path)) {
-					addPath(path, index);
-				}
-			}
-		}
-	}
 	
 	/**
 	 * Extracts information from the file passed and each word found in the file is
