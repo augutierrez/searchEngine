@@ -44,7 +44,6 @@ public class QueryBuilder {
 	 * @throws IOException           : file couldn't be found
 	 * @throws FileNotFoundException
 	 */
-	// TODO String path --> Path path
 	public void build(Path path, boolean partial) throws FileNotFoundException, IOException {
 		try (BufferedReader reader = Files.newBufferedReader(path)) {
 			String line;
@@ -71,7 +70,12 @@ public class QueryBuilder {
 		if (resultsMap.containsKey(joined)) {
 			return;
 		}
-		resultsMap.put(joined, index.generateResults(stems, partial));
+		if (partial) {
+			resultsMap.put(joined, index.partialSearch(stems));
+		}
+		else {
+			resultsMap.put(joined, index.generateResults(stems));
+		}
 	}
 
 	/**

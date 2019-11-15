@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -162,108 +161,68 @@ public class InvertedIndex {
 	}
 	
 	/**
-	 * Takes the set and adds stems that start with the stems inside it for partial
-	 * search.
+	 * Takes the set and performs a partial search. Words that start with each query
+	 * word will be matched as well.
 	 * 
-	 * @param set - the set of queries
+	 * @param queries - the set of queries
 	 * @return the same set with newly added queries for partial search
 	 */
-	public TreeSet<String> partialSearch(TreeSet<String> set) { // TODO Remove, no copies
-		TreeSet<String> returnSet = new TreeSet<>();
-		Iterator<String> stems = set.iterator();
-		while (stems.hasNext()) {
-			String stem = stems.next();
-			Iterator<String> tailMapIterate = map.tailMap(stem).keySet().iterator();
-			String word;
-			while (tailMapIterate.hasNext()) {
-				word = tailMapIterate.next();
-				if (word.startsWith(stem)) {
-					returnSet.add(word);
+	public ArrayList<InvertedIndex.Result> partialSearch(Set<String> queries) {
+		HashMap<String, InvertedIndex.Result> lookUp = new HashMap<>();
+		ArrayList<InvertedIndex.Result> results = new ArrayList<>();
+
+		for (String query : queries) {
+			for (String word : map.tailMap(query).keySet()) {
+				if (word.startsWith(query)) {
+					search(word, results, lookUp);
 				} else {
 					break;
 				}
 			}
 		}
-		return returnSet;
+		Collections.sort(results);
+		return results;
 	}
-	
-	/* TODO partial search
-
-HashMap<String, InvertedIndex.Result> lookup = new HashMap<>();
-ArrayList<InvertedIndex.Result> results = new ArrayList<>();
-
-for (String query : queries) {
-	for (String word : map.tailMap(stem).keySet()) {
-		if (word.startsWith(query)) {
-			then do stuff!
-		}
-		else {
-			break;
-		}
-	}
-}
-
-	 */
 
 	/**
 	 * Creates a list of results based off the queries passed to it and the type of
 	 * search.
 	 * 
-	 * @param set     - set of queries
-	 * @param partial : whether or not to perform partial search
+	 * @param queries - set of queries
 	 * @return a list of results
 	 */
-	// TODO public ArrayList<InvertedIndex.Result> generateResults(Set<String> set, boolean partial) {
-	public ArrayList<InvertedIndex.Result> generateResults(TreeSet<String> set, boolean partial) {
+	public ArrayList<InvertedIndex.Result> generateResults(Set<String> queries) {
 		// stores results in order to access them faster
-		HashMap<String, InvertedIndex.Result> lookup = new HashMap<>();
-
-		if (partial) {
-			set.addAll(partialSearch(set));
-		}
-
-		/*
-		 * TODO Break out exact search and partial search logic.
-		 */
-		
-		ArrayList<InvertedIndex.Result> query = new ArrayList<>();
-		for (String word : set) {
-			if (this.contains(word)) {
-				InvertedIndex.Result result;
-
-				for (String location : this.getLocations(word)) {
-					int counts = this.getPositions(word, location).size();
-					// if we have this result already, then update it
-					if (lookup.containsKey(location)) {
-						lookup.get(location).update(word);
-					}
-					else {
-						result = this.new Result(location, counts);
-						query.add(result);
-						lookup.put(location, result);
-					}
-				}
+		HashMap<String, InvertedIndex.Result> lookUp = new HashMap<>();
+		ArrayList<InvertedIndex.Result> results = new ArrayList<>();
+		for (String word : queries) {
+			if (map.containsKey(word)) {
+				search(word, results, lookUp);
 			}
 		}
-		Collections.sort(query);
-		return query;
+		Collections.sort(results);
+		return results;
 	}
 	
-/* TODO Create a search helper method (private)
-
-				for (String location : this.map.get(word).keyset()) {
-					if (lookup.containsKey(location)) {
-						lookup.get(location).update(word);
-					}
-					else {
-						result = this.new Result(location, word);
-						query.add(result);
-						lookup.put(location, result);
-					}
-				}
-
- */
-	
+	/**
+	 * Searches for the word passed and adds it to the list of results if it's a new
+	 * search
+	 * 
+	 * @param word    - the word to search
+	 * @param results - the list of current results
+	 * @param lookUp  - a map of current results
+	 */
+	private void search(String word, ArrayList<Result> results, HashMap<String, InvertedIndex.Result> lookUp) {
+		for (String location : this.map.get(word).keySet()) {
+			if (lookUp.containsKey(location)) {
+				lookUp.get(location).update(word);
+			} else {
+				Result result = this.new Result(location, word);
+				results.add(result);
+				lookUp.put(location, result);
+			}
+		}
+	}
 
 	@Override
 	public String toString() {
@@ -279,7 +238,7 @@ for (String query : queries) {
 		/**
 		 * the location of the text file for this result
 		 */
-		private String location; // TODO final
+		private final String location;
 
 		/**
 		 * the amount of times our queries show up in this text file
@@ -293,24 +252,16 @@ for (String query : queries) {
 		private double score;
 
 		/**
-		 * TODO describe
+		 * Result constructor method
+		 * 
 		 * @param location - the location of the text file
-		 * @param count    - the number of times the query word shows up in the text
+		 * @param word     - the word for the result
 		 */
-		public Result(String location, int count) {
-			this.location = location;
-			this.count = count;
-			this.score = (double) this.count / wordCount.get(location);
-		}
-
-		/* TODO Switch to this constructor
 		public Result(String location, String word) {
 			this.location = location;
 			this.update(word);
 		}
-		*/
-		
-		
+
 		@Override
 		public int compareTo(Result result) {
 			int sCheck = Double.compare(this.score, result.getScore());
@@ -333,7 +284,7 @@ for (String query : queries) {
 		 * 
 		 * @param word - the query word that will update the score for this location
 		 */
-		public void update(String word) { // TODO private
+		private void update(String word) {
 			this.count += map.get(word).get(this.location).size();
 			this.score = (double) this.count / wordCount.get(location);
 		}
