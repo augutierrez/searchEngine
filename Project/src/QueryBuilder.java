@@ -70,7 +70,12 @@ public class QueryBuilder {
 		if (resultsMap.containsKey(joined)) {
 			return;
 		}
-		resultsMap.put(joined, index.generateResults(stems, partial));
+		if (partial) {
+			resultsMap.put(joined, index.partialSearch(stems));
+		}
+		else {
+			resultsMap.put(joined, index.generateResults(stems));
+		}
 	}
 
 	/**

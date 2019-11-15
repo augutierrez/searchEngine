@@ -161,146 +161,68 @@ public class InvertedIndex {
 	}
 	
 	/**
-	 * Takes the set and adds stems that start with the stems inside it for partial
-	 * search.
+	 * Takes the set and performs a partial search. Words that start with each query
+	 * word will be matched as well.
 	 * 
-	 * @param set - the set of queries
+	 * @param queries - the set of queries
 	 * @return the same set with newly added queries for partial search
 	 */
-//	public TreeSet<String> partialSearch(Set<String> set) { // TODO Remove, no copies
-//		TreeSet<String> returnSet = new TreeSet<>();
-//		Iterator<String> stems = set.iterator();
-//		while (stems.hasNext()) {
-//			String stem = stems.next();
-//			Iterator<String> tailMapIterate = map.tailMap(stem).keySet().iterator();
-//			String word;
-//			while (tailMapIterate.hasNext()) {
-//				word = tailMapIterate.next();
-//				if (word.startsWith(stem)) {
-//					returnSet.add(word);
-//				} else {
-//					break;
-//				}
-//			}
-//		}
-//		return returnSet;
-//	}
 	public ArrayList<InvertedIndex.Result> partialSearch(Set<String> queries) {
-		HashMap<String, InvertedIndex.Result> lookup = new HashMap<>();
+		HashMap<String, InvertedIndex.Result> lookUp = new HashMap<>();
 		ArrayList<InvertedIndex.Result> results = new ArrayList<>();
 
 		for (String query : queries) {
 			for (String word : map.tailMap(query).keySet()) {
 				if (word.startsWith(query)) {
-					// then do stuff!
-					queries.add(word);
+					search(word, results, lookUp);
 				} else {
 					break;
 				}
 			}
 		}
-
+		Collections.sort(results);
 		return results;
 	}
-	
-	/* TODO partial search
-
-HashMap<String, InvertedIndex.Result> lookup = new HashMap<>();
-ArrayList<InvertedIndex.Result> results = new ArrayList<>();
-
-for (String query : queries) {
-	for (String word : map.tailMap(stem).keySet()) {
-		if (word.startsWith(query)) {
-			then do stuff!
-		}
-		else {
-			break;
-		}
-	}
-}
-	 */
-
 
 	/**
 	 * Creates a list of results based off the queries passed to it and the type of
 	 * search.
 	 * 
-	 * @param set     - set of queries
-	 * @param partial : whether or not to perform partial search
+	 * @param queries - set of queries
 	 * @return a list of results
 	 */
-	// TODO public ArrayList<InvertedIndex.Result> generateResults(Set<String> set, boolean partial) {
-	public ArrayList<InvertedIndex.Result> generateResults(Set<String> set, boolean partial) {
+	public ArrayList<InvertedIndex.Result> generateResults(Set<String> queries) {
 		// stores results in order to access them faster
-		HashMap<String, InvertedIndex.Result> lookup = new HashMap<>();
-
-		if (partial) {
-			set.addAll(partialSearch(set));
-		}
-
-		/*
-		 * TODO Break out exact search and partial search logic.
-		 */
-		
-		ArrayList<InvertedIndex.Result> query = new ArrayList<>();
-		for (String word : set) {
-			if (this.contains(word)) {
-				InvertedIndex.Result result;
-
-				for (String location : this.getLocations(word)) {
-					// if we have this result already, then update it
-					if (lookup.containsKey(location)) {
-						lookup.get(location).update(word);
-					}
-					else {
-						result = this.new Result(location, word);
-						query.add(result);
-						lookup.put(location, result);
-					}
-				}
+		HashMap<String, InvertedIndex.Result> lookUp = new HashMap<>();
+		ArrayList<InvertedIndex.Result> results = new ArrayList<>();
+		for (String word : queries) {
+			if (map.containsKey(word)) {
+				search(word, results, lookUp);
 			}
 		}
-		Collections.sort(query);
-		return query;
+		Collections.sort(results);
+		return results;
 	}
 	
 	/**
 	 * Searches for the word passed and adds it to the list of results if it's a new
 	 * search
 	 * 
-	 * @param word      - the word to search
-	 * @param results   - the list of current results
-	 * @param lookUpMap - a map of current results
-	 * @return
+	 * @param word    - the word to search
+	 * @param results - the list of current results
+	 * @param lookUp  - a map of current results
 	 */
-	private Result Search(String word, ArrayList<InvertedIndex.Result> results,
-			HashMap<String, InvertedIndex.Result> lookUpMap) {
+	private void search(String word, ArrayList<Result> results, HashMap<String, InvertedIndex.Result> lookUp) {
 		for (String location : this.map.get(word).keySet()) {
-			if (lookup.containsKey(location)) {
-				lookup.get(location).update(word);
+			if (lookUp.containsKey(location)) {
+				lookUp.get(location).update(word);
 			} else {
-				result = this.new Result(location, word);
-				query.add(result);
-				lookup.put(location, result);
+				Result result = this.new Result(location, word);
+				results.add(result);
+				lookUp.put(location, result);
 			}
 		}
 	}
-	// TODO LOOK UP MAP CAN BE GLOBAL
-/* TODO Create a search helper method (private)
-
-				for (String location : this.map.get(word).keyset()) {
-					if (lookup.containsKey(location)) {
-						lookup.get(location).update(word);
-					}
-					else {
-						result = this.new Result(location, word);
-						query.add(result);
-						lookup.put(location, result);
-					}
-				}
-
- */
-	
 
 	@Override
 	public String toString() {

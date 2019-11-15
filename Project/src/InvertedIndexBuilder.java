@@ -90,7 +90,7 @@ public class InvertedIndexBuilder {
 	 * @see SnowballStemmer
 	 * @see #DEFAULT
 	 */
-	public static void addPath(Path path, InvertedIndex index) throws FileNotFoundException, IOException { // TODO Keep
+	public static void addPath(Path path, InvertedIndex index) throws FileNotFoundException, IOException {
 		try (BufferedReader reader = Files.newBufferedReader(path)) {
 			String line;
 			String pathName = path.toString();
