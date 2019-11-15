@@ -195,6 +195,7 @@ public class InvertedIndex {
 		// stores results in order to access them faster
 		HashMap<String, InvertedIndex.Result> lookUp = new HashMap<>();
 		ArrayList<InvertedIndex.Result> results = new ArrayList<>();
+
 		for (String word : queries) {
 			if (map.containsKey(word)) {
 				search(word, results, lookUp);
