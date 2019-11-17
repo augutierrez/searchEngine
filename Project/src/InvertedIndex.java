@@ -224,6 +224,20 @@ public class InvertedIndex {
 			}
 		}
 	}
+	
+	/*
+	 * TODO Makes things easier if you add a convenience method:
+
+	public ArrayList<Result> search(Set<String> queries, boolean partial) {
+		if (partial) {
+			return index.partialSearch(stems);
+		}
+		else {
+			return index.generateResults(stems);
+		}
+	}
+
+	 */
 
 	@Override
 	public String toString() {
