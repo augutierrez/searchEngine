@@ -29,7 +29,7 @@ public class QueryBuilder {
 	/**
 	 * Constructor method
 	 * 
-	 * @param index TODO describe
+	 * @param index - InvertedIndex that will store information
 	 */
 	public QueryBuilder(InvertedIndex index) {
 		resultsMap = new TreeMap<>();
@@ -70,19 +70,7 @@ public class QueryBuilder {
 		if (resultsMap.containsKey(joined)) {
 			return;
 		}
-		/*
-		 * TODO It is easier if this logic (which search to perform) is in your index,
-		 * so here you can do:
-		 * resultsMap.put(joined, index.search(stems, partial));
-		 * 
-		 * (See also InvertedIndex.)
-		 */
-		if (partial) {
-			resultsMap.put(joined, index.partialSearch(stems));
-		}
-		else {
-			resultsMap.put(joined, index.generateResults(stems));
-		}
+		resultsMap.put(joined, index.generateSearch(stems, partial));
 	}
 
 	/**

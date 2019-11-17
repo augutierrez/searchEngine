@@ -191,7 +191,7 @@ public class InvertedIndex {
 	 * @param queries - set of queries
 	 * @return a list of results
 	 */
-	public ArrayList<InvertedIndex.Result> generateResults(Set<String> queries) {
+	public ArrayList<InvertedIndex.Result> exactSearch(Set<String> queries) {
 		// stores results in order to access them faster
 		HashMap<String, InvertedIndex.Result> lookUp = new HashMap<>();
 		ArrayList<InvertedIndex.Result> results = new ArrayList<>();
@@ -225,19 +225,20 @@ public class InvertedIndex {
 		}
 	}
 	
-	/*
-	 * TODO Makes things easier if you add a convenience method:
-
-	public ArrayList<Result> search(Set<String> queries, boolean partial) {
+	/**
+	 * Helper method that calls on partialSearch() or exactSearch()
+	 * 
+	 * @param queries - the queries to search
+	 * @param partial - whether to call partial
+	 * @return - a list of results
+	 */
+	public ArrayList<Result> generateSearch(Set<String> queries, boolean partial) {
 		if (partial) {
-			return index.partialSearch(stems);
-		}
-		else {
-			return index.generateResults(stems);
+			return partialSearch(queries);
+		} else {
+			return exactSearch(queries);
 		}
 	}
-
-	 */
 
 	@Override
 	public String toString() {
