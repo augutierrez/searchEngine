@@ -25,7 +25,6 @@ public class InvertedIndex {
 	 */
 	private final TreeMap<String, Integer> wordCount;
 
-
 	/**
 	 * Constructor method
 	 */
