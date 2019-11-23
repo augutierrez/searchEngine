@@ -12,6 +12,11 @@ import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/*
+ * TODO Create a QueryBuilderInterface with a default implementation of 
+ * the build(Path) method. Then implement that interface in both classes.
+ */
+
 /**
  * @author tony
  * 
@@ -37,7 +42,7 @@ public class ThreadedQueryBuilder {
 	/**
 	 * The WorkQueue for the class.
 	 */
-	private final WorkQueue wq;
+	private final WorkQueue wq; // TODO Pass in from Driver
 
 	/**
 	 * Constructor method
@@ -88,17 +93,29 @@ public class ThreadedQueryBuilder {
 	 * @param partial : whether or not to perform partial search
 	 */
 	public void searchQuery(String line, boolean partial) {
+		// TODO Just add a new task for this line
+		// TODO Move this implementation into run()
 		TreeSet<String> stems = TextFileStemmer.uniqueStems(line);
 		if (stems.isEmpty()) {
 			return;
 		}
 		String joined = String.join(" ", stems);
-		if (resultsMap.containsKey(joined)) {
+		if (resultsMap.containsKey(joined)) { // TODO Must protect this read of resultsMap
 			return;
 		}
+
 		synchronized (resultsMap) {
+			// TODO Search is inside of here, so multiple threads cnanot search at the same time
 			resultsMap.put(joined, index.generateSearch(stems, partial));
 		}
+
+		/* TODO
+		something = index.generateSearch(stems, partial);
+		
+		synchronized (resultsMap) {
+			resultsMap.put(joined, something);
+		}
+		*/
 	}
 
 	/**
@@ -108,6 +125,7 @@ public class ThreadedQueryBuilder {
 	 * @throws IOException
 	 */
 	public void queryWriter(Path path) throws IOException {
+		// TODO Everywhere you see resultsMap you need to protect
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 			SimpleJsonWriter.searchOutput(resultsMap, path);
 		}
@@ -142,7 +160,7 @@ public class ThreadedQueryBuilder {
 
 		@Override
 		public void run() {
-			synchronized (wq) {
+			synchronized (wq) { // TODO Don't synchronize here---undoing our multithreading
 				searchQuery(line, partial);
 			}
 		}

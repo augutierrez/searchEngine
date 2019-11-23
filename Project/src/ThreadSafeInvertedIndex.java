@@ -60,6 +60,10 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 		super.indexWriter(path);
 		lock.readLock().unlock();
 	}
+	
+	/*
+	 * TODO Still use the lock/try/super/finally/unlock patter
+	 */
 
 	/**
 	 * Returns whether the Inverted Index contains the word
@@ -127,6 +131,10 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 		}
 	}
 
+	/*
+	 * TODO Remove generateSearch, add and lock exact/partialSearch
+	 */
+	
 	/**
 	 * Returns an unmodifiable set of the InvertedIndex's words
 	 * 

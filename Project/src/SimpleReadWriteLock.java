@@ -121,7 +121,8 @@ public class SimpleReadWriteLock {
 		public void unlock() {
 			synchronized (object) {
 				readers--;
-				object.notifyAll();
+				object.notifyAll(); // TODO This can only wake up a writer
+				// TODO Only notify if readers is 0
 			}
 		}
 

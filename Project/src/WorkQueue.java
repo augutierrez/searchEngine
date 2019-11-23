@@ -76,6 +76,7 @@ public class WorkQueue {
 	 * @param r work request (in the form of a {@link Runnable} object)
 	 */
 	public void execute(Runnable r) {
+		// TODO incrementPending();
 		synchronized (queue) {
 			queue.addLast(r);
 			queue.notifyAll();
