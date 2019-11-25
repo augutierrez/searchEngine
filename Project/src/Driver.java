@@ -51,7 +51,7 @@ public class Driver {
 			if (parser.hasFlag("-threads")) {
 				threadBuilder = new ThreadIndexBuilder(threadIndex, workQueue);
 				try {
-					threadBuilder.directoryBuilder(path);
+					threadBuilder.directoryIterator(path);
 				} catch (Exception e) {
 					System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
 							+ " to data structure. Please enter existing paths to textfiles.");

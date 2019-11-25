@@ -107,19 +107,8 @@ public class ThreadedQueryBuilder {
 		ArrayList<InvertedIndex.Result> tempList = index.generateSearch(stems, partial);
 
 		synchronized (resultsMap) {
-			// TODO Search is inside of here, so multiple threads cnanot search at the same time
 			resultsMap.put(joined, tempList);
-			// resultsMap.put(joined, index.generateSearch(stems, partial));
 		}
-
-
-		/* TODO
-		something = index.generateSearch(stems, partial);
-		
-		synchronized (resultsMap) {
-			resultsMap.put(joined, something);
-		}
-		*/
 	}
 
 	/**

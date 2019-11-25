@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -41,12 +42,42 @@ public class InvertedIndex {
 	 * @param position : the line the word was found in the file
 	 */
 	public void add(String word, String path, int position) {
+		System.out.println(5);
 		map.putIfAbsent(word, new TreeMap<>());
 		map.get(word).putIfAbsent(path, new TreeSet<>());
 		map.get(word).get(path).add(position);
 		if (!wordCount.containsKey(path) || wordCount.get(path) < position) {
 			wordCount.put(path, position);
 		} 
+	}
+
+	/**
+	 * Adds all the elements of an InvertedIndex.
+	 * 
+	 * @param index - the index whose elements to add
+	 */
+	public void addAll(InvertedIndex index) {
+		Set<String> wordSet = index.getWords();
+		Iterator<String> wordIterator = wordSet.iterator();
+		while(wordIterator.hasNext()) {
+			System.out.println(1);
+			String word = wordIterator.next();
+			Set<String> locationSet = index.getLocations(word);
+			Iterator<String> locationIterator = locationSet.iterator();
+			while(locationIterator.hasNext()) {
+				System.out.println(2);
+				String path = locationIterator.next();
+				Set<Integer> positionsSet = index.getPositions(word, path);
+				Iterator<Integer> positionIterator = positionsSet.iterator();
+				while(positionIterator.hasNext()) {
+					System.out.println(3);
+					int position = positionIterator.next();
+					add(word, path, position);
+					System.out.println(4);
+				}
+			}
+		}
+		
 	}
 
 	/**

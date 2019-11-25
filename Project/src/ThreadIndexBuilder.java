@@ -2,7 +2,6 @@
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -12,7 +11,7 @@ import opennlp.tools.stemmer.snowball.SnowballStemmer;
 /**
  * @author tony A thread safe version of IndexBuilder
  */
-public class ThreadIndexBuilder { // TODO extends IndexBuilder
+public class ThreadIndexBuilder extends InvertedIndexBuilder { // TODO extends IndexBuilder
 
 	/**
 	 * WorkQueue for the class
@@ -24,10 +23,6 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	 */
 	private final ThreadSafeInvertedIndex index;
 
-	/*
-	 * TODO Create a WorkQueue in Driver and pass it in to this constructor instead
-	 * of the number of threads.
-	 */
 	/**
 	 * Constructor method
 	 * 
@@ -35,41 +30,28 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	 * @param workQueue - the workQueue for the class
 	 */
 	public ThreadIndexBuilder(ThreadSafeInvertedIndex index, WorkQueue workQueue) {
+		super(index);
 		this.index = index;
 		this.workQueue = workQueue;
 	}
 	
 	// TODO Remove the overlap that doesn't change
 
-	/**
-	 * The stemmer used for the path's data
-	 */
-	public static final SnowballStemmer.ALGORITHM DEFAULT = SnowballStemmer.ALGORITHM.ENGLISH;
 
-	/**
-	 * Checks if a path is a text file
-	 * 
-	 * @param path - the path that's being considered
-	 * @return true/ false
-	 */
-	public static boolean isText(Path path) {
-		String lower = path.toString().toLowerCase();
-		return lower.endsWith(".txt") || lower.endsWith(".text");
-	}
-
-	/**
-	 * Calls directory Iterator to pass tasks to the WorkQueue
-	 * 
-	 * @param path       : the to find files from
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws InterruptedException
-	 */
-	public void directoryBuilder(Path path) // TODO Remove
-			throws FileNotFoundException, IOException, InterruptedException {
-		directoryIterator(path);
-		workQueue.finish();
-	}
+//
+//	/**
+//	 * Calls directory Iterator to pass tasks to the WorkQueue
+//	 * 
+//	 * @param path       : the to find files from
+//	 * @throws FileNotFoundException
+//	 * @throws IOException
+//	 * @throws InterruptedException
+//	 */
+//	public void directoryBuilder(Path path) // TODO Remove
+//			throws FileNotFoundException, IOException, InterruptedException {
+//		super.directoryIterator(path);
+//		workQueue.finish();
+//	}
 
 	// TODO Override
 	/**
@@ -80,31 +62,20 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
+	@Override
 	public void directoryIterator(Path path) throws FileNotFoundException, IOException {
-		if (Files.isDirectory(path)) {
-			try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
-				for (Path currPath : listing)
-					directoryIterator(currPath);
-			}
-		} else {
-			if (Files.isRegularFile(path) && isText(path)) {
-				workQueue.execute(new task(path, index));
-			}
-		}
-		
-		/* TODO
 		super.directoryIterator(path);
-		wq.finish();
-		*/
+		try {
+			workQueue.finish();
+		} catch (InterruptedException e) {
+			throw new IOException();
+		}
 	}
 	
-	/*
-	 * TODO 
-	 * @Override
-	 * publci void addPath(Path...) {
-	 * 	wq.execute(new Task(path));
-	 * }
-	 */
+	@Override
+	public void addPath(Path path) {
+		workQueue.execute(new task(path));
+	}
 
 	/**
 	 * Extracts information from the file passed and each word found in the file and
@@ -139,16 +110,11 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	 *
 	 *         Tasks for the WorkQueue
 	 */
-	public static class task implements Runnable { // TODO private Task, non-static
+	private class task implements Runnable {
 		/**
 		 * The file task will read from
 		 */
-		public Path path; // TODO private
-
-		/**
-		 * The index task will store information from its file in.
-		 */
-		public final ThreadSafeInvertedIndex index; // TODO Remove
+		private Path path;
 
 		/**
 		 * The constructor method for task
@@ -156,15 +122,18 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 		 * @param path
 		 * @param index
 		 */
-		public task(Path path, ThreadSafeInvertedIndex index) {
+		public task(Path path) {
 			this.path = path;
-			this.index = index;
 		}
 
 		@Override
 		public void run() {
 			try {
-				addPath(path, index);
+				InvertedIndex local = new InvertedIndex();
+				addPath(path, local);
+				System.out.println("HERE!");
+				index.addAll(local);
+				System.out.println("HERE");
 				
 				/*
 				 * TODO 

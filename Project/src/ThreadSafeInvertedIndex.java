@@ -37,6 +37,14 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 		lock.writeLock().unlock();
 	}
 
+	public void addAll(InvertedIndex local) {
+		lock.writeLock().lock();
+		System.out.println("AFTER LOCK!");
+		super.addAll(local);
+		System.out.println("AFTER ADD ALL");
+		lock.writeLock().unlock();
+	}
+
 	/**
 	 * Creates a writer for the -counts flag and outputs to the file passed
 	 * 
