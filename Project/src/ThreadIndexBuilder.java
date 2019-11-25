@@ -1,17 +1,11 @@
-
-import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-
-import opennlp.tools.stemmer.Stemmer;
-import opennlp.tools.stemmer.snowball.SnowballStemmer;
 
 /**
  * @author tony A thread safe version of IndexBuilder
  */
-public class ThreadIndexBuilder extends InvertedIndexBuilder { // TODO extends IndexBuilder
+public class ThreadIndexBuilder extends InvertedIndexBuilder {
 
 	/**
 	 * WorkQueue for the class
@@ -35,38 +29,6 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder { // TODO extends I
 		this.workQueue = workQueue;
 	}
 	
-	// TODO Remove the overlap that doesn't change
-
-	/**
-	 * The stemmer used for the path's data
-	 */
-	public static final SnowballStemmer.ALGORITHM DEFAULT = SnowballStemmer.ALGORITHM.ENGLISH;
-
-	/**
-	 * Checks if a path is a text file
-	 * 
-	 * @param path - the path that's being considered
-	 * @return true/ false
-	 */
-	public static boolean isText(Path path) {
-		String lower = path.toString().toLowerCase();
-		return lower.endsWith(".txt") || lower.endsWith(".text");
-	}
-
-	/**
-	 * Calls directory Iterator to pass tasks to the WorkQueue
-	 * 
-	 * @param path       : the to find files from
-	 * @throws FileNotFoundException
-	 * @throws IOException
-	 * @throws InterruptedException
-	 */
-//	public void directoryBuilder(Path path) // TODO Remove
-//			throws FileNotFoundException, IOException, InterruptedException {
-//		directoryIterator(path);
-//		workQueue.finish();
-//	}
-
 	@Override
 	/**
 	 * Non static DirectoryIterator method - Iterates over a directory to extract
@@ -87,36 +49,14 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder { // TODO extends I
 	
 
 	@Override
+	/**
+	 * Non static addPath method - Extracts information from the file passed and
+	 * each word found in the file
+	 * 
+	 * @param path - the path to add to the inverted index
+	 */
 	public void addPath(Path path){
 		workQueue.execute(new task(path));
-	}
-
-	/**
-	 * Extracts information from the file passed and each word found in the file and
-	 * passes it to add()
-	 * 
-	 * @param path  : the path to the file that it will read from
-	 * @param index : the InvertedIndex that will store the path's data
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 * 
-	 * @see SnowballStemmer
-	 * @see #DEFAULT
-	 */
-	public static void addPath(Path path, InvertedIndex index) throws FileNotFoundException, IOException {
-
-		try (BufferedReader reader = Files.newBufferedReader(path)) {
-			String line;
-			String pathName = path.toString();
-			int counter = 1;
-			Stemmer stemmer = new SnowballStemmer(DEFAULT);
-			while ((line = reader.readLine()) != null) {
-				for (String word : TextParser.parse(line)) {
-					index.add(stemmer.stem(word).toString(), pathName, counter++);
-				}
-			}
-		}
-
 	}
 
 	/**
@@ -124,7 +64,7 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder { // TODO extends I
 	 *
 	 *         Tasks for the WorkQueue
 	 */
-	private class task implements Runnable { // TODO private Task, non-static
+	private class task implements Runnable {
 		/**
 		 * The file task will read from
 		 */
@@ -147,13 +87,10 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder { // TODO extends I
 		public void run() {
 			try {
 				addPath(path, index);
-				
-				/*
-				 * TODO 
 				InvertedIndex local = new InvertedIndex();
 				addPath(path, local);
-				index.addAll(local); <--- will block, but for little time and infrequently
-				 */
+				index.addAll(local);
+				 
 			} catch (IOException e) {
 				System.err.println("Invalid file found in path :" + path);
 			}

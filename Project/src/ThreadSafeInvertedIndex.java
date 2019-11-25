@@ -39,6 +39,16 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 		}
 	}
 
+	public void addAll(InvertedIndex local) {
+		lock.writeLock().lock();
+		try {
+			super.addAll(local);
+		} finally {
+			lock.writeLock().unlock();
+		}
+
+	}
+
 	/**
 	 * Creates a writer for the -counts flag and outputs to the file passed
 	 * 
@@ -118,6 +128,13 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 		}
 	}
 
+	/**
+	 * Creates a list of results based off the queries passed to it and the type of
+	 * search.
+	 * 
+	 * @param queries - set of queries
+	 * @return a list of results
+	 */
 	public ArrayList<Result> exactSearch(Set<String> queries) {
 		lock.readLock().lock();
 		try {
@@ -127,7 +144,14 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 		}
 	}
 	
-	public ArrayList<Result> partialSearch(Set<String> queries) { // TODO FIND Out why this won't do java doc complain
+	/**
+	 * Takes the set and performs a partial search. Words that start with each query
+	 * word will be matched as well.
+	 * 
+	 * @param queries - the set of queries
+	 * @return the same set with newly added queries for partial search
+	 */
+	public ArrayList<Result> partialSearch(Set<String> queries) {
 		lock.readLock().lock();
 		try {
 			return super.partialSearch(queries);
