@@ -35,20 +35,23 @@ public class Driver {
 		int numThreads;
 		try {
 			numThreads = Integer.parseInt(parser.getString("-threads", "5"));
-			workQueue = new WorkQueue(numThreads);
+
 		} catch (NumberFormatException e) {
 			return;
 		}
 		if (numThreads < 1) {
 			return;
 		}
+		else {
+			workQueue = new WorkQueue(numThreads);
+		}
 
 		if (parser.hasFlag("-path")) {
 			Path path = parser.getPath("-path");
 			if (parser.hasFlag("-threads")) {
-				threadBuilder = new ThreadIndexBuilder(threadIndex, numThreads);
+				threadBuilder = new ThreadIndexBuilder(threadIndex, workQueue);
 				try {
-					threadBuilder.directoryBuilder(path);
+					threadBuilder.directoryIterator(path);
 				} catch (Exception e) {
 					System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
 							+ " to data structure. Please enter existing paths to textfiles.");
@@ -107,7 +110,7 @@ public class Driver {
 			Path name = parser.getPath("-query");
 			if (name != null) {
 				if (parser.hasFlag("-threads")) {
-					threadQueryBuilder = new ThreadedQueryBuilder(threadIndex, numThreads);
+					threadQueryBuilder = new ThreadedQueryBuilder(threadIndex, workQueue);
 					try {
 						threadQueryBuilder.build(name, !parser.hasFlag("-exact"));
 					} catch (Exception e) {

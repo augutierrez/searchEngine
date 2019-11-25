@@ -12,17 +12,12 @@ import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/*
- * TODO Create a QueryBuilderInterface with a default implementation of 
- * the build(Path) method. Then implement that interface in both classes.
- */
-
 /**
  * @author tony
  * 
  *         Thread Safe QueryBuilder
  */
-public class ThreadedQueryBuilder {
+public class ThreadedQueryBuilder implements QueryBuilderInterface {
 
 	/**
 	 * Data Structure that will hold cleaned, stemmed, and sorted query values.
@@ -42,18 +37,18 @@ public class ThreadedQueryBuilder {
 	/**
 	 * The WorkQueue for the class.
 	 */
-	private final WorkQueue wq; // TODO Pass in from Driver
+	private final WorkQueue workQueue;
 
 	/**
 	 * Constructor method
 	 * 
-	 * @param index      - InvertedIndex that will store information
-	 * @param numThreads - number of threads requested for WorkQueue
+	 * @param index     - InvertedIndex that will store information
+	 * @param workQueue - the WorkQueue for the class
 	 */
-	public ThreadedQueryBuilder(ThreadSafeInvertedIndex index, int numThreads) {
+	public ThreadedQueryBuilder(ThreadSafeInvertedIndex index, WorkQueue workQueue) {
 		resultsMap = new TreeMap<>();
 		this.index = index;
-		this.wq = new WorkQueue(numThreads);
+		this.workQueue = workQueue;
 	}
 
 	/**
@@ -71,15 +66,15 @@ public class ThreadedQueryBuilder {
 			while ((line = reader.readLine()) != null) {
 				if (!line.isBlank()) {
 					try {
-						wq.execute(new task(line, partial));
+						searchQuery(line, partial);
 					} catch (Exception e) {
-						e.printStackTrace();
+						throw new IOException();
 					}
 					log.debug("started execute");
 				}
 			}
 			try {
-				wq.finish();
+				workQueue.finish();
 			} catch (InterruptedException e) {
 				throw e;
 			}
@@ -93,29 +88,7 @@ public class ThreadedQueryBuilder {
 	 * @param partial : whether or not to perform partial search
 	 */
 	public void searchQuery(String line, boolean partial) {
-		// TODO Just add a new task for this line
-		// TODO Move this implementation into run()
-		TreeSet<String> stems = TextFileStemmer.uniqueStems(line);
-		if (stems.isEmpty()) {
-			return;
-		}
-		String joined = String.join(" ", stems);
-		if (resultsMap.containsKey(joined)) { // TODO Must protect this read of resultsMap
-			return;
-		}
-
-		synchronized (resultsMap) {
-			// TODO Search is inside of here, so multiple threads cnanot search at the same time
-			resultsMap.put(joined, index.generateSearch(stems, partial));
-		}
-
-		/* TODO
-		something = index.generateSearch(stems, partial);
-		
-		synchronized (resultsMap) {
-			resultsMap.put(joined, something);
-		}
-		*/
+		workQueue.execute(new task(line, partial));
 	}
 
 	/**
@@ -125,9 +98,10 @@ public class ThreadedQueryBuilder {
 	 * @throws IOException
 	 */
 	public void queryWriter(Path path) throws IOException {
-		// TODO Everywhere you see resultsMap you need to protect
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			synchronized (resultsMap) {
 			SimpleJsonWriter.searchOutput(resultsMap, path);
+			}
 		}
 	}
 
@@ -160,8 +134,24 @@ public class ThreadedQueryBuilder {
 
 		@Override
 		public void run() {
-			synchronized (wq) { // TODO Don't synchronize here---undoing our multithreading
-				searchQuery(line, partial);
+
+			TreeSet<String> stems = TextFileStemmer.uniqueStems(line);
+			if (stems.isEmpty()) {
+				return;
+			}
+			String joined = String.join(" ", stems);
+			boolean contains;
+			synchronized (resultsMap) {
+				contains = resultsMap.containsKey(joined);
+			}
+			if (contains) {
+				return;
+			}
+
+			ArrayList<InvertedIndex.Result> tempList = index.generateSearch(stems, partial);
+
+			synchronized (resultsMap) {
+				resultsMap.put(joined, tempList);
 			}
 		}
 	}
