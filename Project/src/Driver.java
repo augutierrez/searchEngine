@@ -35,12 +35,15 @@ public class Driver {
 		int numThreads;
 		try {
 			numThreads = Integer.parseInt(parser.getString("-threads", "5"));
-			workQueue = new WorkQueue(numThreads);
+
 		} catch (NumberFormatException e) {
 			return;
 		}
 		if (numThreads < 1) {
 			return;
+		}
+		else {
+			workQueue = new WorkQueue(numThreads);
 		}
 
 		if (parser.hasFlag("-path")) {

@@ -42,7 +42,7 @@ public class ThreadedQueryBuilder {
 	/**
 	 * The WorkQueue for the class.
 	 */
-	private final WorkQueue wq; // TODO Pass in from Driver
+	private final WorkQueue workQueue;
 
 	/**
 	 * Constructor method
@@ -53,7 +53,7 @@ public class ThreadedQueryBuilder {
 	public ThreadedQueryBuilder(ThreadSafeInvertedIndex index, WorkQueue workQueue) {
 		resultsMap = new TreeMap<>();
 		this.index = index;
-		this.wq = workQueue;
+		this.workQueue = workQueue;
 	}
 
 	/**
@@ -71,7 +71,7 @@ public class ThreadedQueryBuilder {
 			while ((line = reader.readLine()) != null) {
 				if (!line.isBlank()) {
 					try {
-						wq.execute(new task(line, partial));
+						workQueue.execute(new task(line, partial));
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -79,7 +79,7 @@ public class ThreadedQueryBuilder {
 				}
 			}
 			try {
-				wq.finish();
+				workQueue.finish();
 			} catch (InterruptedException e) {
 				throw e;
 			}
@@ -104,10 +104,14 @@ public class ThreadedQueryBuilder {
 			return;
 		}
 
+		ArrayList<InvertedIndex.Result> tempList = index.generateSearch(stems, partial);
+
 		synchronized (resultsMap) {
 			// TODO Search is inside of here, so multiple threads cnanot search at the same time
-			resultsMap.put(joined, index.generateSearch(stems, partial));
+			resultsMap.put(joined, tempList);
+			// resultsMap.put(joined, index.generateSearch(stems, partial));
 		}
+
 
 		/* TODO
 		something = index.generateSearch(stems, partial);
@@ -160,7 +164,7 @@ public class ThreadedQueryBuilder {
 
 		@Override
 		public void run() {
-			synchronized (wq) { // TODO Don't synchronize here---undoing our multithreading
+			synchronized (workQueue) { // TODO Don't synchronize here---undoing our multithreading
 				searchQuery(line, partial);
 			}
 		}
