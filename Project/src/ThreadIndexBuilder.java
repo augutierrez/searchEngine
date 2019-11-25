@@ -24,10 +24,6 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	 */
 	private final ThreadSafeInvertedIndex index;
 
-	/*
-	 * TODO Create a WorkQueue in Driver and pass it in to this constructor instead
-	 * of the number of threads.
-	 */
 	/**
 	 * Constructor method
 	 * 

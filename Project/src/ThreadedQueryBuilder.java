@@ -12,17 +12,12 @@ import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/*
- * TODO Create a QueryBuilderInterface with a default implementation of 
- * the build(Path) method. Then implement that interface in both classes.
- */
-
 /**
  * @author tony
  * 
  *         Thread Safe QueryBuilder
  */
-public class ThreadedQueryBuilder {
+public class ThreadedQueryBuilder implements QueryBuilderInterface {
 
 	/**
 	 * Data Structure that will hold cleaned, stemmed, and sorted query values.
