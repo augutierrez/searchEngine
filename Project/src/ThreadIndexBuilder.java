@@ -2,7 +2,6 @@
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -86,16 +85,10 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder { // TODO extends I
 		}
 	}
 	
-	/*
-	 * TODO 
-	 * @Override
-	 * publci void addPath(Path...) {
-	 * 	wq.execute(new Task(path));
-	 * }
-	 */
+
 	@Override
 	public void addPath(Path path){
-		workQueue.execute(new task(path, this.index));
+		workQueue.execute(new task(path));
 	}
 
 	/**
@@ -131,26 +124,23 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder { // TODO extends I
 	 *
 	 *         Tasks for the WorkQueue
 	 */
-	public static class task implements Runnable { // TODO private Task, non-static
+	private class task implements Runnable { // TODO private Task, non-static
 		/**
 		 * The file task will read from
 		 */
-		public Path path; // TODO private
+		private Path path;
 
 		/**
 		 * The index task will store information from its file in.
 		 */
-		public final ThreadSafeInvertedIndex index; // TODO Remove
 
 		/**
 		 * The constructor method for task
 		 * 
-		 * @param path
-		 * @param index
+		 * @param path - the path to extract information from
 		 */
-		public task(Path path, ThreadSafeInvertedIndex index) {
+		public task(Path path) {
 			this.path = path;
-			this.index = index;
 		}
 
 		@Override
