@@ -17,7 +17,7 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	/**
 	 * WorkQueue for the class
 	 */
-	private final WorkQueue wq; // TODO Better variable name
+	private final WorkQueue workQueue;
 
 	/**
 	 * The ThreadSafeInvertedIndex that is storing the data
@@ -36,7 +36,7 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	 */
 	public ThreadIndexBuilder(ThreadSafeInvertedIndex index, int numThreads) {
 		this.index = index;
-		wq = new WorkQueue(numThreads);
+		workQueue = new WorkQueue(numThreads);
 	}
 	
 	// TODO Remove the overlap that doesn't change
@@ -68,7 +68,7 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	public void directoryBuilder(Path path) // TODO Remove
 			throws FileNotFoundException, IOException, InterruptedException {
 		directoryIterator(path);
-		wq.finish();
+		workQueue.finish();
 	}
 
 	// TODO Override
@@ -88,7 +88,7 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 			}
 		} else {
 			if (Files.isRegularFile(path) && isText(path)) {
-				wq.execute(new task(path, index));
+				workQueue.execute(new task(path, index));
 			}
 		}
 		

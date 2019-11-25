@@ -30,10 +30,12 @@ public class Driver {
 		InvertedIndexBuilder indexBuilder = new InvertedIndexBuilder(index);
 		ThreadIndexBuilder threadBuilder;
 		ThreadedQueryBuilder threadQueryBuilder = null;
+		WorkQueue workQueue = null;
 
 		int numThreads;
 		try {
 			numThreads = Integer.parseInt(parser.getString("-threads", "5"));
+			workQueue = new WorkQueue(numThreads);
 		} catch (NumberFormatException e) {
 			return;
 		}
