@@ -12,18 +12,22 @@ import opennlp.tools.stemmer.snowball.SnowballStemmer;
 /**
  * @author tony A thread safe version of IndexBuilder
  */
-public class ThreadIndexBuilder {
+public class ThreadIndexBuilder { // TODO extends IndexBuilder
 
 	/**
 	 * WorkQueue for the class
 	 */
-	private final WorkQueue wq;
+	private final WorkQueue wq; // TODO Better variable name
 
 	/**
 	 * The ThreadSafeInvertedIndex that is storing the data
 	 */
 	private final ThreadSafeInvertedIndex index;
 
+	/*
+	 * TODO Create a WorkQueue in Driver and pass it in to this constructor instead
+	 * of the number of threads.
+	 */
 	/**
 	 * Constructor method
 	 * 
@@ -34,6 +38,8 @@ public class ThreadIndexBuilder {
 		this.index = index;
 		wq = new WorkQueue(numThreads);
 	}
+	
+	// TODO Remove the overlap that doesn't change
 
 	/**
 	 * The stemmer used for the path's data
@@ -59,12 +65,13 @@ public class ThreadIndexBuilder {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void directoryBuilder(Path path)
+	public void directoryBuilder(Path path) // TODO Remove
 			throws FileNotFoundException, IOException, InterruptedException {
 		directoryIterator(path);
 		wq.finish();
 	}
 
+	// TODO Override
 	/**
 	 * Non static DirectoryIterator method - Iterates over a directory to extract
 	 * files and hands it as a task to WorkQueue
@@ -84,7 +91,20 @@ public class ThreadIndexBuilder {
 				wq.execute(new task(path, index));
 			}
 		}
+		
+		/* TODO
+		super.directoryIterator(path);
+		wq.finish();
+		*/
 	}
+	
+	/*
+	 * TODO 
+	 * @Override
+	 * publci void addPath(Path...) {
+	 * 	wq.execute(new Task(path));
+	 * }
+	 */
 
 	/**
 	 * Extracts information from the file passed and each word found in the file and
@@ -119,16 +139,16 @@ public class ThreadIndexBuilder {
 	 *
 	 *         Tasks for the WorkQueue
 	 */
-	public static class task implements Runnable {
+	public static class task implements Runnable { // TODO private Task, non-static
 		/**
 		 * The file task will read from
 		 */
-		public Path path;
+		public Path path; // TODO private
 
 		/**
 		 * The index task will store information from its file in.
 		 */
-		public final ThreadSafeInvertedIndex index;
+		public final ThreadSafeInvertedIndex index; // TODO Remove
 
 		/**
 		 * The constructor method for task
@@ -145,6 +165,13 @@ public class ThreadIndexBuilder {
 		public void run() {
 			try {
 				addPath(path, index);
+				
+				/*
+				 * TODO 
+				InvertedIndex local = new InvertedIndex();
+				addPath(path, local);
+				index.addAll(local); <--- will block, but for little time and infrequently
+				 */
 			} catch (IOException e) {
 				System.err.println("Invalid file found in path :" + path);
 			}
