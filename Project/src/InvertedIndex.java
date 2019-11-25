@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -47,6 +48,35 @@ public class InvertedIndex {
 		if (!wordCount.containsKey(path) || wordCount.get(path) < position) {
 			wordCount.put(path, position);
 		} 
+	}
+
+	/**
+	 * Adds all the information from the given index.
+	 * 
+	 * @param index - the index whose information will be added
+	 */
+	public void addAll(InvertedIndex index) {
+		Set<String> wordSet = index.getWords();
+		Iterator<String> wordIterator = wordSet.iterator();
+		while (wordIterator.hasNext()) {
+			String word = wordIterator.next();
+			Set<String> locationSet = index.getLocations(word);
+			Iterator<String> locationIterator = locationSet.iterator();
+			while (locationIterator.hasNext()) {
+				String path = locationIterator.next();
+				Set<Integer> positionsSet = index.getPositions(word, path);
+				Iterator<Integer> positionIterator = positionsSet.iterator();
+				while (positionIterator.hasNext()) {
+					int position = positionIterator.next();
+					map.putIfAbsent(word, new TreeMap<>());
+					map.get(word).putIfAbsent(path, new TreeSet<>());
+					map.get(word).get(path).add(position);
+					if (!wordCount.containsKey(path) || wordCount.get(path) < position) {
+						wordCount.put(path, position);
+					}
+				}
+			}
+		}
 	}
 
 	/**
