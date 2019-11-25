@@ -71,9 +71,9 @@ public class ThreadedQueryBuilder {
 			while ((line = reader.readLine()) != null) {
 				if (!line.isBlank()) {
 					try {
-						workQueue.execute(new task(line, partial));
+						searchQuery(line, partial);
 					} catch (Exception e) {
-						e.printStackTrace();
+						throw new IOException();
 					}
 					log.debug("started execute");
 				}
@@ -93,26 +93,7 @@ public class ThreadedQueryBuilder {
 	 * @param partial : whether or not to perform partial search
 	 */
 	public void searchQuery(String line, boolean partial) {
-		// TODO Just add a new task for this line
-		// TODO Move this implementation into run()
-		TreeSet<String> stems = TextFileStemmer.uniqueStems(line);
-		if (stems.isEmpty()) {
-			return;
-		}
-		String joined = String.join(" ", stems);
-		boolean contains;
-		synchronized (resultsMap) {
-			contains = resultsMap.containsKey(joined);
-		}
-		if (contains) {
-			return;
-		}
-
-		ArrayList<InvertedIndex.Result> tempList = index.generateSearch(stems, partial);
-
-		synchronized (resultsMap) {
-			resultsMap.put(joined, tempList);
-		}
+		workQueue.execute(new task(line, partial));
 	}
 
 	/**
@@ -122,9 +103,10 @@ public class ThreadedQueryBuilder {
 	 * @throws IOException
 	 */
 	public void queryWriter(Path path) throws IOException {
-		// TODO Everywhere you see resultsMap you need to protect
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+			synchronized (resultsMap) {
 			SimpleJsonWriter.searchOutput(resultsMap, path);
+			}
 		}
 	}
 
@@ -157,7 +139,25 @@ public class ThreadedQueryBuilder {
 
 		@Override
 		public void run() {
-				searchQuery(line, partial);
+
+			TreeSet<String> stems = TextFileStemmer.uniqueStems(line);
+			if (stems.isEmpty()) {
+				return;
+			}
+			String joined = String.join(" ", stems);
+			boolean contains;
+			synchronized (resultsMap) {
+				contains = resultsMap.containsKey(joined);
+			}
+			if (contains) {
+				return;
+			}
+
+			ArrayList<InvertedIndex.Result> tempList = index.generateSearch(stems, partial);
+
+			synchronized (resultsMap) {
+				resultsMap.put(joined, tempList);
+			}
 		}
 	}
 }
