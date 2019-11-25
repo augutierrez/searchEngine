@@ -86,7 +86,6 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder {
 		@Override
 		public void run() {
 			try {
-				addPath(path, index);
 				InvertedIndex local = new InvertedIndex();
 				addPath(path, local);
 				index.addAll(local);
