@@ -46,7 +46,7 @@ public class Driver {
 		if (parser.hasFlag("-path")) {
 			Path path = parser.getPath("-path");
 			if (parser.hasFlag("-threads")) {
-				threadBuilder = new ThreadIndexBuilder(threadIndex, numThreads);
+				threadBuilder = new ThreadIndexBuilder(threadIndex, workQueue);
 				try {
 					threadBuilder.directoryBuilder(path);
 				} catch (Exception e) {

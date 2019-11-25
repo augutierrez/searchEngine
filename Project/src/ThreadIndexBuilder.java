@@ -31,12 +31,12 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	/**
 	 * Constructor method
 	 * 
-	 * @param index      - The ThreadSafeInvertedIndex that is storing the data
-	 * @param numThreads - the number of threads requested for WorkQueue
+	 * @param index     - The ThreadSafeInvertedIndex that is storing the data
+	 * @param workQueue - the workQueue for the class
 	 */
-	public ThreadIndexBuilder(ThreadSafeInvertedIndex index, int numThreads) {
+	public ThreadIndexBuilder(ThreadSafeInvertedIndex index, WorkQueue workQueue) {
 		this.index = index;
-		workQueue = new WorkQueue(numThreads);
+		this.workQueue = workQueue;
 	}
 	
 	// TODO Remove the overlap that doesn't change
