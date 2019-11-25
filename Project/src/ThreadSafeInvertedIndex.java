@@ -31,10 +31,12 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param position : the line the word was found in the file
 	 */
 	public void add(String word, String path, int position) {
-
 		lock.writeLock().lock();
-		super.add(word, path, position);
-		lock.writeLock().unlock();
+		try {
+			super.add(word, path, position);
+		} finally {
+			lock.writeLock().unlock();
+		}
 	}
 
 	/**
@@ -45,8 +47,11 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	public void countsWriter(Path path) throws IOException {
 		lock.readLock().lock();
-		super.countsWriter(path);
-		lock.readLock().unlock();
+		try {
+			super.countsWriter(path);
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -57,13 +62,12 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	public void indexWriter(Path path) throws IOException {
 		lock.readLock().lock();
-		super.indexWriter(path);
-		lock.readLock().unlock();
+		try {
+			super.indexWriter(path);
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
-	
-	/*
-	 * TODO Still use the lock/try/super/finally/unlock patter
-	 */
 
 	/**
 	 * Returns whether the Inverted Index contains the word
@@ -114,27 +118,24 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 		}
 	}
 
-	/**
-	 * Helper method that calls on partialSearch() or exactSearch()
-	 * 
-	 * @param queries - the queries to search
-	 * @param partial - whether to call partial
-	 * @return - a list of results
-	 */
-	public ArrayList<Result> generateSearch(Set<String> queries, boolean partial) {
+	public ArrayList<Result> exactSearch(Set<String> queries) {
 		lock.readLock().lock();
 		try {
-			return super.generateSearch(queries, partial);
+			return super.exactSearch(queries);
+		} finally {
+			lock.readLock().unlock();
 		}
-		finally {
+	}
+	
+	public ArrayList<Result> partialSearch(Set<String> queries) { // TODO FIND Out why this won't do java doc complain
+		lock.readLock().lock();
+		try {
+			return super.partialSearch(queries);
+		} finally {
 			lock.readLock().unlock();
 		}
 	}
 
-	/*
-	 * TODO Remove generateSearch, add and lock exact/partialSearch
-	 */
-	
 	/**
 	 * Returns an unmodifiable set of the InvertedIndex's words
 	 * 

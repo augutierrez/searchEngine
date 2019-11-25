@@ -100,26 +100,19 @@ public class ThreadedQueryBuilder {
 			return;
 		}
 		String joined = String.join(" ", stems);
-		if (resultsMap.containsKey(joined)) { // TODO Must protect this read of resultsMap
+		boolean contains;
+		synchronized (resultsMap) {
+			contains = resultsMap.containsKey(joined);
+		}
+		if (contains) {
 			return;
 		}
 
 		ArrayList<InvertedIndex.Result> tempList = index.generateSearch(stems, partial);
 
 		synchronized (resultsMap) {
-			// TODO Search is inside of here, so multiple threads cnanot search at the same time
 			resultsMap.put(joined, tempList);
-			// resultsMap.put(joined, index.generateSearch(stems, partial));
 		}
-
-
-		/* TODO
-		something = index.generateSearch(stems, partial);
-		
-		synchronized (resultsMap) {
-			resultsMap.put(joined, something);
-		}
-		*/
 	}
 
 	/**
