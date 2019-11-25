@@ -12,7 +12,7 @@ import opennlp.tools.stemmer.snowball.SnowballStemmer;
 /**
  * @author tony A thread safe version of IndexBuilder
  */
-public class ThreadIndexBuilder { // TODO extends IndexBuilder
+public class ThreadIndexBuilder extends InvertedIndexBuilder { // TODO extends IndexBuilder
 
 	/**
 	 * WorkQueue for the class
@@ -31,6 +31,7 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	 * @param workQueue - the workQueue for the class
 	 */
 	public ThreadIndexBuilder(ThreadSafeInvertedIndex index, WorkQueue workQueue) {
+		super(index);
 		this.index = index;
 		this.workQueue = workQueue;
 	}
@@ -61,13 +62,13 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	public void directoryBuilder(Path path) // TODO Remove
-			throws FileNotFoundException, IOException, InterruptedException {
-		directoryIterator(path);
-		workQueue.finish();
-	}
+//	public void directoryBuilder(Path path) // TODO Remove
+//			throws FileNotFoundException, IOException, InterruptedException {
+//		directoryIterator(path);
+//		workQueue.finish();
+//	}
 
-	// TODO Override
+	@Override
 	/**
 	 * Non static DirectoryIterator method - Iterates over a directory to extract
 	 * files and hands it as a task to WorkQueue
@@ -77,21 +78,12 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	 * @throws IOException
 	 */
 	public void directoryIterator(Path path) throws FileNotFoundException, IOException {
-		if (Files.isDirectory(path)) {
-			try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
-				for (Path currPath : listing)
-					directoryIterator(currPath);
-			}
-		} else {
-			if (Files.isRegularFile(path) && isText(path)) {
-				workQueue.execute(new task(path, index));
-			}
-		}
-		
-		/* TODO
 		super.directoryIterator(path);
-		wq.finish();
-		*/
+		try {
+			workQueue.finish();
+		} catch (InterruptedException e) {
+			throw new IOException();
+		}
 	}
 	
 	/*
@@ -101,6 +93,10 @@ public class ThreadIndexBuilder { // TODO extends IndexBuilder
 	 * 	wq.execute(new Task(path));
 	 * }
 	 */
+	@Override
+	public void addPath(Path path){
+		workQueue.execute(new task(path, this.index));
+	}
 
 	/**
 	 * Extracts information from the file passed and each word found in the file and
