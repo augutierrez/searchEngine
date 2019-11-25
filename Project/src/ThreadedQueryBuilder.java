@@ -47,13 +47,13 @@ public class ThreadedQueryBuilder {
 	/**
 	 * Constructor method
 	 * 
-	 * @param index      - InvertedIndex that will store information
-	 * @param numThreads - number of threads requested for WorkQueue
+	 * @param index     - InvertedIndex that will store information
+	 * @param workQueue - the WorkQueue for the class
 	 */
-	public ThreadedQueryBuilder(ThreadSafeInvertedIndex index, int numThreads) {
+	public ThreadedQueryBuilder(ThreadSafeInvertedIndex index, WorkQueue workQueue) {
 		resultsMap = new TreeMap<>();
 		this.index = index;
-		this.wq = new WorkQueue(numThreads);
+		this.wq = workQueue;
 	}
 
 	/**

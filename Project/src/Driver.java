@@ -107,7 +107,7 @@ public class Driver {
 			Path name = parser.getPath("-query");
 			if (name != null) {
 				if (parser.hasFlag("-threads")) {
-					threadQueryBuilder = new ThreadedQueryBuilder(threadIndex, numThreads);
+					threadQueryBuilder = new ThreadedQueryBuilder(threadIndex, workQueue);
 					try {
 						threadQueryBuilder.build(name, !parser.hasFlag("-exact"));
 					} catch (Exception e) {
