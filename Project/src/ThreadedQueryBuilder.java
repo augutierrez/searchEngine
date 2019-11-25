@@ -164,9 +164,7 @@ public class ThreadedQueryBuilder {
 
 		@Override
 		public void run() {
-			synchronized (workQueue) { // TODO Don't synchronize here---undoing our multithreading
 				searchQuery(line, partial);
-			}
 		}
 	}
 }
