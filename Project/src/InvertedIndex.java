@@ -56,27 +56,36 @@ public class InvertedIndex {
 	 * @param index - the index whose information will be added
 	 */
 	public void addAll(InvertedIndex index) {
-		Set<String> wordSet = index.getWords();
+		Set<String> wordSet = index.map.keySet();
 		Iterator<String> wordIterator = wordSet.iterator();
 		while (wordIterator.hasNext()) {
 			String word = wordIterator.next();
-			Set<String> locationSet = index.getLocations(word);
-			Iterator<String> locationIterator = locationSet.iterator();
-			while (locationIterator.hasNext()) {
-				String path = locationIterator.next();
-				Set<Integer> positionsSet = index.getPositions(word, path);
-				Iterator<Integer> positionIterator = positionsSet.iterator();
-				while (positionIterator.hasNext()) {
-					int position = positionIterator.next();
-					map.putIfAbsent(word, new TreeMap<>());
-					map.get(word).putIfAbsent(path, new TreeSet<>());
-					map.get(word).get(path).add(position);
-					if (!wordCount.containsKey(path) || wordCount.get(path) < position) {
-						wordCount.put(path, position);
+			if (!this.map.containsKey(word)) {
+				this.map.put(word, index.map.get(word));
+			} else {
+				Set<String> locationSet = index.map.get(word).keySet();
+				Iterator<String> locationIterator = locationSet.iterator();
+				while (locationIterator.hasNext()) {
+					String location = locationIterator.next();
+					if (!this.map.get(word).containsKey(location)) {
+						this.map.get(word).put(location, index.map.get(word).get(location));
+					} else {
+						this.map.get(word).get(location).addAll(index.map.get(word).get(location));
 					}
 				}
+
+			}
+
+		}
+		for (String location : index.wordCount.keySet()) {
+			if (!wordCount.containsKey(location)) {
+				wordCount.put(location, index.wordCount.get(location));
+			} else {
+				int count = index.wordCount.get(location);
+				wordCount.put(location, count + 1);
 			}
 		}
+
 	}
 
 	/**
