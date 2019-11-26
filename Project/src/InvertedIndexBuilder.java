@@ -43,10 +43,22 @@ public class InvertedIndexBuilder {
 	 * @throws IOException
 	 */
 	public void directoryIterator(Path path) throws FileNotFoundException, IOException {
+		directoryIteratorRecursive(path);
+	}
+
+	/**
+	 * Non static DirectoryIterator method - Iterates over a directory to extract
+	 * files
+	 * 
+	 * @param path
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	private void directoryIteratorRecursive(Path path) throws FileNotFoundException, IOException {
 		if (Files.isDirectory(path)) {
 			try (DirectoryStream<Path> listing = Files.newDirectoryStream(path)) {
 				for (Path currPath : listing)
-					directoryIterator(currPath);
+					directoryIteratorRecursive(currPath);
 			}
 		} else {
 			if (Files.isRegularFile(path) && isText(path)) {

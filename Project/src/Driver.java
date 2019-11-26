@@ -145,6 +145,10 @@ public class Driver {
 			}
 		}
 
+		if (workQueue != null) {
+			workQueue.shutdown();
+		}
+
 		Duration elapsed = Duration.between(start, Instant.now());
 		double seconds = (double) elapsed.toMillis() / Duration.ofSeconds(1).toMillis();
 		System.out.printf("Elapsed: %f seconds%n", seconds);
