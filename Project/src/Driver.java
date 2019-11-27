@@ -31,8 +31,27 @@ public class Driver {
 		ThreadIndexBuilder threadBuilder;
 		ThreadedQueryBuilder threadQueryBuilder = null;
 		WorkQueue workQueue = null;
-
 		int numThreads;
+
+		// Project04
+		int redirectLimit;
+		try {
+			redirectLimit = Integer.parseInt(parser.getString("-limit", "50"));
+		} catch (NumberFormatException e) {
+			return;
+		}
+
+		String seed = null;
+		if (parser.hasFlag("-url")) {
+			seed = parser.getString("-url");
+			// if the threads flag isn't there, we give it so that we can multithread
+			if (!parser.hasFlag("-threads")) {
+				String[] arg = { "-threads" };
+				parser.parse(arg);
+			}
+
+		}
+
 		try {
 			numThreads = Integer.parseInt(parser.getString("-threads", "5"));
 
