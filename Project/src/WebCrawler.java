@@ -48,8 +48,8 @@ public class WebCrawler {
 	 */
 	public void crawl(String url) throws InterruptedException, MalformedURLException {
 		URL cleaned = LinkParser.clean(new URL(url));
-		crawl(cleaned);
-
+		storeHtml(cleaned);
+		urlList.add(cleaned);
 		workQueue.finish();
 	}
 
@@ -63,31 +63,12 @@ public class WebCrawler {
 		 * 
 		 * URL lists during execute?
 		 */
-		boolean add = false;
-		boolean maxedOut = false;
-		synchronized (urlList) {
-			System.out.println("Made it here: " + url.toString());
-			if (urlList.size() < numLinks && !urlList.contains(url)) {
-				urlList.add(url);
-				add = true;
-			}
-			if (urlList.size() == numLinks) {
-				maxedOut = true;
-			}
-		}
-		if (add) {
-			storeHtml(url);
-		}
-		if (maxedOut) {
-			return;
-		}
 		// call here
 		String html = HtmlFetcher.fetch(url, 3);
 		if (html == null) {
 			return;
 		}
 		// need to edit out unecessary stuff ( head tags)
-//		synchronized (workQueue) {
 		for (URL tempUrl : LinkParser.listLinks(url, html)) {
 			URL tempCleaned = LinkParser.clean(tempUrl);
 			boolean contain = false;
@@ -101,13 +82,8 @@ public class WebCrawler {
 			if (!contain && urlList.size() < numLinks) {
 				storeHtml(tempCleaned);
 				urlList.add(tempCleaned);
-//					crawl(tempCleaned);
 				}
 			}
-//		}
-		// check that we don't go over limit, also might want to just call execute right
-		// away - that way it starts working until we find more matches, just use array
-		// list as way to keep record
 	}
 
 	public void storeHtml(URL url) {
@@ -166,10 +142,6 @@ public class WebCrawler {
 				return;
 			}
 			String cleanedHtml = HtmlCleaner.stripHtml(html);
-
-			// multithreading - perhaps overwrite fetch to create a new
-			// if html is null return
-
 			int counter = 1;
 			Stemmer stemmer = new SnowballStemmer(DEFAULT);
 			synchronized (index) {
