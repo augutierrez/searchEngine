@@ -55,10 +55,18 @@ public class WebCrawler {
 
 	public void crawl(URL url) throws MalformedURLException {
 		//like directory iterator but for urls
+		/*
+		 * I want to learn what this is doing better, so we are going to mess around
+		 * with it to see what its doing Try to take out the execute component and just
+		 * printout all the sites, see if the ones we are need is found if they are,
+		 * this means its prob not an issue with regex
+		 * 
+		 * URL lists during execute?
+		 */
 		boolean add = false;
 		boolean maxedOut = false;
-		System.out.println(1);
 		synchronized (urlList) {
+			System.out.println("Made it here: " + url.toString());
 			if (urlList.size() < numLinks && !urlList.contains(url)) {
 				urlList.add(url);
 				add = true;
@@ -67,8 +75,6 @@ public class WebCrawler {
 				maxedOut = true;
 			}
 		}
-		System.out.println(url.toString());
-		System.out.println(2);
 		if (add) {
 			storeHtml(url);
 		}
@@ -81,6 +87,7 @@ public class WebCrawler {
 			return;
 		}
 		// need to edit out unecessary stuff ( head tags)
+//		synchronized (workQueue) {
 		for (URL tempUrl : LinkParser.listLinks(url, html)) {
 			URL tempCleaned = LinkParser.clean(tempUrl);
 			boolean contain = false;
@@ -89,12 +96,15 @@ public class WebCrawler {
 				if (urlList.contains(tempCleaned)) {
 					contain = true;
 				}
-			}
+				}
 			System.out.println("URL : " + tempCleaned.toString() + " is in list : " + contain);
-			if (!contain) {
-			crawl(tempCleaned);
+			if (!contain && urlList.size() < numLinks) {
+				storeHtml(tempCleaned);
+				urlList.add(tempCleaned);
+//					crawl(tempCleaned);
+				}
 			}
-		}
+//		}
 		// check that we don't go over limit, also might want to just call execute right
 		// away - that way it starts working until we find more matches, just use array
 		// list as way to keep record
@@ -167,6 +177,12 @@ public class WebCrawler {
 					// maybe do local index and then addall
 					index.add(stemmer.stem(word).toString(), url.toString(), counter++);
 				}
+			}
+			try {
+				crawl(url);
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				return;
 			}
 		}
 	}
