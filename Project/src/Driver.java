@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -31,12 +32,13 @@ public class Driver {
 		ThreadIndexBuilder threadBuilder;
 		ThreadedQueryBuilder threadQueryBuilder = null;
 		WorkQueue workQueue = null;
+		WebCrawler webCrawler = null;
 		int numThreads;
 
 		// Project04
-		int redirectLimit;
+		int numLinks;
 		try {
-			redirectLimit = Integer.parseInt(parser.getString("-limit", "50"));
+			numLinks = Integer.parseInt(parser.getString("-limit", "50"));
 		} catch (NumberFormatException e) {
 			return;
 		}
@@ -49,7 +51,6 @@ public class Driver {
 				String[] arg = { "-threads" };
 				parser.parse(arg);
 			}
-
 		}
 
 		try {
@@ -63,6 +64,24 @@ public class Driver {
 		}
 		else {
 			workQueue = new WorkQueue(numThreads);
+			if (parser.hasFlag("-url")) {
+				webCrawler = new WebCrawler(threadIndex, workQueue, numLinks);
+			}
+		}
+
+		if (parser.hasFlag("-url")) {
+
+			try {
+				try {
+					webCrawler.crawl(parser.getString("-url"));
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		if (parser.hasFlag("-path")) {

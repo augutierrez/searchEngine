@@ -176,6 +176,7 @@ public class WorkQueue {
 					r.run();
 				} catch (RuntimeException ex) {
 					// catch runtime exceptions to avoid leaking threads
+					ex.printStackTrace();
 					System.err.println("Warning: Work queue encountered an exception while running.");
 				}
 				decrementPending();
