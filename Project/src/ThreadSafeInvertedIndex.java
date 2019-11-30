@@ -3,6 +3,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Set;
 
+// TODO USe the @Override annotation---configure Eclipse to add it for you
+
 /**
  * A thread safe version of InvertedIndex
  * 
@@ -15,7 +17,6 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 
 	/**
 	 * Initializes a thread-safe indexed set.
-	 *
 	 */
 	public ThreadSafeInvertedIndex() {
 		// NOTE: DO NOT MODIFY THIS METHOD

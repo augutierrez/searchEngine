@@ -21,5 +21,19 @@ public interface QueryBuilderInterface {
 	 * @throws InterruptedException
 	 */
 	public void build(Path path, boolean partial) throws FileNotFoundException, IOException, InterruptedException;
-
+	
+	/* TODO public default void build(Path path, boolean partial) throws FileNotFoundException, IOException {
+		try (BufferedReader reader = Files.newBufferedReader(path)) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				if (!line.isBlank()) {
+					searchQuery(line, partial);
+				}
+			}
+		}
+	}
+	
+	public void searchQuery(String line, boolean partial);
+	public void queryWriter(Path path) throws IOException;
+	*/
 }

@@ -36,6 +36,7 @@ public class QueryBuilder {
 		this.index = index;
 	}
 
+	// TODO Remove
 	/**
 	 * Reads the query files. It handles both exact and partial searches.
 	 * 

@@ -48,13 +48,13 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder {
 	}
 	
 
-	@Override
 	/**
 	 * Non static addPath method - Extracts information from the file passed and
 	 * each word found in the file
 	 * 
 	 * @param path - the path to add to the inverted index
 	 */
+	@Override
 	public void addPath(Path path){
 		workQueue.execute(new task(path));
 	}
@@ -64,7 +64,7 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder {
 	 *
 	 *         Tasks for the WorkQueue
 	 */
-	private class task implements Runnable {
+	private class task implements Runnable { // TODO Task
 		/**
 		 * The file task will read from
 		 */

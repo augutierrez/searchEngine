@@ -61,6 +61,7 @@ public class ThreadedQueryBuilder implements QueryBuilderInterface {
 	 * @throws InterruptedException
 	 */
 	public void build(Path path, boolean partial) throws FileNotFoundException, IOException, InterruptedException {
+		// TODO QueryBuilderInterface.super.build(path, partial); and finish
 		try (BufferedReader reader = Files.newBufferedReader(path)) {
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -110,7 +111,7 @@ public class ThreadedQueryBuilder implements QueryBuilderInterface {
 	 *
 	 *         The runnable class
 	 */
-	public class task implements Runnable {
+	public class task implements Runnable { // TODO Task
 		/**
 		 * The Query line the task is handling.
 		 */

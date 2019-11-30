@@ -24,6 +24,42 @@ public class Driver {
 
 		ArgumentParser parser = new ArgumentParser();
 		parser.parse(args);
+		
+		/* TODO Try this instead:
+
+		InvertedIndex index;
+		InvertedIndexBuilder indexBuilder;
+		QueryBuilderInterface queryBuilder;
+		WorkQueue queue = null;
+
+		if (-threads) {
+			parse the threads flag and create the work queue
+			
+			ThreadSafeInvertedIndex threadIndex = new ThreadSafeInvertedIndex();
+			index = threadIndex;
+			indexBuilder = new ThreadIndexBuilder(threadIndex, workQueue);
+			etc.
+		}
+		else {
+			index = new InvertedIndex();
+		}
+		 */
+		
+		/*
+		 * TODO ...and then the rest is the same as project 2
+		 * 
+		if (parser.hasFlag("-results")) {
+			Path resultsPath = parser.getPath("-results", Path.of("results.json"));
+			try {
+				queryBuilder.queryWriter(resultsPath);
+				} catch (IOException e1) {
+					System.err.println("Unable to write results into path : " + resultsPath
+							+ ". Please enter a valid output path name.");
+				}
+			}
+		}
+		 */		
+		
 		InvertedIndex index = new InvertedIndex();
 		ThreadSafeInvertedIndex threadIndex = new ThreadSafeInvertedIndex();
 		QueryBuilder queryBuilder = new QueryBuilder(index);

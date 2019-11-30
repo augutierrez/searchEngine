@@ -81,6 +81,7 @@ public class InvertedIndex {
 			if (!wordCount.containsKey(location)) {
 				wordCount.put(location, index.wordCount.get(location));
 			} else {
+				// TODO Don't add, keep max position
 				int count = index.wordCount.get(location);
 				wordCount.put(location, count + 1);
 			}
