@@ -1,4 +1,3 @@
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -8,9 +7,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * @author tony
@@ -29,10 +25,6 @@ public class ThreadedQueryBuilder implements QueryBuilderInterface {
 	 */
 	private final ThreadSafeInvertedIndex index;
 
-	/**
-	 * Logger for the class.
-	 */
-	private static final Logger log = LogManager.getLogger();
 
 	/**
 	 * The WorkQueue for the class.
@@ -60,26 +52,10 @@ public class ThreadedQueryBuilder implements QueryBuilderInterface {
 	 * @throws FileNotFoundException
 	 * @throws InterruptedException
 	 */
+	@Override
 	public void build(Path path, boolean partial) throws FileNotFoundException, IOException, InterruptedException {
-		// TODO QueryBuilderInterface.super.build(path, partial); and finish
-		try (BufferedReader reader = Files.newBufferedReader(path)) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				if (!line.isBlank()) {
-					try {
-						searchQuery(line, partial);
-					} catch (Exception e) {
-						throw new IOException();
-					}
-					log.debug("started execute");
-				}
-			}
-			try {
-				workQueue.finish();
-			} catch (InterruptedException e) {
-				throw e;
-			}
-		}
+		QueryBuilderInterface.super.build(path, partial);
+		workQueue.finish();
 	}
 
 	/**
@@ -88,6 +64,7 @@ public class ThreadedQueryBuilder implements QueryBuilderInterface {
 	 * @param line    : the query line
 	 * @param partial : whether or not to perform partial search
 	 */
+	@Override
 	public void searchQuery(String line, boolean partial) {
 		workQueue.execute(new Task(line, partial));
 	}
@@ -98,6 +75,7 @@ public class ThreadedQueryBuilder implements QueryBuilderInterface {
 	 * @param path - the output path
 	 * @throws IOException
 	 */
+	@Override
 	public void queryWriter(Path path) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 			synchronized (resultsMap) {

@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,7 +12,7 @@ import java.util.TreeSet;
  * 
  * @author tony
  */
-public class QueryBuilder {
+public class QueryBuilder implements QueryBuilderInterface {
 
 	/**
 	 * Data Structure that will hold cleaned, stemmed, and sorted query values.
@@ -36,32 +34,13 @@ public class QueryBuilder {
 		this.index = index;
 	}
 
-	// TODO Remove
-	/**
-	 * Reads the query files. It handles both exact and partial searches.
-	 * 
-	 * @param path    : the path that has the query values
-	 * @param partial : whether or not to perform partial search
-	 * @throws IOException           : file couldn't be found
-	 * @throws FileNotFoundException
-	 */
-	public void build(Path path, boolean partial) throws FileNotFoundException, IOException {
-		try (BufferedReader reader = Files.newBufferedReader(path)) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				if (!line.isBlank()) {
-					searchQuery(line, partial);
-				}
-			}
-		}
-	}
-
 	/**
 	 * Initiates the search of queries and stores it into the data structure.
 	 * 
 	 * @param line    : the query line
 	 * @param partial : whether or not to perform partial search
 	 */
+	@Override
 	public void searchQuery(String line, boolean partial) {
 		TreeSet<String> stems = TextFileStemmer.uniqueStems(line);
 		if (stems.isEmpty()) {
@@ -80,6 +59,7 @@ public class QueryBuilder {
 	 * @param path - the output path
 	 * @throws IOException
 	 */
+	@Override
 	public void queryWriter(Path path) throws IOException {
 		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
 			SimpleJsonWriter.searchOutput(resultsMap, path);

@@ -3,8 +3,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Set;
 
-// TODO USe the @Override annotation---configure Eclipse to add it for you
-
 /**
  * A thread safe version of InvertedIndex
  * 

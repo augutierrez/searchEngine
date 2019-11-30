@@ -24,49 +24,34 @@ public class Driver {
 
 		ArgumentParser parser = new ArgumentParser();
 		parser.parse(args);
-		
-		/* TODO Try this instead:
-
 		InvertedIndex index;
 		InvertedIndexBuilder indexBuilder;
 		QueryBuilderInterface queryBuilder;
-		WorkQueue queue = null;
+		WorkQueue workQueue = null;
 
-		if (-threads) {
-			parse the threads flag and create the work queue
+		if (parser.hasFlag("-threads")) {
+			int numThreads;
+			try {
+				numThreads = Integer.parseInt(parser.getString("-threads", "5"));
+
+			} catch (NumberFormatException e) {
+				return;
+			}
+			if (numThreads < 1) {
+				return;
+			}
+			workQueue = new WorkQueue(numThreads);
 			
 			ThreadSafeInvertedIndex threadIndex = new ThreadSafeInvertedIndex();
 			index = threadIndex;
 			indexBuilder = new ThreadIndexBuilder(threadIndex, workQueue);
-			etc.
+			queryBuilder = new ThreadedQueryBuilder(threadIndex, workQueue);
 		}
 		else {
 			index = new InvertedIndex();
+			indexBuilder = new InvertedIndexBuilder(index);
+			queryBuilder = new QueryBuilder(index);
 		}
-		 */
-		
-		/*
-		 * TODO ...and then the rest is the same as project 2
-		 * 
-		if (parser.hasFlag("-results")) {
-			Path resultsPath = parser.getPath("-results", Path.of("results.json"));
-			try {
-				queryBuilder.queryWriter(resultsPath);
-				} catch (IOException e1) {
-					System.err.println("Unable to write results into path : " + resultsPath
-							+ ". Please enter a valid output path name.");
-				}
-			}
-		}
-		 */		
-		
-		InvertedIndex index = new InvertedIndex();
-		ThreadSafeInvertedIndex threadIndex = new ThreadSafeInvertedIndex();
-		QueryBuilder queryBuilder = new QueryBuilder(index);
-		InvertedIndexBuilder indexBuilder = new InvertedIndexBuilder(index);
-		ThreadIndexBuilder threadBuilder;
-		ThreadedQueryBuilder threadQueryBuilder = null;
-		WorkQueue workQueue = null;
 
 		int numThreads;
 		try {
@@ -84,101 +69,54 @@ public class Driver {
 
 		if (parser.hasFlag("-path")) {
 			Path path = parser.getPath("-path");
-			if (parser.hasFlag("-threads")) {
-				threadBuilder = new ThreadIndexBuilder(threadIndex, workQueue);
-				try {
-					threadBuilder.directoryIterator(path);
-				} catch (Exception e) {
-					System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
-							+ " to data structure. Please enter existing paths to textfiles.");
-				}
-			} else {
-				try {
-					indexBuilder.directoryIterator(path);
-				} catch (Exception e) {
-					System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
-							+ " to data structure. Please enter existing paths to textfiles.");
-				}
+			try {
+				indexBuilder.directoryIterator(path);
+			} catch (Exception e) {
+				System.err.println("Invalid path sent to Inverted Index, unable to add :" + path
+						+ " to data structure. Please enter existing paths to textfiles.");
 			}
 		}
 
 		if (parser.hasFlag("-index")) {
 			Path indexPath = parser.getPath("-index", Path.of("index.json"));
-
-			if (parser.hasFlag("-threads")) {
-				try {
-					threadIndex.indexWriter(indexPath);
-				} catch (Exception e) {
-					System.err.println("Invalid output file sent to indexWriter: " + indexPath
-							+ ". Please enter a valid output file path name.");
-				}
-			} else {
 			try {
-					index.indexWriter(indexPath);
+				index.indexWriter(indexPath);
 			} catch (Exception e) {
-					System.err.println("Invalid output file sent to indexWriter: " + indexPath
-							+ ". Please enter a valid output file path name.");
-			}
+				System.err.println("Invalid output file sent to indexWriter: " + indexPath
+						+ ". Please enter a valid output file path name.");
 			}
 		}
 
 		if (parser.hasFlag("-counts")) {
 			Path countsPath = parser.getPath("-counts", Path.of("counts.json"));
-			if (parser.hasFlag("-threads")) {
-				try {
-					threadIndex.countsWriter(countsPath);
-				} catch (Exception e) {
-					System.err.println("Invalid output file sent to indexWriter: " + countsPath
-							+ ". Please enter a valid output file path name.");
-				}
-			} else {
 				try {
 					index.countsWriter(countsPath);
 				} catch (Exception e) {
 					System.err.println("Unalbe to write word counts to the path:" + countsPath
 							+ ". Please enter a valid output file path name.");
 				}
-			}
 		}
 
 
 		if (parser.hasFlag("-query")) {
 			Path name = parser.getPath("-query");
 			if (name != null) {
-				if (parser.hasFlag("-threads")) {
-					threadQueryBuilder = new ThreadedQueryBuilder(threadIndex, workQueue);
-					try {
-						threadQueryBuilder.build(name, !parser.hasFlag("-exact"));
-					} catch (Exception e) {
-						System.err.println("Invlad query file: " + name);
-					}
-				} else {
 					try {
 					queryBuilder.build(name, !parser.hasFlag("-exact"));
 					} catch (Exception e) {
 						System.err.println("Invlad query file: " + name);
 					}
-				}
 			}
 		}
 
 		if (parser.hasFlag("-results")) {
 			Path resultsPath = parser.getPath("-results", Path.of("results.json"));
-			if (parser.hasFlag("-threads")) {
-				try {
-					threadQueryBuilder.queryWriter(resultsPath);
-				} catch (IOException e1) {
-					System.err.println("Unable to write results into path : " + resultsPath
-							+ ". Please enter a valid output path name.");
-				}
-			} else {
 			try {
 				queryBuilder.queryWriter(resultsPath);
 				} catch (IOException e1) {
 					System.err.println("Unable to write results into path : " + resultsPath
 							+ ". Please enter a valid output path name.");
 				}
-			}
 		}
 
 		if (workQueue != null) {
