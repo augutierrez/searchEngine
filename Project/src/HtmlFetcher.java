@@ -70,7 +70,6 @@ public class HtmlFetcher {
 	 * @param redirects the number of times to follow redirects
 	 * @return the html or {@code null} if unable to fetch the resource or the
 	 *         resource is not html
-	 * @throws IOException 
 	 *
 	 * @see HttpsFetcher#openConnection(URL)
 	 * @see HttpsFetcher#printGetRequest(PrintWriter, URL)

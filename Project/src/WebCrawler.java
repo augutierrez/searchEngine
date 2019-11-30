@@ -18,12 +18,24 @@ public class WebCrawler {
 	 */
 	public static final SnowballStemmer.ALGORITHM DEFAULT = SnowballStemmer.ALGORITHM.ENGLISH;
 
+	/**
+	 * WorkQueue for the class
+	 */
 	private final WorkQueue workQueue;
 
+	/**
+	 * InvertedIndex that is used to store the information
+	 */
 	private final ThreadSafeInvertedIndex index;
 
+	/**
+	 * The amount of links requested to be stored
+	 */
 	private final int numLinks;
 
+	/**
+	 * a URL list that is used to keep track of the URLs processed
+	 */
 	private final ArrayList<URL> urlList;
 	
 
@@ -31,6 +43,7 @@ public class WebCrawler {
 	/**
 	 * Constructor method for WebCrawler
 	 * 
+	 * @param index     - the index that will be used to store information
 	 * @param workQueue - the WorkQueue for the class
 	 * @param numLinks  - the limit of redirects requested
 	 */
@@ -53,22 +66,17 @@ public class WebCrawler {
 		workQueue.finish();
 	}
 
+	/**
+	 * Takes a URL and stores the HTML found in the links found within it
+	 * 
+	 * @param url - the URL whose information will be extracted
+	 * @throws MalformedURLException
+	 */
 	public void crawl(URL url) throws MalformedURLException {
-		//like directory iterator but for urls
-		/*
-		 * I want to learn what this is doing better, so we are going to mess around
-		 * with it to see what its doing Try to take out the execute component and just
-		 * printout all the sites, see if the ones we are need is found if they are,
-		 * this means its prob not an issue with regex
-		 * 
-		 * URL lists during execute?
-		 */
-		// call here
 		String html = HtmlFetcher.fetch(url, 3);
 		if (html == null) {
 			return;
 		}
-		// need to edit out unecessary stuff ( head tags)
 		for (URL tempUrl : LinkParser.listLinks(url, html)) {
 			URL tempCleaned = LinkParser.clean(tempUrl);
 			boolean contain = false;
@@ -78,7 +86,6 @@ public class WebCrawler {
 					contain = true;
 				}
 				}
-			System.out.println("URL : " + tempCleaned.toString() + " is in list : " + contain);
 			if (!contain && urlList.size() < numLinks) {
 				storeHtml(tempCleaned);
 				urlList.add(tempCleaned);
@@ -86,6 +93,11 @@ public class WebCrawler {
 			}
 	}
 
+	/**
+	 * Creates a new task that will store information to the InvertedIndex
+	 * 
+	 * @param url - the URL whose HTML text will be extracted
+	 */
 	public void storeHtml(URL url) {
 		workQueue.execute(new Task(url));
 	}
@@ -106,30 +118,21 @@ public class WebCrawler {
 		}
 	}
 
-
-	/*
-	 * We basically need to get to the point where we extract the words from the
-	 * webpages. Then we pass it to add() with a word, the string url (seed) and the
-	 * position (index of the word on the page, starts at 1)
+	/**
+	 * Task class that will handle adding to the InvertedIndex
+	 * 
+	 * @author tony
 	 */
-
 	private class Task implements Runnable {
 		/**
-		 * The file task will read from
+		 * The URL to the website the task will read from
 		 */
 		private URL url;
 
 		/**
-		 * The index task will store information from its file in.
-		 */
-
-
-		/**
 		 * The constructor method for task
 		 * 
-		 * @param url  - the url from a website
-		 * @param html - the text from the website that will be stored in the
-		 *             InvertedIndex
+		 * @param url - the url whose information needs to be stored
 		 */
 		public Task(URL url) {
 			this.url = url;
@@ -153,7 +156,6 @@ public class WebCrawler {
 			try {
 				crawl(url);
 			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
 				return;
 			}
 		}

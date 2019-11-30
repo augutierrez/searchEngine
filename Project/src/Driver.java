@@ -43,9 +43,7 @@ public class Driver {
 			return;
 		}
 
-		String seed = null;
 		if (parser.hasFlag("-url")) {
-			seed = parser.getString("-url");
 			// if the threads flag isn't there, we give it so that we can multithread
 			if (!parser.hasFlag("-threads")) {
 				String[] arg = { "-threads" };
