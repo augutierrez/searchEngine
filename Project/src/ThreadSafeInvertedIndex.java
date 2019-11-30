@@ -31,6 +31,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param path     : the path where the word was found
 	 * @param position : the line the word was found in the file
 	 */
+	@Override
 	public void add(String word, String path, int position) {
 		lock.writeLock().lock();
 		try {
@@ -40,6 +41,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 		}
 	}
 
+	@Override
 	public void addAll(InvertedIndex local) {
 		lock.writeLock().lock();
 		try {
@@ -56,6 +58,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param path : path of output file
 	 * @throws IOException
 	 */
+	@Override
 	public void countsWriter(Path path) throws IOException {
 		lock.readLock().lock();
 		try {
@@ -71,6 +74,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param path : path of the output file
 	 * @throws IOException
 	 */
+	@Override
 	public void indexWriter(Path path) throws IOException {
 		lock.readLock().lock();
 		try {
@@ -86,6 +90,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param word - the word to look up
 	 * @return true/false
 	 */
+	@Override
 	public boolean contains(String word) {
 		lock.readLock().lock();
 		try {
@@ -102,6 +107,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param location - the location we are confirming exists
 	 * @return true/false
 	 */
+	@Override
 	public boolean contains(String word, String location) {
 		lock.readLock().lock();
 		try {
@@ -120,6 +126,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param position - the position we are confirming exists
 	 * @return true/false
 	 */
+	@Override
 	public boolean contains(String word, String location, int position) {
 		lock.readLock().lock();
 		try {
@@ -136,6 +143,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param queries - set of queries
 	 * @return a list of results
 	 */
+	@Override
 	public ArrayList<Result> exactSearch(Set<String> queries) {
 		lock.readLock().lock();
 		try {
@@ -152,6 +160,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param queries - the set of queries
 	 * @return the same set with newly added queries for partial search
 	 */
+	@Override
 	public ArrayList<Result> partialSearch(Set<String> queries) {
 		lock.readLock().lock();
 		try {
@@ -166,6 +175,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * 
 	 * @return a set of the words in the map
 	 */
+	@Override
 	public Set<String> getWords() {
 		lock.readLock().lock();
 		try {
@@ -181,6 +191,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param word - the word associated with the set of locations
 	 * @return the set of locations requested
 	 */
+	@Override
 	public Set<String> getLocations(String word) {
 		lock.readLock().lock();
 		try {
@@ -197,6 +208,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param location - the location associated with the set
 	 * @return the set requested
 	 */
+	@Override
 	public Set<Integer> getPositions(String word, String location) {
 		lock.readLock().lock();
 		try {
@@ -212,6 +224,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 * @param location - the location we want the counts of
 	 * @return the counts of the specified location
 	 */
+	@Override
 	public Integer getWordCounts(String location) {
 		lock.readLock().lock();
 		try {

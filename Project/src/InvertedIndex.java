@@ -73,20 +73,13 @@ public class InvertedIndex {
 						this.map.get(word).get(location).addAll(index.map.get(word).get(location));
 					}
 				}
-
 			}
-
 		}
 		for (String location : index.wordCount.keySet()) {
-			if (!wordCount.containsKey(location)) {
+			if (!wordCount.containsKey(location) || wordCount.get(location) < index.getWordCounts(location)) {
 				wordCount.put(location, index.wordCount.get(location));
-			} else {
-				// TODO Don't add, keep max position
-				int count = index.wordCount.get(location);
-				wordCount.put(location, count + 1);
 			}
 		}
-
 	}
 
 	/**

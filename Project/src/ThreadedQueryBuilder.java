@@ -89,7 +89,7 @@ public class ThreadedQueryBuilder implements QueryBuilderInterface {
 	 * @param partial : whether or not to perform partial search
 	 */
 	public void searchQuery(String line, boolean partial) {
-		workQueue.execute(new task(line, partial));
+		workQueue.execute(new Task(line, partial));
 	}
 
 	/**
@@ -111,7 +111,7 @@ public class ThreadedQueryBuilder implements QueryBuilderInterface {
 	 *
 	 *         The runnable class
 	 */
-	public class task implements Runnable { // TODO Task
+	public class Task implements Runnable {
 		/**
 		 * The Query line the task is handling.
 		 */
@@ -128,7 +128,7 @@ public class ThreadedQueryBuilder implements QueryBuilderInterface {
 		 * @param line    - the query line.
 		 * @param partial - whether or not to perform partial search
 		 */
-		public task(String line, boolean partial) {
+		public Task(String line, boolean partial) {
 			this.line = line;
 			this.partial = partial;
 		}

@@ -56,7 +56,7 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder {
 	 */
 	@Override
 	public void addPath(Path path){
-		workQueue.execute(new task(path));
+		workQueue.execute(new Task(path));
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder {
 	 *
 	 *         Tasks for the WorkQueue
 	 */
-	private class task implements Runnable { // TODO Task
+	private class Task implements Runnable {
 		/**
 		 * The file task will read from
 		 */
@@ -79,7 +79,7 @@ public class ThreadIndexBuilder extends InvertedIndexBuilder {
 		 * 
 		 * @param path - the path to extract information from
 		 */
-		public task(Path path) {
+		public Task(Path path) {
 			this.path = path;
 		}
 
