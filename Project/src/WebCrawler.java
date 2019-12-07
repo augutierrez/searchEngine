@@ -147,7 +147,6 @@ public class WebCrawler {
 			Stemmer stemmer = new SnowballStemmer(DEFAULT);
 			synchronized (index) {
 				for (String word : TextParser.parse(cleanedHtml)) {
-					// maybe do local index and then addall
 					index.add(stemmer.stem(word).toString(), url.toString(), counter++);
 				}
 			}
