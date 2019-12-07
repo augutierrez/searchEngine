@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -28,6 +29,14 @@ public class Driver {
 		InvertedIndexBuilder indexBuilder;
 		QueryBuilderInterface queryBuilder;
 		WorkQueue workQueue = null;
+		WebCrawler webCrawler = null;
+		int numLinks;
+		
+		try {
+			numLinks = Integer.parseInt(parser.getString("-limit", "50"));
+		} catch (NumberFormatException e) {
+			return;
+		}
 
 		if (parser.hasFlag("-threads")) {
 			int numThreads;
@@ -46,6 +55,9 @@ public class Driver {
 			index = threadIndex;
 			indexBuilder = new ThreadIndexBuilder(threadIndex, workQueue);
 			queryBuilder = new ThreadedQueryBuilder(threadIndex, workQueue);
+			if (parser.hasFlag("-url")) {
+				webCrawler = new WebCrawler(threadIndex, workQueue, numLinks);
+			}
 		}
 		else {
 			index = new InvertedIndex();
@@ -65,6 +77,19 @@ public class Driver {
 		}
 		else {
 			workQueue = new WorkQueue(numThreads);
+		}
+		
+		if (parser.hasFlag("-url")) {
+
+			try {
+				try {
+					webCrawler.crawl(parser.getString("-url"));
+				} catch (InterruptedException e) {
+					System.out.println("Error occured while trying to process URL: " + parser.getString("-url"));
+				}
+			} catch (MalformedURLException e) {
+				System.out.println("Please enter a valid url!  Url: " + parser.getString("-url") + " is invalid.");
+			}
 		}
 
 		if (parser.hasFlag("-path")) {
